@@ -132,20 +132,20 @@ namespace RogueBasin
                 switch (MenuPosition)
                 {
                     case 0:
-                        Game.Base.ClearSpecialScreenAndHandler();
+                        Game.Base.InputHandler.ClearSpecialScreenAndHandler();
                         exitFunction();
                         return;
                     case 1:
                         Game.Dungeon.FunMode = !Game.Dungeon.FunMode;
                         return;
                     case 2:
-                        Game.Base.ToggleSounds();
+                        Game.Base.SystemActions.ToggleSounds();
                         return;
                     case 3:
-                        Game.Base.ToggleMusic();
+                        Game.Base.SystemActions.ToggleMusic();
                         break;
                     case 4:
-                        Game.Base.QuitImmediately();
+                        Game.Base.SystemActions.QuitImmediately();
                         break;
                 }
             }

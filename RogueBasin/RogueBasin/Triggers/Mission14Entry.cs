@@ -31,7 +31,7 @@ namespace RogueBasin.Triggers
 
             //Mission 2 tutorial
             //Always play the late ones
-            Game.Base.PlayMovie("mission14", true);
+            Game.Base.SystemActions.PlayMovie("mission14", true);
 
             Triggered = true;
 

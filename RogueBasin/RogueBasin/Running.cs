@@ -1,27 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    class Running
+    public class Running
     {
-        RogueBase rogueBase;
         Player player;
         Point runningDirection;
         IEnumerable<Point> runningPath;
+        InputHandler inputHandler;
 
-        public Running(RogueBase rogueBase, Player player) {
-            this.rogueBase = rogueBase;
+        public Running(Player player) {
             this.player = player;
+        }
+
+        public void SetInputHandler(InputHandler inputHandler)
+        {
+            this.inputHandler = inputHandler;
         }
 
         public ActionResult StartRunning(int directionX, int directionY)
         {
             runningDirection = new Point(directionX, directionY);
-            rogueBase.ActionState = ActionState.Running;
+            inputHandler.ActionState = ActionState.Running;
 
             return RunNextStep();
         }
@@ -30,7 +31,7 @@ namespace RogueBasin
         {
             runningDirection = null;
             runningPath = path;
-            rogueBase.ActionState = ActionState.Running;
+            inputHandler.ActionState = ActionState.Running;
             player.Running = true;
 
             return RunNextStep();
@@ -38,8 +39,8 @@ namespace RogueBasin
 
         public void StopRunning()
         {
-            rogueBase.ActionState = ActionState.Interactive;
-            rogueBase.SimulateMouseEventInCurrentPosition();
+            inputHandler.ActionState = ActionState.Interactive;
+            inputHandler.SimulateMouseEventInCurrentPosition();
             player.Running = false;
         }
 

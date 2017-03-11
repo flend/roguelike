@@ -29,7 +29,7 @@ namespace RogueBasin.Locks
 
             if (!canDoorBeOpened)
             {
-                Game.Base.PlayMovie(cantOpenMovie, true);
+                Game.Base.SystemActions.PlayMovie(cantOpenMovie, true);
                 //var result = Screen.Instance.YesNoQuestionWithFrame(confirmationString, 0, System.Drawing.Color.Khaki, System.Drawing.Color.MediumSeaGreen);
                 var result = true;
                 if (result)
@@ -46,7 +46,7 @@ namespace RogueBasin.Locks
 
         private void OpenDoor()
         {
-            Game.Base.PlayMovie(openMovie, true);
+            Game.Base.SystemActions.PlayMovie(openMovie, true);
             isOpen = true;
         }
     }

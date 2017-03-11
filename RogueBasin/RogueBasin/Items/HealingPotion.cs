@@ -54,8 +54,8 @@ namespace RogueBasin.Items
             //Play movies if set
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Game.Base.PlayMovie("plotglove", true);
-                //Game.Base.PlayMovie("vaultbackstab", false);
+                //Game.Base.SystemActions.PlayMovie("plotglove", true);
+                //Game.Base.SystemActions.PlayMovie("vaultbackstab", false);
             }
 
             //Messages

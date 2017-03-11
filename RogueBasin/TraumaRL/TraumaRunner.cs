@@ -31,7 +31,7 @@ namespace TraumaRL
             {
                 try
                 {
-                    StandardDungeonSetup();
+                    rb.SetupDungeon();
 
                     GenerateStoryDungeon(retry);
 
@@ -54,12 +54,12 @@ namespace TraumaRL
 
         private void ShowIntroMovies()
         {
-            Game.Base.PlayMovie("qe_start", true);
-            Game.Base.PlayMovie("helpkeys", true);
+            Game.Base.SystemActions.PlayMovie("qe_start", true);
+            Game.Base.SystemActions.PlayMovie("helpkeys", true);
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                Game.Base.PlayMovie("helpkeys", true);
+                Game.Base.SystemActions.PlayMovie("helpkeys", true);
             }
         }
 
@@ -70,32 +70,17 @@ namespace TraumaRL
             worldGen.GenerateTraumaLevels(retry);
         }
 
-        private void RandomSetup() {
+        private void RandomSetup()
+        {
             int seedToUse = new Random().Next();
             seedToUse = 153;
             LogFile.Log.LogEntry("Random seed: " + seedToUse);
             Game.Random = new Random(seedToUse);
         }
 
-        GameDifficulty difficulty;
-        string playerName;
-        bool playItemMovies;
-
         private void IntroScreen()
         {
-            //live
-            //var gameInfo = new RogueBasin.GameIntro();
-
-            //gameInfo.ShowIntroScreen();
-
-            //difficulty = gameInfo.Difficulty;
-            //playerName = gameInfo.PlayerName;
-            //playItemMovies = gameInfo.ShowMovies;
-
-            //dev
-            difficulty = GameDifficulty.Medium;
-            playerName = "Dave";
-            playItemMovies = true;
+ 
         }
     
         private void StandardSystemSetup()
@@ -103,6 +88,8 @@ namespace TraumaRL
             rb = new RogueBase();
             Game.Base = rb;
             rb.SetupSystem();
+            rb.SetupDungeon();
+            rb.Initialise();
 
             //Minimum debug
             if(Game.Config.DebugMode)
@@ -111,28 +98,11 @@ namespace TraumaRL
                 LogFile.Log.DebugLevel = 1;
         }
 
-        private void StandardDungeonSetup()
-        {
-            var dungeonInfo = new DungeonInfo();
-            Game.Dungeon = new Dungeon(dungeonInfo);
-
-            Game.Dungeon.Player.StartGameSetup();
-
-            Game.Dungeon.Difficulty = difficulty;
-            Game.Dungeon.Player.Name = playerName;
-            Game.Dungeon.Player.PlayItemMovies = playItemMovies;
-
-            Game.Dungeon.AllLocksOpen = false;
-
-            if(Game.Config.DebugMode)
-                Game.Dungeon.PlayerImmortal = true;
-        }
-
         private void RunGame()
         {
             Game.Base.StartGame();
 
-            rb.StartEventLoop();
+            Game.Base.Events.StartEventLoop();
 
             //Movies can only be shown after event loop started
             ShowIntroMovies();

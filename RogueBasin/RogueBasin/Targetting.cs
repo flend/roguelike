@@ -6,21 +6,25 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    class Targetting
+    public class Targetting
     {
-        RogueBase rogueBase;
         Dungeon dungeon;
         Player player;
 
         TargettingReticle targetReticle;
+        InputHandler inputHandler;
 
-        public Targetting(RogueBase rogueBase) {
+        public Targetting(Dungeon dungeon, Player player) {
 
-            targetReticle = new TargettingReticle(rogueBase, Game.Dungeon, Game.Dungeon.Player);
+            this.dungeon = dungeon;
+            this.player = player;
 
-            this.rogueBase = rogueBase;
-            dungeon = Game.Dungeon;
-            player = Game.Dungeon.Player;
+            targetReticle = new TargettingReticle(dungeon, player);
+        }
+
+        public void SetInputHandler(InputHandler inputHandler)
+        {
+            this.inputHandler = inputHandler;
         }
 
         public void TargetWeapon()
@@ -98,7 +102,7 @@ namespace RogueBasin
         private void SetupWeaponTarget(Location target)
         {
             SetupWeaponTypeTarget(target, TargettingAction.Weapon, "f", "Fire Weapon");
-            rogueBase.SetInputState(RogueBase.InputState.Targetting);
+            inputHandler.SetInputState(InputHandler.InputState.Targetting);
         }
 
         private void SetupWeaponTypeTarget(Location target, TargettingAction action, string confirmKey, string message)
@@ -118,13 +122,13 @@ namespace RogueBasin
         private void SetupMoveTarget(Location target)
         {
             TargetAction(target, new MoveTargettingInfo(), TargettingAction.Move, "ENTER", "Move");
-            rogueBase.SetInputState(RogueBase.InputState.Targetting);
+            inputHandler.SetInputState(InputHandler.InputState.Targetting);
         }
 
         private void SetupThrowTarget(Location target)
         {
             SetupThrowTypeTarget(target, RogueBasin.TargettingAction.Utility, "t", "Throw Item");
-            rogueBase.SetInputState(RogueBase.InputState.Targetting);
+            inputHandler.SetInputState(InputHandler.InputState.Targetting);
         }
 
         private void SetupThrowTypeTarget(Location target, TargettingAction action, string confirmKey, string message)
@@ -144,7 +148,7 @@ namespace RogueBasin
         private void SetupExamineTarget(Location target)
         {
             TargetAction(target, new ExamineTargettingInfo(), TargettingAction.Examine, "x", "Examine");
-            rogueBase.SetInputState(RogueBase.InputState.Targetting);
+            inputHandler.SetInputState(InputHandler.InputState.Targetting);
         }
 
         private void SetupExamineTargetInstant(Location target)
@@ -267,7 +271,7 @@ namespace RogueBasin
 
         public void DisableTargettingMode()
         {
-            rogueBase.SetInputState(RogueBasin.RogueBase.InputState.MapMovement);
+            inputHandler.SetInputState(InputHandler.InputState.MapMovement);
             targetReticle.DisableScreenTargettingMode();
         }
     }

@@ -59,6 +59,7 @@
     <Compile Include="CustomInputArgs.cs" />
     <Compile Include="DifficultyOrdering.cs" />
     <Compile Include="DirectedGraphWrapper.cs" />
+    <Compile Include="GameActions.cs" />
     <Compile Include="GameTick.cs" />
     <Compile Include="GraphVizExporter.cs" />
     <Compile Include="InputEvents.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="RequiredLevelInfo.cs" />
     <Compile Include="Running.cs" />
     <Compile Include="ShotgunTargettingInfo.cs" />
+    <Compile Include="SystemActions.cs" />
     <Compile Include="TargettingAction.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Creatures\AlertBot.cs" />

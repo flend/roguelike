@@ -28,11 +28,11 @@ namespace RogueBasin.Triggers
             {
                 if (Game.Dungeon.PercentRemembered() > 80)
                 {
-                    Game.Base.PlayMovie("seeCorpses", true);
+                    Game.Base.SystemActions.PlayMovie("seeCorpses", true);
                 }
                 else
                 {
-                    Game.Base.PlayMovie("seeCorpsesForgetful", true);
+                    Game.Base.SystemActions.PlayMovie("seeCorpsesForgetful", true);
                 }
                 Triggered = true;
             }

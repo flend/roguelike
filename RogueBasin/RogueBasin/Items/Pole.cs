@@ -40,21 +40,21 @@ namespace RogueBasin.Items
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                //Game.Base.PlayMovie("plotbadge", true);
-                //Game.Base.PlayMovie("multiattack", false);
+                //Game.Base.SystemActions.PlayMovie("plotbadge", true);
+                //Game.Base.SystemActions.PlayMovie("multiattack", false);
             }
 
             //Messages
             //Game.MessageQueue.AddMessage("Vibro-blade.");
 
-            //Game.Base.PlayMovie("plotbadge", true);
+            //Game.Base.SystemActions.PlayMovie("plotbadge", true);
 
             //Level up?
             //Game.Dungeon.Player.LevelUp();
 
             //Add move?
             //Game.Dungeon.LearnMove(new SpecialMoves.MultiAttack());
-            //Game.Base.PlayMovie("multiattack", false);
+            //Game.Base.SystemActions.PlayMovie("multiattack", false);
 
             //Add any equipped (actually permanent) effects
             //Game.Dungeon.Player.Speed += 10;

@@ -31,12 +31,12 @@ namespace RogueBasin.Features
 
             if (!canDoorBeOpened)
             {
-                Game.Base.PlayMovie("selfdestructlocked", true);
+                Game.Base.SystemActions.PlayMovie("selfdestructlocked", true);
                 return false;
             }
             else
             {
-                Game.Base.PlayMovie("selfdestructunlocked", true);
+                Game.Base.SystemActions.PlayMovie("selfdestructunlocked", true);
 
                 //Add clues directly into player's inventory
                 GivePlayerObjectiveClues(player);

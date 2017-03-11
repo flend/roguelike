@@ -23,7 +23,7 @@ namespace RogueBasin.Items
 
         public override bool OnPickup(Creature pickupCreature)
         {
-            Game.Base.PlayMovie(pickupMovie, true);
+            Game.Base.SystemActions.PlayMovie(pickupMovie, true);
 
             return true;
         }

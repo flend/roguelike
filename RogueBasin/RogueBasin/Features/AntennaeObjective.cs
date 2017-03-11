@@ -28,12 +28,12 @@ namespace RogueBasin.Features
 
             if (!canDoorBeOpened)
             {
-                Game.Base.PlayMovie("antennaelocked", true);
+                Game.Base.SystemActions.PlayMovie("antennaelocked", true);
                 return false;
             }
             else
             {
-                Game.Base.PlayMovie("antennaeunlocked", true);
+                Game.Base.SystemActions.PlayMovie("antennaeunlocked", true);
 
                 //Add clues directly into player's inventory
                 GivePlayerObjectiveClues(player);

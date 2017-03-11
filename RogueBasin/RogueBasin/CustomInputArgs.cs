@@ -10,7 +10,7 @@ namespace RogueBasin
         MouseMoveToCurrentLocation
     }
 
-    class CustomInputArgs
+    public class CustomInputArgs
     {
         public readonly CustomInputArgsActions action;
 

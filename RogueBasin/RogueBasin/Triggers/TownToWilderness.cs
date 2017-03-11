@@ -32,7 +32,7 @@ namespace RogueBasin.Triggers
                 if (!ShownMovie && Game.Dungeon.Player.PlayItemMovies)
                 {
                     ShownMovie = true;
-                    Game.Base.PlayMovie("helpwilderness", false);
+                    Game.Base.SystemActions.PlayMovie("helpwilderness", false);
                 }
                 Triggered = true;
             }

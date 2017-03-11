@@ -1913,8 +1913,9 @@ namespace RogueBasin
             //Message the user
             LogFile.Log.LogEntryDebug("Item equipped: " + itemToUse.SingleItemDescription, LogDebugLevel.Low);
             Game.MessageQueue.AddMessage(itemToUse.SingleItemDescription + " equipped.");
-
-            Game.Base.UpdateMapTargetting();
+            
+            //Implies that this would be better wrapped into a PlayerAction - leaving this code to handle player state only
+            Game.Base.InputHandler.UpdateMapTargetting();
 
             return true;
         }
@@ -2796,11 +2797,31 @@ namespace RogueBasin
             }
         }
 
-
         internal void NotifyMonsterEvent(MonsterEvent monsterEvent)
         {
-            Game.Base.NotifyMonsterEvent(monsterEvent);
+            switch (monsterEvent.EventType)
+            {
+                case MonsterEvent.MonsterEventType.MonsterAttacksPlayer:
+
+                    Game.Base.Running.StopRunning();
+
+                    if (!Screen.Instance.TargetSelected())
+                    {
+                        Screen.Instance.CreatureToView = monsterEvent.Monster;
+                    }
+
+                    break;
+
+                case MonsterEvent.MonsterEventType.MonsterSeenByPlayer:
+
+                    Game.Base.Running.StopRunning();
+
+                    Game.MessageQueue.AddMessage("You see a " + monsterEvent.Monster.SingleDescription + ".");
+
+                    break;
+            }
         }
+    
 
         internal void RefillWeapons()
         {

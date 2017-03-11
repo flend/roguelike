@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    class GameTick
+    public class GameTick
     {
         bool waitingForTurnTick = true;
         private InputHandler handler;

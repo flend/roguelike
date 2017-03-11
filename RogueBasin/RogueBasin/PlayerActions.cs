@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    class PlayerActions
+    public class PlayerActions
     {
         private Running running;
         private Targetting targetting;
@@ -20,8 +20,70 @@ namespace RogueBasin
             this.targetting = targetting;
         }
 
+        public ActionResult DoNothing()
+        {
+            return Utility.TimeAdvancesOnMove(Game.Dungeon.PCMove(0, 0));
+        }
 
-        private ActionResult RunToTargettedDestination()
+        public bool UseUtility()
+        {
+            return UseUtilityOrWeapon(true);
+        }
+
+        public bool UseWeapon()
+        {
+            return UseUtilityOrWeapon(false);
+        }
+
+        /// <summary>
+        /// Use a utility
+        /// </summary>
+        private bool UseUtilityOrWeapon(bool isUtility)
+        {
+
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            //Check we have a useable item
+
+            IEquippableItem toUse = null;
+            Item toUseItem = null;
+
+            if (isUtility)
+            {
+                toUse = player.GetEquippedUtility();
+                toUseItem = player.GetEquippedUtilityAsItem();
+            }
+            else
+            {
+                toUse = player.GetEquippedRangedWeapon();
+                toUseItem = player.GetEquippedRangedWeaponAsItem();
+            }
+
+            if (toUse == null || !toUse.HasOperateAction())
+            {
+                Game.MessageQueue.AddMessage("Need an item that can be operated.");
+                LogFile.Log.LogEntryDebug("Can't use " + toUseItem.SingleItemDescription, LogDebugLevel.Medium);
+                return false;
+            }
+
+            //Use the item
+            LogFile.Log.LogEntryDebug("Using " + toUseItem.SingleItemDescription, LogDebugLevel.Medium);
+            bool success = toUse.OperateItem();
+
+            if (success && toUse.DestroyedOnUse())
+            {
+                //Destroy the item
+                player.UnequipAndDestroyItem(toUseItem);
+                player.EquipNextUtility();
+            };
+
+            return success;
+
+        }
+
+
+        public ActionResult RunToTargettedDestination()
         {
             if (!Game.Dungeon.IsSquareSeenByPlayer(targetting.CurrentTarget) && !Screen.Instance.SeeAllMap)
             {
@@ -40,7 +102,7 @@ namespace RogueBasin
             return running.StartRunning(path);
         }
 
-        private ActionResult ThrowTargettedUtility()
+        public ActionResult ThrowTargettedUtility()
         {
             if (!Game.Dungeon.IsSquareInPlayerFOV(targetting.CurrentTarget))
             {
@@ -54,7 +116,7 @@ namespace RogueBasin
             return new ActionResult(throwSuccessfully, throwSuccessfully);
         }
 
-        private ActionResult FireTargettedWeapon()
+        public ActionResult FireTargettedWeapon()
         {
             if (!Game.Dungeon.IsSquareInPlayerFOV(targetting.CurrentTarget))
             {
@@ -254,5 +316,22 @@ namespace RogueBasin
             player.RemoveEffect(typeof(PlayerEffects.StealthBoost));
         }
 
+        /// <summary>
+        /// Examine using the target. Returns if time passes.
+        /// </summary>
+        /// <returns></returns>
+        public bool Examine()
+        {
+            targetting.TargetExamine();
+            return false;
+        }
+
+        /// <summary>
+        /// Call when time moves on due to a PC action that isn't a move. This may cause some special moves to cancel.
+        /// </summary>
+        public void SpecialMoveNonMoveAction()
+        {
+            Game.Dungeon.PCActionNoMove();
+        }
     }
 }

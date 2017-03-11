@@ -32,7 +32,7 @@ namespace RogueBasin.Triggers
             //Mission 2 tutorial
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-                Game.Base.PlayMovie("mission1", true);
+                Game.Base.SystemActions.PlayMovie("mission1", true);
             }
 
             Triggered = true;

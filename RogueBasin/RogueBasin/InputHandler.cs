@@ -1,15 +1,11 @@
 ﻿using SdlDotNet.Input;
-using SdlDotNet.Core;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace RogueBasin
 {
-    class InputHandler
+    public class InputHandler
     {
         public enum InputState
         {
@@ -18,12 +14,21 @@ namespace RogueBasin
             MovieDisplay, PreMapMovement, SpecialScreen
         }
 
+        public enum KeyModifier
+        {
+            Vi,
+            Numeric,
+            Arrow
+        }
+
         InputState inputState = InputState.MapMovement;
         ActionState actionState = ActionState.Interactive;
 
         Targetting targetting;
         Running running;
         PlayerActions playerActions;
+        GameActions gameActions;
+        SystemActions systemActions;
 
         TargettingAction mouseDefaultTargettingAction = TargettingAction.MoveOrWeapon;
 
@@ -34,16 +39,39 @@ namespace RogueBasin
         public ActionState ActionState { get { return actionState; } set { actionState = value; } }
 
         private Action<KeyboardEventArgs> SpecialScreenKeyboardHandler { get; set; }
+        private Action<bool> promptAction = null;
 
-
-        public InputHandler()
+        public InputHandler(Running running, Targetting targetting, PlayerActions playerActions, GameActions gameActions, SystemActions systemActions)
         {
-            //Or we could inject these
-            targetting = new Targetting(Game.Base);
-            running = new Running(Game.Base, Game.Dungeon.Player);
-            playerActions = new PlayerActions(running, targetting);
+            this.running = running;
+            this.targetting = targetting;
+            this.playerActions = playerActions;
+            this.gameActions = gameActions;
+            this.systemActions = systemActions;
         }
 
+        public void FPrompt(string introMessage, Action<bool> action)
+        {
+            Screen.Instance.SetPrompt(introMessage);
+            Screen.Instance.NeedsUpdate = true;
+
+            inputState = InputState.FPrompt;
+            promptAction = action;
+        }
+
+        public void YesNoQuestion(string introMessage, Action<bool> action)
+        {
+            Screen.Instance.SetPrompt(introMessage + " (y / n):");
+            Screen.Instance.NeedsUpdate = true;
+
+            inputState = InputState.YesNoPrompt;
+            promptAction = action;
+        }
+
+        public void SetInputState(InputState newState)
+        {
+            inputState = newState;
+        }
 
         private ActionResult TargettingMouseEvent(Point clickLocation, MouseButton mouseButton)
         {
@@ -414,29 +442,29 @@ namespace RogueBasin
 
                             case Key.S:
                                 //Toggle sounds
-                                ToggleSounds();
+                                systemActions.ToggleSounds();
                                 break;
 
                             case Key.M:
-                                ToggleMusic();
+                                systemActions.ToggleMusic();
 
                                 break;
 
                             case Key.N:
-                                SetMsgHistoryScreen();
-                                DisableMsgHistoryScreen();
+                                gameActions.SetMsgHistoryScreen();
+                                gameActions.DisableMsgHistoryScreen();
                                 timeAdvances = false;
                                 break;
 
                             case Key.C:
-                                SetClueScreen();
-                                DisableClueScreen();
+                                gameActions.SetClueScreen();
+                                gameActions.DisableClueScreen();
                                 timeAdvances = false;
                                 break;
 
                             case Key.Slash:
-                                Game.Base.PlayMovie("helpkeys", true);
-                                Game.Base.PlayMovie("qe_start", true);
+                                systemActions.PlayMovie("helpkeys", true);
+                                systemActions.PlayMovie("qe_start", true);
 
                                 timeAdvances = false;
                                 break;
@@ -460,7 +488,7 @@ namespace RogueBasin
                                 }
 
                                 if (timeAdvances)
-                                    SpecialMoveNonMoveAction();
+                                    playerActions.SpecialMoveNonMoveAction();
 
                                 centreOnPC = true;
                                 break;
@@ -477,11 +505,11 @@ namespace RogueBasin
                                 }
                                 else if (Game.Dungeon.Player.GetEquippedUtility().HasOperateAction())
                                 {
-                                    timeAdvances = UseUtility();
+                                    timeAdvances = playerActions.UseUtility();
                                 }
 
                                 if (timeAdvances)
-                                    SpecialMoveNonMoveAction();
+                                    playerActions.SpecialMoveNonMoveAction();
 
                                 centreOnPC = true;
                                 break;
@@ -519,17 +547,17 @@ namespace RogueBasin
 
                             case Key.X:
                                 //Examine
-                                timeAdvances = Examine();
+                                timeAdvances = playerActions.Examine();
 
                                 if (timeAdvances)
-                                    SpecialMoveNonMoveAction();
+                                    playerActions.SpecialMoveNonMoveAction();
 
                                 centreOnPC = true;
                                 break;
 
                             case Key.Period:
                                 // Do nothing
-                                var nothingResult = DoNothing();
+                                var nothingResult = playerActions.DoNothing();
                                 // Don't recentre - useful for viewing
                                 timeAdvances = nothingResult.timeAdvances;
                                 centreOnPC = nothingResult.centreOnPC;
@@ -1066,13 +1094,13 @@ namespace RogueBasin
                         {
                             if (direction == new Point(0, -1))
                             {
-                                ScreenLevelUp();
+                                gameActions.ScreenLevelUp();
                                 centreOnPC = false;
                             }
 
                             if (direction == new Point(0, 1))
                             {
-                                ScreenLevelDown();
+                                gameActions.ScreenLevelDown();
                                 centreOnPC = false;
                             }
                         }
@@ -1203,12 +1231,12 @@ namespace RogueBasin
             {
                 case TargettingAction.Weapon:
 
-                    result = FireTargettedWeapon();
+                    result = playerActions.FireTargettedWeapon();
                     break;
 
                 case TargettingAction.Utility:
 
-                    result = ThrowTargettedUtility();
+                    result = playerActions.ThrowTargettedUtility();
                     break;
 
                 case TargettingAction.Examine:
@@ -1223,23 +1251,23 @@ namespace RogueBasin
                         {
                             if (!alternativeActionMode)
                             {
-                                result = FireTargettedWeapon();
+                                result = playerActions.FireTargettedWeapon();
                             }
                             else
                             {
-                                result = RunToTargettedDestination();
+                                result = playerActions.RunToTargettedDestination();
                             }
                         }
                         else
                         {
                             if (!alternativeActionMode)
                             {
-                                result = RunToTargettedDestination();
+                                result = playerActions.RunToTargettedDestination();
                             }
                             else
                             {
 
-                                result = FireTargettedWeapon();
+                                result = playerActions.FireTargettedWeapon();
                             }
                         }
                     }
@@ -1252,29 +1280,29 @@ namespace RogueBasin
                         {
                             if (!alternativeActionMode)
                             {
-                                result = ThrowTargettedUtility();
+                                result = playerActions.ThrowTargettedUtility();
                             }
                             else
                             {
-                                result = RunToTargettedDestination();
+                                result = playerActions.RunToTargettedDestination();
                             }
                         }
                         else
                         {
                             if (!alternativeActionMode)
                             {
-                                result = RunToTargettedDestination();
+                                result = playerActions.RunToTargettedDestination();
                             }
                             else
                             {
-                                result = ThrowTargettedUtility();
+                                result = playerActions.ThrowTargettedUtility();
                             }
                         }
                     }
                     break;
 
                 case TargettingAction.Move:
-                    result = RunToTargettedDestination();
+                    result = playerActions.RunToTargettedDestination();
                     break;
             }
 
@@ -1287,5 +1315,279 @@ namespace RogueBasin
 
             return result;
         }
+
+
+        /// <summary>
+        /// Get a direction from a keypress. Will return false if not valid. Otherwise in parameter.
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        private bool GetDirectionFromKeypress(KeyboardEventArgs args, out Point direction, out KeyModifier mod)
+        {
+
+            direction = new Point(9, 9);
+            mod = KeyModifier.Arrow;
+
+            //Vi keys for directions
+            switch (args.Key)
+            {
+                case Key.B:
+                    direction = new Point(-1, 1);
+                    mod = KeyModifier.Vi;
+                    break;
+
+                case Key.N:
+                    direction = new Point(1, 1);
+                    mod = KeyModifier.Vi;
+                    break;
+
+                case Key.Y:
+                    direction = new Point(-1, -1);
+                    mod = KeyModifier.Vi;
+                    break;
+
+                case Key.U:
+                    direction = new Point(1, -1);
+                    mod = KeyModifier.Vi;
+                    break;
+
+                case Key.H:
+                    direction = new Point(-1, 0);
+                    mod = KeyModifier.Vi;
+                    break;
+
+                case Key.L:
+                    direction = new Point(1, 0);
+                    mod = KeyModifier.Vi;
+                    break;
+
+                case Key.K:
+                    direction = new Point(0, -1);
+                    mod = KeyModifier.Vi;
+                    break;
+
+                case Key.J:
+                    direction = new Point(0, 1);
+                    mod = KeyModifier.Vi;
+                    break;
+
+
+                //Arrow keys for directions
+
+
+                case Key.Keypad1:
+                    direction = new Point(-1, 1);
+                    mod = KeyModifier.Numeric;
+                    break;
+
+                case Key.Keypad3:
+                    direction = new Point(1, 1);
+                    mod = KeyModifier.Numeric;
+                    break;
+
+                case Key.KeypadPeriod:
+                    direction = new Point(0, 0);
+                    mod = KeyModifier.Arrow;
+                    break;
+
+                case Key.Keypad5:
+                    direction = new Point(0, 0);
+                    mod = KeyModifier.Numeric;
+                    break;
+
+                case Key.Keypad7:
+                    direction = new Point(-1, -1);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.Keypad9:
+                    direction = new Point(1, -1);
+                    mod = KeyModifier.Numeric;
+                    break;
+
+                case Key.LeftArrow:
+                    direction = new Point(-1, 0);
+                    mod = KeyModifier.Arrow;
+                    break;
+
+                case Key.Keypad4:
+                    direction = new Point(-1, 0);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.RightArrow:
+                    direction = new Point(1, 0);
+                    mod = KeyModifier.Arrow;
+                    break;
+                case Key.Keypad6:
+                    direction = new Point(1, 0);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.UpArrow:
+                    direction = new Point(0, -1);
+                    mod = KeyModifier.Arrow;
+                    break;
+                case Key.Keypad8:
+                    direction = new Point(0, -1);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.Keypad2:
+                    direction = new Point(0, 1);
+                    mod = KeyModifier.Numeric;
+                    break;
+                case Key.DownArrow:
+                    direction = new Point(0, 1);
+                    mod = KeyModifier.Arrow;
+                    break;
+            }
+
+            //Not valid
+            if (direction == new Point(9, 9))
+                return false;
+
+            return true;
+        }
+
+
+        /// <summary>
+        /// Get a keypress and interpret it as a direction
+        /// </summary>
+        /// <returns></returns>
+        private bool GetDirectionKeypress(out Point direction, out KeyModifier mod)
+        {
+            //Get direction
+            //KeyPress userKey = libtcodWrapper.Keyboard.WaitForKeyPress(true);
+
+            if (GetDirectionFromKeypress(null, out direction, out mod))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+
+        private int GetNumberFromNonKeypadKeyPress(KeyboardEventArgs args)
+        {
+            switch (args.Key)
+            {
+                case Key.Zero:
+                    return 0;
+
+                case Key.One:
+                    return 1;
+
+                case Key.Two:
+                    return 2;
+
+                case Key.Three:
+                    return 3;
+
+                case Key.Four:
+                    return 4;
+
+                case Key.Five:
+                    return 5;
+
+                case Key.Six:
+                    return 6;
+
+                case Key.Seven:
+                    return 7;
+
+                case Key.Eight:
+                    return 8;
+
+                case Key.Nine:
+                    return 9;
+            }
+
+            return -1;
+        }
+
+
+        private void YesNoPromptKeyboardEvent(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.Y)
+            {
+                if (promptAction != null)
+                {
+                    promptAction(true);
+                    ResetPrompt();
+                }
+            }
+
+            if (args.Key == Key.N)
+            {
+                if (promptAction != null)
+                {
+                    promptAction(false);
+                    ResetPrompt();
+                }
+            }
+        }
+
+        private void ResetPrompt()
+        {
+            //Only reset input state if called function doesn't set it to something else
+            if (inputState == InputState.YesNoPrompt)
+                inputState = InputState.MapMovement;
+            Screen.Instance.ClearPrompt();
+        }
+
+
+        public void FunModeDeathKeyHandler(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.F)
+            {
+                ClearSpecialScreenAndHandler();
+                Screen.Instance.ResetScreen();
+                Game.Base.StartGame();
+            }
+        }
+
+        public void EndOfGameSelectionKeyHandler(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.Return)
+            {
+                ClearSpecialScreenAndHandler();
+                Game.Base.SystemActions.RestartGameAfterDeath();
+            }
+        }
+
+
+        private void FinishMovie()
+        {
+            //Finish movie
+            Screen.Instance.DequeueFirstMovie();
+            //Out of movie mode if no more to display
+            if (!Screen.Instance.MoviesToPlay())
+                inputState = InputState.MapMovement;
+        }
+
+
+        private void MovieDisplayKeyboardEvent(KeyboardEventArgs args)
+        {
+            if (args.Key == Key.Return)
+            {
+                FinishMovie();
+            }
+        }
+
+
+        private void MovieDisplayMouseEvent(MouseButtonEventArgs args)
+        {
+            if (args.Button == MouseButton.PrimaryButton)
+            {
+                FinishMovie();
+            }
+        }
+
+
+        public void SimulateMouseEventInCurrentPosition()
+        {
+            DoPlayerNextAction(null, null, null, new CustomInputArgs(CustomInputArgsActions.MouseMoveToCurrentLocation));
+        }
+
+
+
     }
 }

@@ -31,15 +31,15 @@ namespace RogueBasin.Triggers
 
             //Initial game entry
 
-           // Game.Base.PlayMovie("enterflatline", true);
+           // Game.Base.SystemActions.PlayMovie("enterflatline", true);
 
             if (Game.Dungeon.Player.PlayItemMovies)
             {
-               //// Game.Base.PlayMovie("helpkeys", true);
-               // Game.Base.PlayMovie("helpnewuser", true);
+               //// Game.Base.SystemActions.PlayMovie("helpkeys", true);
+               // Game.Base.SystemActions.PlayMovie("helpnewuser", true);
             }
 
-            //Game.Base.PlayMovie("mission0", true);
+            //Game.Base.SystemActions.PlayMovie("mission0", true);
 
             Triggered = true;
 

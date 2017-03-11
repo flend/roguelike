@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace RogueBasin
 {
-    class InputEvents
+    public class InputEvents
     {
         private GameTick gameTick;
         private InputHandler inputHandler;
@@ -53,6 +53,11 @@ namespace RogueBasin
             //Do any final cleanup
             LogFile.Log.Close();
 
+            Events.QuitApplication();
+        }
+
+        public void QuitApplication()
+        {
             Events.QuitApplication();
         }
 

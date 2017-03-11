@@ -308,6 +308,15 @@ namespace RogueBasin {
             ExtraUI = true;
         }
 
+        public void ResetScreen()
+        {
+            CreatureToView = null;
+            ItemToView = null;
+            FeatureToView = null;
+
+            Game.MessageQueue.ClearList();
+        }
+
         //Maybe pull this into a view panel class
         public void ResetViewPanelIfRequired(CreatureFOV playerFOV)
         {

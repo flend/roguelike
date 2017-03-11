@@ -8,7 +8,6 @@ namespace RogueBasin
 {
     class TargettingReticle
     {
-        private readonly RogueBase rogueBase;
         private readonly Player player;
         private readonly Dungeon dungeon;
 
@@ -21,8 +20,7 @@ namespace RogueBasin
 
         TargettingInfo currentInfo;
 
-        public TargettingReticle(RogueBase rogueBase, Dungeon dungeon, Player player) {
-            this.rogueBase = rogueBase;
+        public TargettingReticle(Dungeon dungeon, Player player) {
             this.player = player;
             this.dungeon = dungeon;
         }
@@ -34,7 +32,7 @@ namespace RogueBasin
             SetScreenTargettingMode(currentTarget, currentInfo, currentTargettingAction);
 
             CheckTargetInRange(newTarget, currentTargettingAction, currentInfo);
-            SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(newTarget);
+            SquareContents sqC = SetViewPanelToTargetAtSquare(newTarget);
 
             //Update screen
             SetTargettingMessage(TargettingMessage, TargettingConfirmChar);
@@ -52,7 +50,7 @@ namespace RogueBasin
 
             CheckTargetInRange(newTarget, targetAction, targetInfo);
 
-            SquareContents sqC = rogueBase.SetViewPanelToTargetAtSquare(newTarget);
+            SquareContents sqC = SetViewPanelToTargetAtSquare(newTarget);
 
             SetTargettingMessage(message, confirmKey);
 
@@ -110,6 +108,19 @@ namespace RogueBasin
         public void DisableScreenTargettingMode()
         {
             Screen.Instance.TargettingModeOff();
+        }
+
+        public SquareContents SetViewPanelToTargetAtSquare(Location start)
+        {
+            SquareContents sqC = dungeon.MapSquareContents(start);
+            Screen.Instance.CreatureToView = sqC.monster; //may reset to null
+            if (sqC.items.Count > 0)
+                Screen.Instance.ItemToView = sqC.items[0];
+            else
+                Screen.Instance.ItemToView = null;
+
+            Screen.Instance.FeatureToView = sqC.feature; //may reset to null
+            return sqC;
         }
     }
 }
