@@ -125,7 +125,7 @@ namespace RogueBasin
 
         public void UpdateMapTargetting()
         {
-            var mousePosition = SdlDotNet.Input.Mouse.MousePosition;
+            var mousePosition = Mouse.MousePosition;
             var mouseLocation = Screen.Instance.PixelToCoord(mousePosition);
 
             MouseFocusOnMap(mouseLocation);
@@ -340,7 +340,6 @@ namespace RogueBasin
             {
                 case InputState.Targetting:
                     return TargettingMouseEvent(clickLocation, mouseArgs.Button);
-                    break;
 
                 //Normal movement on the map
                 case InputState.MapMovement:
@@ -362,8 +361,6 @@ namespace RogueBasin
 
             LogFile.Log.LogEntryDebug("Action: keyboard: " + args.ToString(), LogDebugLevel.Low);
 
-            //Only on key up
-
             try
             {
                 return ActionOnKeypress(args);
@@ -382,10 +379,9 @@ namespace RogueBasin
             bool timeAdvances = false;
             bool centreOnPC = false;
 
-            //Only on key up
             if (args.Down)
             {
-                return new ActionResult(false, false);
+                return ActionOnKeyDown(args);
             }
 
             //Each interactive state has different keys
@@ -1113,6 +1109,17 @@ namespace RogueBasin
             return new ActionResult(timeAdvances, centreOnPC);
         }
 
+        private ActionResult ActionOnKeyDown(KeyboardEventArgs args)
+        {
+            //Each interactive state has different keys
+            switch (inputState)
+            {
+                case InputState.MapMovement:
+                case InputState.Targetting:
+                    return TargettingKeyDownEvent(args);
+            }
+            return new ActionResult(false, false);
+        }
 
         public void SetSpecialScreenAndHandler(Action specialScreen, Action<KeyboardEventArgs> specialScreenHandler)
         {
@@ -1150,13 +1157,19 @@ namespace RogueBasin
 
             if (args.Key == Key.F)
             {
-                if (promptAction != null)
-                {
-                    promptAction(true);
-
-                }
+                promptAction?.Invoke(true);
 
             }
+        }
+
+        private ActionResult TargettingKeyDownEvent(KeyboardEventArgs args)
+        {
+            var mousePosition = Mouse.MousePosition;
+            var mouseLocation = Screen.Instance.PixelToCoord(mousePosition);
+
+            MouseFocusOnMap(mouseLocation);
+
+            return new ActionResult(false, false);
         }
 
         private ActionResult TargettingKeyboardEvent(KeyboardEventArgs args)
@@ -1165,7 +1178,6 @@ namespace RogueBasin
             KeyModifier mod = KeyModifier.Arrow;
             bool wasDirection = GetDirectionFromKeypress(args, out direction, out mod);
             bool validFire = false;
-            bool escape = false;
 
             if (!wasDirection)
             {
@@ -1177,7 +1189,7 @@ namespace RogueBasin
 
                 if (args.Key == Key.Escape)
                 {
-                    escape = true;
+                    //Exit
                 }
             }
 

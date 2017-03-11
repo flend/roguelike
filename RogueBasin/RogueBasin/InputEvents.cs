@@ -25,6 +25,7 @@ namespace RogueBasin
             Events.Quit += new EventHandler<QuitEventArgs>(ApplicationQuitEventHandler);
             Events.Tick += new EventHandler<TickEventArgs>(ApplicationTickEventHandler);
             Events.KeyboardUp += new EventHandler<KeyboardEventArgs>(KeyboardEventHandler);
+            Events.KeyboardDown += new EventHandler<KeyboardEventArgs>(KeyboardEventHandler);
             Events.MusicFinished += new EventHandler<MusicFinishedEventArgs>(MusicFinishedEventHandler);
             Events.MouseButtonUp += new EventHandler<MouseButtonEventArgs>(MouseButtonHandler);
             Events.MouseMotion += new EventHandler<MouseMotionEventArgs>(MouseMotionHandler);
