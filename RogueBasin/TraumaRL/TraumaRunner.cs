@@ -1,11 +1,6 @@
 ﻿using GraphMap;
 using RogueBasin;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TraumaRL
 {
@@ -31,7 +26,7 @@ namespace TraumaRL
             {
                 try
                 {
-                    rb.SetupDungeon();
+                    rb.SetupGameWithNewDungeon();
 
                     GenerateStoryDungeon(retry);
 
@@ -88,8 +83,6 @@ namespace TraumaRL
             rb = new RogueBase();
             Game.Base = rb;
             rb.SetupSystem();
-            rb.SetupDungeon();
-            rb.Initialise();
 
             //Minimum debug
             if(Game.Config.DebugMode)
@@ -100,9 +93,9 @@ namespace TraumaRL
 
         private void RunGame()
         {
-            Game.Base.StartGame();
+            rb.StartGame();
 
-            Game.Base.Events.StartEventLoop();
+            rb.Events.StartEventLoop();
 
             //Movies can only be shown after event loop started
             ShowIntroMovies();

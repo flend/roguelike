@@ -63,12 +63,12 @@ namespace RogueBasin
 
         }
 
-        public void Initialise()
+        private void InitialiseGame(Dungeon dungeon)
         {
             //Setup input-related classes via dependency injection
 
-            targetting = new Targetting(Game.Dungeon, Game.Dungeon.Player);
-            running = new Running(Game.Dungeon.Player);
+            targetting = new Targetting(dungeon, dungeon.Player);
+            running = new Running(dungeon.Player);
 
             playerActions = new PlayerActions(running, targetting);
             gameActions = new GameActions();
@@ -118,19 +118,22 @@ namespace RogueBasin
             SetupFromConfig();
         }
 
-        public void SetupDungeon()
+        public void SetupGameWithNewDungeon()
         {
             var dungeonInfo = new DungeonInfo();
-            Game.Dungeon = new Dungeon(dungeonInfo);
+            var dungeon = new Dungeon(dungeonInfo);
+            InitialiseGame(dungeon);
 
-            Game.Dungeon.Difficulty = GameDifficulty.Medium;
-            Game.Dungeon.Player.Name = "A name";
-            Game.Dungeon.Player.PlayItemMovies = true;
+            dungeon.Difficulty = GameDifficulty.Medium;
+            dungeon.Player.Name = "A name";
+            dungeon.Player.PlayItemMovies = true;
 
-            Game.Dungeon.AllLocksOpen = false;
+            dungeon.AllLocksOpen = false;
 
             if (Game.Config.DebugMode)
-                Game.Dungeon.PlayerImmortal = true;
+                dungeon.PlayerImmortal = true;
+
+            Game.Dungeon = dungeon;
         }
 
 

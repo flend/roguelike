@@ -123,7 +123,7 @@ namespace RogueBasin
 
         public void RestartGameAfterDeath()
         {
-            Game.Base.SetupDungeon();
+            Game.Base.SetupGameWithNewDungeon();
         }
     }
 }
