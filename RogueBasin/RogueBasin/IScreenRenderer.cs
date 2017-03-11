@@ -18,8 +18,8 @@ namespace RogueBasin
 
         void Clear();
 
-        void DrawTextWidth(string msg, Point p, int size, int width, Color foregroundColor, Color backgroundColor);
-        void DrawText(string msg, Point p, int size, LineAlignment alignment, Color foregroundColor, Color backgroundColor);
+        void DrawTextWidth(string msg, Point p, int size, int width, Color foregroundColor, Color backgroundColor, double alpha = 1.0);
+        void DrawText(string msg, Point p, int size, LineAlignment alignment, Color foregroundColor, Color backgroundColor, double alpha = 1.0);
 
         void DrawTextWidth(string msg, Point p, int size, int width, Color color);
         void DrawText(string msg, Point p, int size, LineAlignment alignment, Color color);
@@ -32,7 +32,7 @@ namespace RogueBasin
         void DrawTraumaSprite(int id, Point p, LibtcodColorFlags flags, double scaling, double alpha);
         Size GetTraumaSpriteDimensions(int id);
 
-        void DrawLine(Point p1, Point p2, Color color);
-        void DrawRectangle(Rectangle rect, Color color);
+        void DrawLine(Point p1, Point p2, Color color, double alpha = 1.0);
+        void DrawRectangle(Rectangle rect, Color color, double alpha = 1.0);
     }
 }

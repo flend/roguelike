@@ -371,15 +371,28 @@ namespace RogueBasin
             videoSurface.Fill(Color.Black);
         }
 
-        public void DrawLine(Point p1, Point p2, Color color)
+        public void DrawLine(Point p1, Point p2, Color color, double alpha = 1.0)
         {
             IPrimitive line = new SdlDotNet.Graphics.Primitives.Line(p1.ToPoint(), p2.ToPoint());
             line.Draw(videoSurface, color);
         }
 
-        public void DrawRectangle(Rectangle rect, Color color) 
+        public void DrawRectangle(Rectangle rect, Color color, double alpha = 1.0) 
         {
-            videoSurface.Fill(rect, color);
+            if (alpha > 0.99)
+            {
+                videoSurface.Fill(rect, color);
+            }
+            else
+            {
+                Surface rectSurface = new Surface(rect.Size.Width, rect.Size.Height);
+                rectSurface.Fill(color);
+
+                rectSurface.AlphaBlending = true;
+                rectSurface.Alpha = (byte)(255 * alpha);
+
+                videoSurface.Blit(rectSurface, rect.Location);
+            }
         }
         
         public SdlDotNet.Graphics.Font GetFontSurfaceFromCache(int size) {
@@ -396,7 +409,7 @@ namespace RogueBasin
             return font;
         }
 
-        public void DrawText(string msg, Point p, int size, LineAlignment lineAlignment, Color foregroundColor, Color backgroundColor)
+        public void DrawText(string msg, Point p, int size, LineAlignment lineAlignment, Color foregroundColor, Color backgroundColor, double alpha = 1.0)
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
             Surface fontSurface = font.Render(msg, foregroundColor, backgroundColor, true);
@@ -407,6 +420,12 @@ namespace RogueBasin
             {
                 var dimensions = font.SizeText(msg);
                 pointToDraw = new System.Drawing.Point(p.x - dimensions.Width / 2, p.y - dimensions.Height / 2);
+            }
+
+            if (alpha <= 0.99)
+            {
+                fontSurface.AlphaBlending = true;
+                fontSurface.Alpha = (byte)(255 * alpha);
             }
 
             videoSurface.Blit(fontSurface, pointToDraw);
@@ -440,10 +459,16 @@ namespace RogueBasin
             videoSurface.Blit(fontSurface, p.ToPoint());
         }
 
-        public void DrawTextWidth(string msg, Point p, int size, int width, Color foregroundColor, Color backgroundColor)
+        public void DrawTextWidth(string msg, Point p, int size, int width, Color foregroundColor, Color backgroundColor, double alpha = 1.0)
         {
             SdlDotNet.Graphics.Font font = GetFontSurfaceFromCache(size);
+
             Surface fontSurface = font.Render(msg, foregroundColor, backgroundColor, true, width, 100);
+            if(alpha <= 0.99)
+            {
+                fontSurface.AlphaBlending = true;
+                fontSurface.Alpha = (byte)(255 * alpha);
+            }
 
             videoSurface.Blit(fontSurface, p.ToPoint());
         }

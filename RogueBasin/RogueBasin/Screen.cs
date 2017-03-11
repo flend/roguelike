@@ -4,11 +4,9 @@ using System.Text;
 using libtcodWrapper;
 using Console = System.Console;
 using System.IO;
-using System.Windows.Forms;
 using System.Reflection;
 using System.Linq;
 using System.Drawing;
-using RogueBasin.LibTCOD;
 
 namespace RogueBasin {
 
@@ -116,7 +114,9 @@ namespace RogueBasin {
 
         System.Drawing.Color headingColor = System.Drawing.Color.Yellow;
 
-        System.Drawing.Color messageColor = System.Drawing.Color.CadetBlue;
+        System.Drawing.Color messageColor = System.Drawing.Color.SkyBlue;
+        System.Drawing.Color messageBackgroundColor = System.Drawing.Color.Black;
+        double messageBackgroundAlpha = 0.6;
         System.Drawing.Color titleColor = System.Drawing.Color.CadetBlue;
 
         System.Drawing.Color soundColor = System.Drawing.Color.Yellow;
@@ -401,11 +401,15 @@ namespace RogueBasin {
 
         public void ShowMessageLine(string msg, System.Drawing.Color color)
         {
+            var textDimensions = TextDimensions(msg);
+            DrawRect(new Rectangle(msgDisplayTopLeft.ToPoint(), textDimensions), messageBackgroundColor, messageBackgroundAlpha);
             DrawTextWidth(msg, msgDisplayTopLeft, msgDisplayBotRight.x - msgDisplayTopLeft.x, color);
         }
 
         public void ShowMessageLine(string msg)
         {
+            var textDimensions = TextDimensions(msg);
+            DrawRect(new Rectangle(msgDisplayTopLeft.ToPoint(), textDimensions), messageBackgroundColor, messageBackgroundAlpha);
             DrawTextWidth(msg, msgDisplayTopLeft, msgDisplayBotRight.x - msgDisplayTopLeft.x, messageColor);
         }
 
@@ -1654,6 +1658,21 @@ namespace RogueBasin {
         void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
         {
             renderer.DrawTextWidth(msg, p, largeTextSize, width, color);
+        }
+
+        void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor, double alpha)
+        {
+            renderer.DrawTextWidth(msg, p, largeTextSize, width, foregroundColor, backgroundColor, alpha);
+        }
+
+        void DrawRect(Rectangle rect, System.Drawing.Color color, double alpha = 1.0)
+        {
+            renderer.DrawRectangle(rect, color, alpha);
+        }
+
+        Size TextDimensions(string msg)
+        {
+            return renderer.TextDimensions(msg, largeTextSize);
         }
 
         private void DrawUIText(string msg, Point p)

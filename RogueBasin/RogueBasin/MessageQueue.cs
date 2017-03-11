@@ -24,7 +24,7 @@ namespace RogueBasin
         public int CachedMsgTurnCount{ get; set; }
         bool showCachedMsg = false;
         string cachedMsg = "";
-        System.Drawing.Color cachedMsgColor = System.Drawing.Color.Gray;
+        System.Drawing.Color cachedMsgColor = System.Drawing.Color.SkyBlue;
         
         /// <summary>
         /// Require a keypress at the end of the message display
@@ -133,10 +133,6 @@ namespace RogueBasin
         {
             List<string> messages = Game.MessageQueue.GetMessages();
 
-            int msgDisplayTopLeftX = 50;
-            int msgDisplayTopLeftY = 50;
-            int msgDisplayWidth = 800;
-
             //Increment no of turns we have shown cached msg. Turn it off if too many
             IncrementCachedMsgCounter();
             if (CachedMsgTurnCount > displayCachedMsgTurns)
@@ -147,6 +143,7 @@ namespace RogueBasin
                 //If we have a cached msg, show it
                 if (showCachedMsg)
                 {
+                    //The different colors don't work so well now since with the mouse we sometimes seem to take an extra frame
                     Screen.Instance.ClearMessageLine();
                     Screen.Instance.ShowMessageLine(cachedMsg, cachedMsgColor);
                 }
