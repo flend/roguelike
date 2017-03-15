@@ -101,7 +101,7 @@ namespace RogueBasin
 
         private void SetupWeaponTarget(Location target)
         {
-            SetupWeaponTypeTarget(target, TargettingAction.Weapon, "f", "Fire Weapon");
+            SetupWeaponTypeTarget(target, TargettingAction.Fire, "f", "Fire Weapon");
             inputHandler.SetInputState(InputHandler.InputState.Targetting);
         }
 
@@ -116,18 +116,18 @@ namespace RogueBasin
                 targetInfo = weapon.TargettingInfo();
             }
 
-            TargetAction(target, targetInfo, action, confirmKey, message, false);
+            TargetAction(target, targetInfo, action, confirmKey, message);
         }
 
         private void SetupMoveTarget(Location target)
         {
-            TargetAction(target, new MoveTargettingInfo(), TargettingAction.Move, "ENTER", "Move", false);
+            TargetAction(target, new MoveTargettingInfo(), TargettingAction.Move, "ENTER", "Move");
             inputHandler.SetInputState(InputHandler.InputState.Targetting);
         }
 
         private void SetupThrowTarget(Location target)
         {
-            SetupThrowTypeTarget(target, RogueBasin.TargettingAction.Utility, "t", "Throw Item");
+            SetupThrowTypeTarget(target, RogueBasin.TargettingAction.Throw, "t", "Throw Item");
             inputHandler.SetInputState(InputHandler.InputState.Targetting);
         }
 
@@ -142,26 +142,28 @@ namespace RogueBasin
                 targetType = utility.TargettingInfo();
             }
 
-            TargetAction(target, targetType, action, confirmKey, message, false);
+            TargetAction(target, targetType, action, confirmKey, message);
         }
 
         private void SetupExamineTarget(Location target)
         {
-            TargetAction(target, new ExamineTargettingInfo(), TargettingAction.Examine, "x", "Examine", false);
+            TargetAction(target, new ExamineTargettingInfo(), TargettingAction.Examine, "x", "Examine");
             inputHandler.SetInputState(InputHandler.InputState.Targetting);
         }
 
         private void SetupExamineTargetInstant(Location target)
         {
-            TargetAction(target, new ExamineTargettingInfo(), TargettingAction.Examine, "x", "Examine", false);
+            TargetAction(target, new ExamineTargettingInfo(), TargettingAction.Examine, "x", "Examine");
         }
 
         private void SetupMoveOrFireTargetInstant(Location target, bool alternativeTargetMode)
         {
             SquareContents squareContents = dungeon.MapSquareContents(target);
 
-            if (dungeon.IsSquareInPlayerFOV(target) && (squareContents.monster != null || alternativeTargetMode))
-            {
+            if (dungeon.IsSquareInPlayerFOV(target) &&
+                ((squareContents.monster != null && !alternativeTargetMode) ||
+                (squareContents.monster == null && alternativeTargetMode))) { 
+            
                 IEquippableItem weapon = player.GetEquippedRangedWeapon();
 
                 TargettingInfo targetInfo = new NullTargettingInfo();
@@ -171,11 +173,11 @@ namespace RogueBasin
                     targetInfo = weapon.TargettingInfo();
                 }
 
-                TargetAction(target, targetInfo, TargettingAction.MoveOrWeapon, "f", null, alternativeTargetMode);
+                TargetAction(target, targetInfo, TargettingAction.MoveOrFire, TargettingAction.Fire, "f", null);
             }
             else
             {
-                TargetAction(target, new MoveTargettingInfo(), TargettingAction.MoveOrWeapon, "f", null, alternativeTargetMode);
+                TargetAction(target, new MoveTargettingInfo(), TargettingAction.MoveOrFire, TargettingAction.Move, "f", null);
             }
         }
 
@@ -183,7 +185,9 @@ namespace RogueBasin
         {
             SquareContents squareContents = Game.Dungeon.MapSquareContents(target);
 
-            if (dungeon.IsSquareInPlayerFOV(target) && squareContents.monster != null || alternativeTargetMode)
+            if (dungeon.IsSquareInPlayerFOV(target) &&
+                ((squareContents.monster != null && !alternativeTargetMode) ||
+                (squareContents.monster == null && alternativeTargetMode))) 
             {
                 IEquippableItem utility = player.GetEquippedUtility();
 
@@ -194,11 +198,11 @@ namespace RogueBasin
                     targetInfo = utility.TargettingInfo();
                 }
 
-                TargetAction(target, targetInfo, RogueBasin.TargettingAction.MoveOrThrow, "t", null, alternativeTargetMode);
+                TargetAction(target, targetInfo, TargettingAction.MoveOrThrow, TargettingAction.Throw, "t", null);
             }
             else
             {
-                TargetAction(target, new MoveTargettingInfo(), RogueBasin.TargettingAction.MoveOrThrow, "t", null, alternativeTargetMode);
+                TargetAction(target, new MoveTargettingInfo(), TargettingAction.MoveOrThrow, TargettingAction.Move, "t", null);
             }
         }
 
@@ -224,9 +228,14 @@ namespace RogueBasin
             return true;
         }
 
-        private void TargetAction(Location target, TargettingInfo targetInfo, TargettingAction targetAction, string confirmChar, string message, bool alternativeTargettingMode)
+        private void TargetAction(Location target, TargettingInfo targetInfo, TargettingAction targetAction, string confirmChar, string message)
         {
-            targetReticle.SetupScreenTargetting(target, targetInfo, targetAction, confirmChar, message, alternativeTargettingMode);
+            targetReticle.SetupScreenTargetting(target, targetInfo, targetAction, confirmChar, message);
+        }
+
+        private void TargetAction(Location target, TargettingInfo targetInfo, TargettingAction targetAction, TargettingAction targetSubAction, string confirmChar, string message)
+        {
+            targetReticle.SetupScreenTargetting(target, targetInfo, targetAction, targetSubAction, confirmChar, message);
         }
 
         private Location GetDefaultTarget(int range)
@@ -261,15 +270,14 @@ namespace RogueBasin
 
         internal void RetargetSquare(Location newPoint)
         {
-            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(player);
-            targetReticle.RetargetSquare(newPoint, currentFOV);
+            targetReticle.RetargetSquare(newPoint);
         }
 
         public TargettingAction TargettingAction { get { return targetReticle.TargettingAction; } }
 
         public Location CurrentTarget { get { return targetReticle.CurrentTarget; } }
 
-        public bool AlternativeTargettingMode { get { return targetReticle.AlternativeTargettingMode; } }
+        public TargettingAction TargettingSubAction { get { return targetReticle.TargettingSubAction; } }
 
         public void DisableTargettingMode()
         {

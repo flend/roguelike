@@ -30,7 +30,7 @@ namespace RogueBasin
         GameActions gameActions;
         SystemActions systemActions;
 
-        TargettingAction mouseTargettingAction = TargettingAction.MoveOrWeapon;
+        TargettingAction mouseTargettingAction = TargettingAction.MoveOrFire;
 
         private Point DragTracker { get; set; }
         private bool lastMouseActionWasDrag = false;
@@ -109,14 +109,14 @@ namespace RogueBasin
             else
             {
                 //Secondary button - switch targetting modes
-                if (mouseTargettingAction == TargettingAction.MoveOrWeapon)
+                if (mouseTargettingAction == TargettingAction.MoveOrFire)
                 {
                     mouseTargettingAction = TargettingAction.MoveOrThrow;
                     MouseFocusOnMap(clickLocation);
                 }
                 else
                 {
-                    mouseTargettingAction = TargettingAction.MoveOrWeapon;
+                    mouseTargettingAction = TargettingAction.MoveOrFire;
                     MouseFocusOnMap(clickLocation);
                 }
 
@@ -134,7 +134,15 @@ namespace RogueBasin
             LogFile.Log.LogEntryDebug("mouse pos: " + new Point(mousePosition), LogDebugLevel.High);
         }
 
-        public void MouseFocusOnMap(Point mousePosition)
+        private void MouseFocusOnMap()
+        {
+            var mousePosition = Mouse.MousePosition;
+            var mouseLocation = Screen.Instance.PixelToCoord(mousePosition);
+
+            MouseFocusOnMap(mouseLocation);
+        }
+
+        private void MouseFocusOnMap(Point mouseLocation)
         {
             bool shifted = false;
 
@@ -149,9 +157,9 @@ namespace RogueBasin
                 shifted = true;
             }
 
-            var gameLocation = new Location(Screen.Instance.LevelToDisplay, mousePosition);
+            var gameLocation = new Location(Screen.Instance.LevelToDisplay, mouseLocation);
 
-            if (mouseTargettingAction == TargettingAction.MoveOrWeapon)
+            if (mouseTargettingAction == TargettingAction.MoveOrFire)
             {
                 targetting.TargetMoveOrFireInstant(gameLocation, shifted);
             }
@@ -200,7 +208,7 @@ namespace RogueBasin
             return true;
         }
 
-        public bool DoPlayerNextAction(KeyboardEventArgs args, MouseButtonEventArgs mouseArgs, MouseMotionEventArgs mouseMotionArgs, CustomInputArgs customArgs)
+        public bool DoPlayerNextAction(KeyboardEventArgs keyboardArgs, MouseButtonEventArgs mouseArgs, MouseMotionEventArgs mouseMotionArgs, CustomInputArgs customArgs)
         {
             var player = Game.Dungeon.Player;
             try
@@ -216,9 +224,9 @@ namespace RogueBasin
 
                     case ActionState.Interactive:
 
-                        if (args != null)
+                        if (keyboardArgs != null)
                         {
-                            inputResult = PlayerAction(actionState, args);
+                            inputResult = PlayerAction(actionState, keyboardArgs);
                         }
                         else if (mouseArgs != null)
                         {
@@ -384,6 +392,9 @@ namespace RogueBasin
             {
                 return ActionOnKeyDown(args);
             }
+
+            //Since mouse targetting modifiers may have changed, refocus on map
+            MouseFocusOnMap();
 
             //Each interactive state has different keys
             switch (inputState)
@@ -1242,12 +1253,12 @@ namespace RogueBasin
             //Complete actions
             switch (targetting.TargettingAction)
             {
-                case TargettingAction.Weapon:
+                case TargettingAction.Fire:
 
                     result = playerActions.FireTargettedWeapon();
                     break;
 
-                case TargettingAction.Utility:
+                case TargettingAction.Throw:
 
                     result = playerActions.ThrowTargettedUtility();
                     break;
@@ -1257,7 +1268,7 @@ namespace RogueBasin
                     restoreExamine = false;
                     break;
 
-                case TargettingAction.MoveOrWeapon:
+                case TargettingAction.MoveOrFire:
                     {
                         SquareContents squareContents = Game.Dungeon.MapSquareContents(targetting.CurrentTarget);
                         if (squareContents.monster != null)

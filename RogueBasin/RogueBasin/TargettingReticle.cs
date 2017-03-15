@@ -1,8 +1,8 @@
 ﻿namespace RogueBasin
 {
     /// <summary>
-    /// Retains the state about the current targetted action and target
-    /// Also updates the screen flags on a change of target
+    /// Retains the state about the current targetted action and target location
+    /// Also updates the screen flags and view panel on a change of target
     /// </summary>
     class TargettingReticle
     {
@@ -12,46 +12,39 @@
         private string TargettingConfirmChar { get; set; }
         private string TargettingMessage { get; set; }
 
-        private TargettingAction currentTargettingAction = TargettingAction.Weapon;
+        private TargettingAction currentTargettingAction = TargettingAction.Fire;
+        private TargettingAction currentTargettingSubAction = TargettingAction.Fire;
 
         private Location currentTarget = null;
 
-        private TargettingInfo currentInfo;
-
-        private bool alternateTargettingMode = false;
+        private TargettingInfo currentTargetInfo;
 
         public TargettingReticle(Dungeon dungeon, Player player) {
             this.player = player;
             this.dungeon = dungeon;
         }
 
-        public void RetargetSquare(Location newTarget, CreatureFOV currentFOV)
+        public void RetargetSquare(Location newTarget)
         {
             currentTarget = newTarget;
 
-            SetScreenTargettingMode(currentTarget, currentInfo, currentTargettingAction, AlternativeTargettingMode);
-
-            CheckTargetInRange(newTarget, currentTargettingAction, currentInfo);
-            SquareContents sqC = SetViewPanelToTargetAtSquare(newTarget);
-
-            //Update screen
-            SetTargettingMessage(TargettingMessage, TargettingConfirmChar);
-            SetTargettingState(currentTarget, currentInfo, currentTargettingAction, TargettingConfirmChar, TargettingMessage);
+            SetupScreenTargetting(currentTarget, currentTargetInfo, currentTargettingAction, currentTargettingSubAction, TargettingConfirmChar, TargettingMessage);
         }
 
-        public void SetupScreenTargetting(Location newTarget, TargettingInfo targetInfo, TargettingAction targetAction, string confirmKey, string message, bool alternateTargettingMode)
+        public void SetupScreenTargetting(Location newTarget, TargettingInfo targetInfo, TargettingAction targetAction, TargettingAction targetSubAction, string confirmKey, string message)
         {
-            this.alternateTargettingMode = alternateTargettingMode;
+            currentTargettingSubAction = targetSubAction;
+            SetupScreenTargetting(newTarget, targetInfo, targetAction, confirmKey, message);
+        }
 
-            SetScreenTargettingMode(newTarget, targetInfo, targetAction, alternateTargettingMode);
-
-            CheckTargetInRange(newTarget, targetAction, targetInfo);
-
-            SquareContents sqC = SetViewPanelToTargetAtSquare(newTarget);
-
+        public void SetupScreenTargetting(Location newTarget, TargettingInfo targetInfo, TargettingAction targetAction, string confirmKey, string message)
+        {
             SetTargettingMessage(message, confirmKey);
-
             SetTargettingState(newTarget, targetInfo, targetAction, confirmKey, message);
+
+            CheckTargetInRange();
+            SetScreenTargettingMode();
+            SetViewPanelToTargetAtSquare();
         }
 
         private void SetTargettingMessage(string message, string confirmKey)
@@ -62,18 +55,18 @@
             Game.MessageQueue.AddMessage(message + " find a target. " + confirmKey + " to confirm. ESC to exit.");
         }
 
-        private void CheckTargetInRange(Location start, TargettingAction targetAction, TargettingInfo targetInfo)
+        private void CheckTargetInRange()
         {
-            Screen.Instance.TargetInRange = targetInfo.IsInRange(player, dungeon, start);
+            Screen.Instance.TargetInRange = currentTargetInfo.IsInRange(player, dungeon, currentTarget);
         }
 
-        private void SetScreenTargettingMode(Location start, TargettingInfo info, TargettingAction targetAction, bool alternativeTargettingMode)
+        private void SetScreenTargettingMode()
         {
             Screen.Instance.TargettingModeOn();
-            Screen.Instance.Target = start;
-            Screen.Instance.TargetInfo = info;
-            Screen.Instance.TargetAction = targetAction;
-            Screen.Instance.AlternativeTargettingMode = alternateTargettingMode;
+            Screen.Instance.Target = CurrentTarget;
+            Screen.Instance.TargetInfo = currentTargetInfo;
+            Screen.Instance.TargetAction = TargettingAction;
+            Screen.Instance.TargetSubAction = TargettingSubAction;
         }
 
         private void SetTargettingState(Location target, TargettingInfo info, TargettingAction targetAction, string confirmKey, string message)
@@ -81,24 +74,24 @@
             currentTargettingAction = targetAction;
             TargettingConfirmChar = confirmKey;
             currentTarget = target;
-            currentInfo = info;
+            currentTargetInfo = info;
             TargettingMessage = message;
         }
 
         public TargettingAction TargettingAction { get { return currentTargettingAction; } }
 
-        public Location CurrentTarget { get { return currentTarget; } }
+        public TargettingAction TargettingSubAction { get { return currentTargettingSubAction; } }
 
-        public bool AlternativeTargettingMode { get { return alternateTargettingMode; } }
+        public Location CurrentTarget { get { return currentTarget; } }
 
         public void DisableScreenTargettingMode()
         {
             Screen.Instance.TargettingModeOff();
         }
 
-        private SquareContents SetViewPanelToTargetAtSquare(Location start)
+        private SquareContents SetViewPanelToTargetAtSquare()
         {
-            SquareContents sqC = dungeon.MapSquareContents(start);
+            SquareContents sqC = dungeon.MapSquareContents(currentTarget);
             Screen.Instance.CreatureToView = sqC.monster; //may reset to null
             if (sqC.items.Count > 0)
                 Screen.Instance.ItemToView = sqC.items[0];

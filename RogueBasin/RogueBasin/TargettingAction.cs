@@ -8,7 +8,7 @@ namespace RogueBasin
 {
     public enum TargettingAction
     {
-        Weapon, Examine, Utility, Move, MoveOrWeapon, MoveOrThrow
+        Fire, Examine, Throw, Move, MoveOrFire, MoveOrThrow
     }
        
 }

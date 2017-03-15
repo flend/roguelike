@@ -177,7 +177,7 @@ namespace RogueBasin {
         public Location Target { get; set; }
         public TargettingInfo TargetInfo { get; set; }
         public TargettingAction TargetAction { get; set; }
-        public bool AlternativeTargettingMode { get; set; }
+        public TargettingAction TargetSubAction { get; set; }
 
         public System.Drawing.Color PCColor { get; set;}
 
@@ -1265,11 +1265,17 @@ namespace RogueBasin {
                 {
                     var targetSprite = TargetAction == TargettingAction.Examine ? greenTargetTile : redTargetTile;
 
-                    if(TargetAction == TargettingAction.MoveOrWeapon && !AlternativeTargettingMode)
+                    if(TargetAction == TargettingAction.Fire || 
+                        (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Fire))
                     {
                         targetSprite = targetWeaponTile;
                     }
-
+                    else if (TargetAction == TargettingAction.Throw ||
+                        (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Throw))
+                    {
+                        targetSprite = orangeTargetTile;
+                    }
+                    
                     tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
                 }
                 else
