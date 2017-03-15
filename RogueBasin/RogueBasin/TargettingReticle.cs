@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RogueBasin
+﻿namespace RogueBasin
 {
+    /// <summary>
+    /// Retains the state about the current targetted action and target
+    /// Also updates the screen flags on a change of target
+    /// </summary>
     class TargettingReticle
     {
         private readonly Player player;
@@ -14,11 +12,13 @@ namespace RogueBasin
         private string TargettingConfirmChar { get; set; }
         private string TargettingMessage { get; set; }
 
-        TargettingAction currentTargettingAction = TargettingAction.Weapon;
+        private TargettingAction currentTargettingAction = TargettingAction.Weapon;
 
-        Location currentTarget = null;
+        private Location currentTarget = null;
 
-        TargettingInfo currentInfo;
+        private TargettingInfo currentInfo;
+
+        private bool alternateTargettingMode = false;
 
         public TargettingReticle(Dungeon dungeon, Player player) {
             this.player = player;
@@ -29,7 +29,7 @@ namespace RogueBasin
         {
             currentTarget = newTarget;
 
-            SetScreenTargettingMode(currentTarget, currentInfo, currentTargettingAction);
+            SetScreenTargettingMode(currentTarget, currentInfo, currentTargettingAction, AlternativeTargettingMode);
 
             CheckTargetInRange(newTarget, currentTargettingAction, currentInfo);
             SquareContents sqC = SetViewPanelToTargetAtSquare(newTarget);
@@ -39,14 +39,11 @@ namespace RogueBasin
             SetTargettingState(currentTarget, currentInfo, currentTargettingAction, TargettingConfirmChar, TargettingMessage);
         }
 
-        /// <summary>
-        /// Gets a target from the player. false showed an escape. otherwise target is the target selected.
-        /// </summary>
-        /// <param name="?"></param>
-        /// <returns></returns>
-        public void GetTargetFromPlayer(Location newTarget, TargettingInfo targetInfo, TargettingAction targetAction, string confirmKey, string message)
+        public void SetupScreenTargetting(Location newTarget, TargettingInfo targetInfo, TargettingAction targetAction, string confirmKey, string message, bool alternateTargettingMode)
         {
-            SetScreenTargettingMode(newTarget, targetInfo, targetAction);
+            this.alternateTargettingMode = alternateTargettingMode;
+
+            SetScreenTargettingMode(newTarget, targetInfo, targetAction, alternateTargettingMode);
 
             CheckTargetInRange(newTarget, targetAction, targetInfo);
 
@@ -67,29 +64,16 @@ namespace RogueBasin
 
         private void CheckTargetInRange(Location start, TargettingAction targetAction, TargettingInfo targetInfo)
         {
-            if (targetAction == TargettingAction.Utility || targetAction == TargettingAction.Weapon || targetAction == TargettingAction.Examine || targetAction == TargettingAction.MoveOrWeapon || targetAction == TargettingAction.MoveOrThrow)
-            {
-                if (targetInfo.IsInRange(player, dungeon, start))
-                {
-                    Screen.Instance.TargetInRange = true;
-                }
-                else
-                {
-                    Screen.Instance.TargetInRange = false;
-                }
-            }
-            else
-            {
-                Screen.Instance.TargetInRange = true;
-            }
+            Screen.Instance.TargetInRange = targetInfo.IsInRange(player, dungeon, start);
         }
 
-        private void SetScreenTargettingMode(Location start, TargettingInfo info, TargettingAction targetAction)
+        private void SetScreenTargettingMode(Location start, TargettingInfo info, TargettingAction targetAction, bool alternativeTargettingMode)
         {
             Screen.Instance.TargettingModeOn();
             Screen.Instance.Target = start;
             Screen.Instance.TargetInfo = info;
             Screen.Instance.TargetAction = targetAction;
+            Screen.Instance.AlternativeTargettingMode = alternateTargettingMode;
         }
 
         private void SetTargettingState(Location target, TargettingInfo info, TargettingAction targetAction, string confirmKey, string message)
@@ -105,12 +89,14 @@ namespace RogueBasin
 
         public Location CurrentTarget { get { return currentTarget; } }
 
+        public bool AlternativeTargettingMode { get { return alternateTargettingMode; } }
+
         public void DisableScreenTargettingMode()
         {
             Screen.Instance.TargettingModeOff();
         }
 
-        public SquareContents SetViewPanelToTargetAtSquare(Location start)
+        private SquareContents SetViewPanelToTargetAtSquare(Location start)
         {
             SquareContents sqC = dungeon.MapSquareContents(start);
             Screen.Instance.CreatureToView = sqC.monster; //may reset to null

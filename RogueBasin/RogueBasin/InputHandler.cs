@@ -30,7 +30,7 @@ namespace RogueBasin
         GameActions gameActions;
         SystemActions systemActions;
 
-        TargettingAction mouseDefaultTargettingAction = TargettingAction.MoveOrWeapon;
+        TargettingAction mouseTargettingAction = TargettingAction.MoveOrWeapon;
 
         private Point DragTracker { get; set; }
         private bool lastMouseActionWasDrag = false;
@@ -108,14 +108,15 @@ namespace RogueBasin
             }
             else
             {
-                if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
+                //Secondary button - switch targetting modes
+                if (mouseTargettingAction == TargettingAction.MoveOrWeapon)
                 {
-                    mouseDefaultTargettingAction = TargettingAction.MoveOrThrow;
+                    mouseTargettingAction = TargettingAction.MoveOrThrow;
                     MouseFocusOnMap(clickLocation);
                 }
                 else
                 {
-                    mouseDefaultTargettingAction = TargettingAction.MoveOrWeapon;
+                    mouseTargettingAction = TargettingAction.MoveOrWeapon;
                     MouseFocusOnMap(clickLocation);
                 }
 
@@ -150,7 +151,7 @@ namespace RogueBasin
 
             var gameLocation = new Location(Screen.Instance.LevelToDisplay, mousePosition);
 
-            if (mouseDefaultTargettingAction == TargettingAction.MoveOrWeapon)
+            if (mouseTargettingAction == TargettingAction.MoveOrWeapon)
             {
                 targetting.TargetMoveOrFireInstant(gameLocation, shifted);
             }
@@ -1272,13 +1273,13 @@ namespace RogueBasin
                         }
                         else
                         {
+                            //No monster
                             if (!alternativeActionMode)
                             {
                                 result = playerActions.RunToTargettedDestination();
                             }
                             else
                             {
-
                                 result = playerActions.FireTargettedWeapon();
                             }
                         }
@@ -1301,6 +1302,7 @@ namespace RogueBasin
                         }
                         else
                         {
+                            //No monster
                             if (!alternativeActionMode)
                             {
                                 result = playerActions.RunToTargettedDestination();

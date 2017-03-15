@@ -1205,4 +1205,7 @@
     <EmbeddedResource Include="bin\Debug\graphics\tiles\orangeoutlinetarget.png" />
     <EmbeddedResource Include="bin\Debug\graphics\tiles\redoutlinetarget.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\shoot.png" />
+  </ItemGroup>
 </Project>

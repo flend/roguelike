@@ -173,18 +173,11 @@ namespace RogueBasin {
         int largeTextSize = 22;
         int largeTextSizeLineOffset = 11;
 
-        /// <summary>
-        /// Targetting mode
-        /// </summary>
         bool targettingMode = false;
-
-        /// <summary>
-        /// Targetting cursor
-        /// </summary>
         public Location Target { get; set; }
-
         public TargettingInfo TargetInfo { get; set; }
         public TargettingAction TargetAction { get; set; }
+        public bool AlternativeTargettingMode { get; set; }
 
         public System.Drawing.Color PCColor { get; set;}
 
@@ -240,6 +233,8 @@ namespace RogueBasin {
         static readonly string redOutlineTargetTile = "redoutlinetarget";
         static readonly string orangeOutlineTargetTile = "orangeoutlinetarget";
         static readonly string blackOutlineTargetTile = "blackoutlinetarget";
+
+        static readonly string targetWeaponTile = "shoot";
 
         public int LevelToDisplay
         {
@@ -1263,14 +1258,18 @@ namespace RogueBasin {
                 var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
                 var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
 
-//                var targetSquareContents =  
-
                 DrawTargettingOverSquaresAndCreatures(pathToTarget, orangeTargetTile);
                 DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, redTargetTile);
 
                 if (TargetInRange)
                 {
                     var targetSprite = TargetAction == TargettingAction.Examine ? greenTargetTile : redTargetTile;
+
+                    if(TargetAction == TargettingAction.MoveOrWeapon && !AlternativeTargettingMode)
+                    {
+                        targetSprite = targetWeaponTile;
+                    }
+
                     tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
                 }
                 else
