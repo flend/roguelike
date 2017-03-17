@@ -235,6 +235,10 @@ namespace RogueBasin {
         static readonly string blackOutlineTargetTile = "blackoutlinetarget";
 
         static readonly string targetWeaponTile = "shoot";
+        static readonly string targetThrowingTile = "throw";
+        static readonly string targetMoveTile = "move";
+        static readonly string pathMoveTile = "movepath";
+        static readonly string targetMeleeTile = "melee";
 
         public int LevelToDisplay
         {
@@ -1258,37 +1262,60 @@ namespace RogueBasin {
                 var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
                 var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
 
-                DrawTargettingOverSquaresAndCreatures(pathToTarget, orangeTargetTile);
                 DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, redTargetTile);
 
                 if (TargetInRange)
                 {
-                    var targetSprite = TargetAction == TargettingAction.Examine ? greenTargetTile : redTargetTile;
+                    if (TargetAction == TargettingAction.Examine)
+                    {
+                        DrawTargetTile(greenTargetTile);
+                    }
 
-                    if(TargetAction == TargettingAction.Fire || 
+                    if (TargetAction == TargettingAction.Fire ||
                         (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Fire))
                     {
-                        targetSprite = targetWeaponTile;
+                        DrawTargettingOverSquaresAndCreatures(pathToTarget, orangeTargetTile);
+                        DrawTargetTile(targetWeaponTile);
                     }
                     else if (TargetAction == TargettingAction.Throw ||
                         (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Throw))
                     {
-                        targetSprite = orangeTargetTile;
+                        DrawTargettingOverSquaresAndCreatures(pathToTarget, orangeTargetTile);
+                        DrawTargetTile(targetThrowingTile);
                     }
-                    
-                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
+
+                    if (TargetAction == TargettingAction.Move ||
+                        (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Move) ||
+                        (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Move))
+                    {
+
+                        var sq = Game.Dungeon.MapSquareContents(Target);
+
+                        var targetSprite = targetMoveTile;
+
+                        if (sq.monster != null)
+                        {
+                            targetSprite = targetMeleeTile;
+                        }
+
+                        DrawTargettingOverSquaresAndCreatures(pathToTarget, pathMoveTile);
+                        DrawTargetTile(targetSprite);
+                    }
                 }
                 else
                 {
-                    var targetSprite = blackTargetTile;
-                    tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
+                    DrawTargetTile(blackTargetTile);
                 }
             }
             else
             {
-                var targetSprite = redTargetTile;
-                tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
+                DrawTargetTile(redTargetTile);
             }
+        }
+
+        private void DrawTargetTile(string targetSprite)
+        {
+            tileMapLayer(TileLevel.TargettingUI)[ViewRelative(Target.MapCoord)] = new TileEngine.TileCell(targetSprite);
         }
 
         private void DrawTargettingOverSquaresAndCreatures(IEnumerable<Point> splashSquares, string targetSprite)
