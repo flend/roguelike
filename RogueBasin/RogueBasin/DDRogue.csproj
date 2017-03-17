@@ -1208,4 +1208,8 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\tiles\shoot.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\melee.png" />
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\throw.png" />
+  </ItemGroup>
 </Project>
