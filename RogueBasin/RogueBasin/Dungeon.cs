@@ -226,13 +226,13 @@ namespace RogueBasin
         /// </summary>
         public void SetupDungeonStartAndEndDebug()
         {
-                DungeonProfile thisDung = new DungeonProfile();
+            DungeonProfile thisDung = new DungeonProfile();
 
-                thisDung.dungeonStartLevel = 1;
-                thisDung.dungeonEndLevel = 1;
+            thisDung.dungeonStartLevel = 1;
+            thisDung.dungeonEndLevel = 1;
 
-                dungeons.Add(thisDung);
-    
+            dungeons.Add(thisDung);
+
 
             /*
             for (int i = 0; i < 6; i++)
@@ -243,7 +243,7 @@ namespace RogueBasin
 
             //Setup the original open dungeons
             dungeons[0].open = true;
-        
+
         }
 
         public List<DungeonProfile> Dungeons
@@ -350,8 +350,8 @@ namespace RogueBasin
             }
         }
 
-        public Dictionary<int, string> LevelNaming { get { return levelNaming; } set { levelNaming = value; }}
-  
+        public Dictionary<int, string> LevelNaming { get { return levelNaming; } set { levelNaming = value; } }
+
         /// <summary>
         /// Names for the areas
         /// </summary>
@@ -359,7 +359,7 @@ namespace RogueBasin
         /// <returns></returns>
         internal string LookupMissionName(int level)
         {
-            if(LevelNaming.ContainsKey(level))
+            if (LevelNaming.ContainsKey(level))
                 return LevelNaming[level];
             return "";
         }
@@ -371,6 +371,8 @@ namespace RogueBasin
     /// </summary>
     public class Dungeon
     {
+        Player player;
+
         List<Map> levels;
 
         Pathing pathFinding;
@@ -380,19 +382,15 @@ namespace RogueBasin
         List<Item> items;
         Dictionary<Location, List<Feature>> features;
         Dictionary<Location, List<Lock>> locks;
-        public List<HiddenNameInfo> HiddenNameInfo { get; set; } //for serialization
         public Dictionary<Location, List<DungeonSquareTrigger>> Triggers { get; set; }
 
         List<SpecialMove> specialMoves;
-
         List<Spell> spells;
 
-        Player player;
+        public List<HiddenNameInfo> HiddenNameInfo { get; set; } //for serialization
 
         public bool SaveScumming { get; set; }
-
         public GameDifficulty Difficulty { get; set; }
-
         public bool PlayerImmortal { get; set; }
         public bool PlayerCheating { get; set; }
 
@@ -402,28 +400,6 @@ namespace RogueBasin
 
         public bool Profiling { get; set; }
 
-        /*
-        public int Dungeon1StartLevel { get; set;}
-        public int Dungeon1EndLevel { get; set; }
-
-        public int Dungeon2StartLevel { get; set; }
-        public int Dungeon2EndLevel { get; set; }
-
-        public int Dungeon3StartLevel { get; set; }
-        public int Dungeon3EndLevel { get; set; }
-
-        public int Dungeon4StartLevel { get; set; }
-        public int Dungeon4EndLevel { get; set; }
-
-        public int Dungeon5StartLevel { get; set; }
-        public int Dungeon5EndLevel { get; set; }
-
-        public int Dungeon6StartLevel { get; set; }
-        public int Dungeon6EndLevel { get; set; }
-
-        public int Dungeon7StartLevel { get; set; }
-        public int Dungeon7EndLevel { get; set; }
-        */
         long worldClock = 0;
 
         /// <summary>
@@ -461,7 +437,6 @@ namespace RogueBasin
         /// </summary>
         List<SoundEffect> effects;
 
-
         System.Drawing.Color defaultPCColor = System.Drawing.Color.White;
 
         public DungeonMaker DungeonMaker { get; set; }
@@ -491,6 +466,7 @@ namespace RogueBasin
             Triggers = new Dictionary<Location, List<DungeonSquareTrigger>>();
 
             dungeonInfo = new DungeonInfo();
+            combat = new Combat(this);
 
             //Should pull this out as an interface, and get TraumaRL to set it
             MonsterPlacement = new MonsterPlacement();
@@ -522,6 +498,8 @@ namespace RogueBasin
             SetupDungeon();
             dungeonInfo = info;
         }
+
+        public Combat Combat { get { return combat; } }
 
         /// <summary>
         /// Give the player a bonus turn before the monsters
@@ -5185,6 +5163,7 @@ namespace RogueBasin
         }
 
         Dictionary<int, bool> DoorStatus = new Dictionary<int, bool>();
+        private Combat combat;
 
         internal void ShutDoor(int level)
         {

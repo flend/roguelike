@@ -1275,9 +1275,19 @@ namespace RogueBasin {
                     if (TargetAction == TargettingAction.Fire ||
                         (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Fire))
                     {
+                        var ableToFire = Game.Dungeon.Combat.CanFireOnTargetWithEquippedWeapon(Target);
+
                         DrawTargettingOverSquaresAndCreatures(pathToTarget, pathWeaponTile);
-                        DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, targetWeaponTile);
-                        DrawTargetTile(targetWeaponTile);
+
+                        if (ableToFire == Combat.FireOnTargetStatus.OK)
+                        {
+                            DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, targetWeaponTile);
+                            DrawTargetTile(targetWeaponTile);
+                        }
+                        else
+                        {
+                            DrawTargetTile(pathWeaponTile);
+                        }
                     }
                     else if (TargetAction == TargettingAction.Throw ||
                         (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Throw))

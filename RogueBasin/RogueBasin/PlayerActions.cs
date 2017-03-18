@@ -124,7 +124,7 @@ namespace RogueBasin
             }
 
             var player = Game.Dungeon.Player;
-            var fireSuccessfully = FireTargettedWeapon(targetting.CurrentTarget.MapCoord);
+            var fireSuccessfully = FireTargettedWeapon(targetting.CurrentTarget);
             player.ResetTurnsMoving();
             player.ResetTurnsSinceAction();
             return new ActionResult(fireSuccessfully, fireSuccessfully);
@@ -208,51 +208,50 @@ namespace RogueBasin
             return true;
         }
 
-        private bool FireTargettedWeapon(Point target)
+        private bool FireTargettedWeapon(Location target)
         {
-
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
 
             IEquippableItem weapon = player.GetEquippedRangedWeapon();
             Item weaponI = player.GetEquippedRangedWeaponAsItem();
 
-            if (weapon == null)
-            {
-                Game.MessageQueue.AddMessage("No weapon to fire");
-                LogFile.Log.LogEntryDebug("No weapon to fire", LogDebugLevel.Medium);
+            var fireResult = dungeon.Combat.CanFireOnTargetWithEquippedWeapon(target);
+
+                switch(fireResult)
+                {
+                    case Combat.FireOnTargetStatus.CantFireBetweenLevels:
+                        Game.MessageQueue.AddMessage("Can't fire between levels with " + weaponI.SingleItemDescription + ".");
+                        LogFile.Log.LogEntryDebug("Can't fire between levels with " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
+                    return false;
+
+                    case Combat.FireOnTargetStatus.CantTargetSelf:
+                        Game.MessageQueue.AddMessage("Can't target self with " + weaponI.SingleItemDescription + ".");
+                        LogFile.Log.LogEntryDebug("Can't target self with " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
+                    return false;
+
+                case Combat.FireOnTargetStatus.NotEnoughAmmo:
+                        Game.MessageQueue.AddMessage("Not enough ammo for " + weaponI.SingleItemDescription);
+                        LogFile.Log.LogEntryDebug("Not enough ammo for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
+                    return false;
+
+                case Combat.FireOnTargetStatus.NoWeapon:
+                        Game.MessageQueue.AddMessage("No weapon to fire");
+                        LogFile.Log.LogEntryDebug("No weapon to fire", LogDebugLevel.Medium);
+                    return false;
+
+                case Combat.FireOnTargetStatus.OutOfRange:
+                        Game.MessageQueue.AddMessage("Out of range!");
+                        LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
+                    return false;
+
+                case Combat.FireOnTargetStatus.OK:
+                    break;
             }
 
-            if (target.x == player.LocationMap.x && target.y == player.LocationMap.y)
-            {
-                Game.MessageQueue.AddMessage("Can't target self with " + weaponI.SingleItemDescription + ".");
-                LogFile.Log.LogEntryDebug("Can't target self with " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
-                return false;
-            }
-
-            //Check ammo
-            if (weapon.RemainingAmmo() < 1)
-            {
-                Game.MessageQueue.AddMessage("Not enough ammo for " + weaponI.SingleItemDescription);
-                LogFile.Log.LogEntryDebug("Not enough ammo for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
-
-                return false;
-            }
-
-            //Check we are in range of target (not done above)
-            int range = weapon.RangeFire();
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
-
-            if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
-            {
-                Game.MessageQueue.AddMessage("Out of range!");
-                LogFile.Log.LogEntryDebug("Out of range for " + weaponI.SingleItemDescription, LogDebugLevel.Medium);
-
-                return false;
-            }
-
-            //Actually do firing action
-            bool success = weapon.FireItem(target);
+            //Confirmed able to fire
+            //Weapons may fail?
+            bool success = weapon.FireItem(target.MapCoord);
 
             if (success)
             {
@@ -271,12 +270,12 @@ namespace RogueBasin
 
             //Store details for a recast
 
-            //If we successful, store the target
+            //If we were successful, store the target
             if (success)
             {
                 //Spell target is the creature (monster or PC)
 
-                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, target);
+                SquareContents squareContents = dungeon.MapSquareContents(target);
 
                 //Is there a creature here? If so, store
                 if (squareContents.monster != null)
