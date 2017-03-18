@@ -6,6 +6,8 @@ RogueBasin/RogueBasin/bin/Debug/QuickGraph.*
 RogueBasin/RogueBasin/bin/Debug/*.png
 RogueBasin/RogueBasin/bin/Debug/*.dot
 RogueBasin/RogueBasin/bin/Debug/*.sav
+RogueBasin/RogueBasin/bin/Debug/*.dll
+RogueBasin/RogueBasin/bin/Debug/*.xml
 RogueBasin/libtcod-net/bin/*
 RogueBasin/libtcod-net/obj/*
 RogueBasin/Roguebasin/obj/*
@@ -26,9 +28,15 @@ RogueBasin/DDRogueTest/bin/
 RogueBasin/DDRogueTest/obj/
 RogueBasin/TraumaRL/obj/
 RogueBasin/TraumaRL/bin/Debug/logs
+RogueBasin/TraumaRL/bin/Debug/*.pdf
+RogueBasin/TraumaRL/bin/Debug/*.dll
+RogueBasin/TraumaRL/bin/Debug/*.xml
+RogueBasin/TraumaRL/bin/Debug/*.manifest
 RogueBasin/TraumaRL/bin/Debug/obituary
 RogueBasin/TraumaRL/bin/Debug/QuickGraph.Graphviz.xml
 RogueBasin/TraumaRL/bin/Release/
+Backup/
+UpgradeLog.htm
 *.pdb
 *.o
 *.so

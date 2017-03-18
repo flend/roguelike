@@ -235,7 +235,9 @@ namespace RogueBasin {
         static readonly string blackOutlineTargetTile = "blackoutlinetarget";
 
         static readonly string targetWeaponTile = "shoot";
+        static readonly string pathWeaponTile = "shootpath";
         static readonly string targetThrowingTile = "throw";
+        static readonly string pathThrowingTile = "throwpath";
         static readonly string targetMoveTile = "move";
         static readonly string pathMoveTile = "movepath";
         static readonly string targetMeleeTile = "melee";
@@ -1262,7 +1264,6 @@ namespace RogueBasin {
                 var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
                 var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
 
-                DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, redTargetTile);
 
                 if (TargetInRange)
                 {
@@ -1274,13 +1275,15 @@ namespace RogueBasin {
                     if (TargetAction == TargettingAction.Fire ||
                         (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Fire))
                     {
-                        DrawTargettingOverSquaresAndCreatures(pathToTarget, orangeTargetTile);
+                        DrawTargettingOverSquaresAndCreatures(pathToTarget, pathWeaponTile);
+                        DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, pathWeaponTile);
                         DrawTargetTile(targetWeaponTile);
                     }
                     else if (TargetAction == TargettingAction.Throw ||
                         (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Throw))
                     {
-                        DrawTargettingOverSquaresAndCreatures(pathToTarget, orangeTargetTile);
+                        DrawTargettingOverSquaresAndCreatures(pathToTarget, pathThrowingTile);
+                        DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, targetThrowingTile);
                         DrawTargetTile(targetThrowingTile);
                     }
 

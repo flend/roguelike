@@ -1218,4 +1218,10 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\tiles\movepath.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\shootpath.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\tiles\throwpath.png" />
+  </ItemGroup>
 </Project>
