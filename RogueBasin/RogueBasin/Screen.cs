@@ -1276,7 +1276,7 @@ namespace RogueBasin {
                         (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Fire))
                     {
                         DrawTargettingOverSquaresAndCreatures(pathToTarget, pathWeaponTile);
-                        DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, pathWeaponTile);
+                        DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, targetWeaponTile);
                         DrawTargetTile(targetWeaponTile);
                     }
                     else if (TargetAction == TargettingAction.Throw ||
