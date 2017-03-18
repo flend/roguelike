@@ -1263,61 +1263,62 @@ namespace RogueBasin {
             {
                 var pathToTarget = TargetInfo.ToPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
                 var pointsInWeaponArea = TargetInfo.TargetPoints(player, Game.Dungeon, new Location(Target.Level, Target.MapCoord));
-
-
-                if (TargetInRange)
+ 
+                if (TargetAction == TargettingAction.Examine)
                 {
-                    if (TargetAction == TargettingAction.Examine)
+                    DrawTargetTile(greenTargetTile);
+                }
+
+                if (TargetAction == TargettingAction.Fire ||
+                    (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Fire))
+                {
+                    var ableToFire = Game.Dungeon.Combat.CanFireOnTargetWithEquippedWeapon(Target);
+
+                    DrawTargettingOverSquaresAndCreatures(pathToTarget, pathWeaponTile);
+
+                    if (ableToFire == Combat.FireOnTargetStatus.OK)
                     {
-                        DrawTargetTile(greenTargetTile);
+                        DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, targetWeaponTile);
+                        DrawTargetTile(targetWeaponTile);
                     }
-
-                    if (TargetAction == TargettingAction.Fire ||
-                        (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Fire))
+                    else
                     {
-                        var ableToFire = Game.Dungeon.Combat.CanFireOnTargetWithEquippedWeapon(Target);
-
-                        DrawTargettingOverSquaresAndCreatures(pathToTarget, pathWeaponTile);
-
-                        if (ableToFire == Combat.FireOnTargetStatus.OK)
-                        {
-                            DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, targetWeaponTile);
-                            DrawTargetTile(targetWeaponTile);
-                        }
-                        else
-                        {
-                            DrawTargetTile(pathWeaponTile);
-                        }
+                        DrawTargetTile(pathWeaponTile);
                     }
-                    else if (TargetAction == TargettingAction.Throw ||
-                        (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Throw))
+                }
+                else if (TargetAction == TargettingAction.Throw ||
+                    (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Throw))
+                {
+                    var canThrowToTarget = Game.Dungeon.Combat.CanThrowToTargetWithEquippedUtility(Target);
+
+                    DrawTargettingOverSquaresAndCreatures(pathToTarget, pathThrowingTile);
+
+                    if (canThrowToTarget == Combat.ThrowToTargetStatus.OK)
                     {
-                        DrawTargettingOverSquaresAndCreatures(pathToTarget, pathThrowingTile);
                         DrawTargettingOverSquaresAndCreatures(pointsInWeaponArea, targetThrowingTile);
                         DrawTargetTile(targetThrowingTile);
                     }
-
-                    if (TargetAction == TargettingAction.Move ||
-                        (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Move) ||
-                        (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Move))
+                    else
                     {
-
-                        var sq = Game.Dungeon.MapSquareContents(Target);
-
-                        var targetSprite = targetMoveTile;
-
-                        if (sq.monster != null)
-                        {
-                            targetSprite = targetMeleeTile;
-                        }
-
-                        DrawTargettingOverSquaresAndCreatures(pathToTarget, pathMoveTile);
-                        DrawTargetTile(targetSprite);
+                        DrawTargetTile(pathThrowingTile);
                     }
                 }
-                else
+
+                if (TargetAction == TargettingAction.Move ||
+                    (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Move) ||
+                    (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Move))
                 {
-                    DrawTargetTile(blackTargetTile);
+                    var sq = Game.Dungeon.MapSquareContents(Target);
+
+                    var targetSprite = targetMoveTile;
+
+                    if (sq.monster != null)
+                    {
+                        targetSprite = targetMeleeTile;
+                    }
+
+                    DrawTargettingOverSquaresAndCreatures(pathToTarget, pathMoveTile);
+                    DrawTargetTile(targetSprite);
                 }
             }
             else

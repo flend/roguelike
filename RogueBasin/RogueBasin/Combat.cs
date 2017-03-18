@@ -59,5 +59,42 @@ namespace RogueBasin
 
             return FireOnTargetStatus.OK;
         }
+
+        public enum ThrowToTargetStatus
+        {
+            NoUtility, CantThrowBetweenLevels, OutOfRange, OK
+        }
+
+        public ThrowToTargetStatus CanThrowToTargetWithEquippedUtility(Location target)
+        {
+            Dungeon dungeon = Game.Dungeon;
+            Player player = Game.Dungeon.Player;
+
+            IEquippableItem toThrow = player.GetEquippedUtility();
+            Item toThrowItem = player.GetEquippedUtilityAsItem();
+
+            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+
+            if (toThrow == null)
+            {
+                return ThrowToTargetStatus.NoUtility;
+            }
+
+            if (target.Level != player.Location.Level)
+            {
+                return ThrowToTargetStatus.CantThrowBetweenLevels;
+            }
+
+            //Check we are in range of target (not done above)
+
+            int range = toThrow.RangeThrow();
+
+            if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target.MapCoord, range, currentFOV))
+            {
+                return ThrowToTargetStatus.OutOfRange;
+            }
+
+            return ThrowToTargetStatus.OK;
+        }
     }
 }

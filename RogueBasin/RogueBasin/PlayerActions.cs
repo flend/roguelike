@@ -110,7 +110,7 @@ namespace RogueBasin
             }
 
             var player = Game.Dungeon.Player;
-            var throwSuccessfully = ThrowTargettedUtility(targetting.CurrentTarget.MapCoord);
+            var throwSuccessfully = ThrowTargettedUtility(targetting.CurrentTarget);
             player.ResetTurnsMoving();
             player.ResetTurnsSinceAction();
             return new ActionResult(throwSuccessfully, throwSuccessfully);
@@ -131,7 +131,7 @@ namespace RogueBasin
         }
 
 
-        private bool ThrowTargettedUtility(Point target)
+        private bool ThrowTargettedUtility(Location target)
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = Game.Dungeon.Player;
@@ -139,28 +139,31 @@ namespace RogueBasin
             IEquippableItem toThrow = player.GetEquippedUtility();
             Item toThrowItem = player.GetEquippedUtilityAsItem();
 
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+            var canThrowToTarget = dungeon.Combat.CanThrowToTargetWithEquippedUtility(target);
 
-            if (toThrow == null)
+            switch(canThrowToTarget)
             {
-                Game.MessageQueue.AddMessage("No throwable weapon!");
-                LogFile.Log.LogEntryDebug("No throwable weapon", LogDebugLevel.Medium);
-                return false;
+                case Combat.ThrowToTargetStatus.NoUtility:
+                    Game.MessageQueue.AddMessage("No throwable utility!");
+                    LogFile.Log.LogEntryDebug("No throwable utility", LogDebugLevel.Medium);
+                    return false;
+
+                case Combat.ThrowToTargetStatus.CantThrowBetweenLevels:
+                    Game.MessageQueue.AddMessage("Can't throw between levels with " + toThrowItem.SingleItemDescription + ".");
+                    LogFile.Log.LogEntryDebug("Can't throw between levels with " + toThrowItem.SingleItemDescription, LogDebugLevel.Medium);
+                    return false;
+
+                case Combat.ThrowToTargetStatus.OutOfRange:
+                    Game.MessageQueue.AddMessage("Out of range!");
+                    LogFile.Log.LogEntryDebug("Out of range for " + toThrowItem.SingleItemDescription, LogDebugLevel.Medium);
+                    return false;
+
+                case Combat.ThrowToTargetStatus.OK:
+                    break;
             }
-
-            int range = toThrow.RangeThrow();
-
-            //Check we are in range of target (not done above)
-            if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target, range, currentFOV))
-            {
-                Game.MessageQueue.AddMessage("Out of range!");
-                LogFile.Log.LogEntryDebug("Out of range for " + toThrowItem.SingleItemDescription, LogDebugLevel.Medium);
-
-                return false;
-            }
-
+            
             //Actually do throwing action
-            Point destinationSq = toThrow.ThrowItem(target);
+            Point destinationSq = toThrow.ThrowItem(target.MapCoord);
 
             //Remove stealth
             RemoveEffectsDueToThrowing(player, toThrowItem);
@@ -174,7 +177,6 @@ namespace RogueBasin
                 player.UnequipAndDestroyItem(toThrowItem);
 
                 //Try to reequip another item 
-                //player.EquipInventoryItemType(toThrow.GetType());
                 player.EquipNextUtility();
 
                 return true;
