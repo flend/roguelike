@@ -95,7 +95,7 @@ namespace TraumaRL
             dungeonMapSetup.SetupMapsInEngine(mapState);
 
             //Pause here to attach the debugger
-            MessageBox.Show("post engine");
+            //MessageBox.Show("post engine");
 
             //Add items/monsters/features from room model into dungeon
             dungeonMapSetup.AddMapObjectsToDungeon(mapState.MapInfo);
