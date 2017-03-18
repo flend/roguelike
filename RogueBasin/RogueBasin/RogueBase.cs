@@ -571,7 +571,7 @@ namespace RogueBasin
                                     Game.Dungeon.Player.AddEffect(healing);
                                     Screen.Instance.Update();
                                     break;
-                               */
+                               
                                 /*
                             case 'k':
                                 //Display the inventory
@@ -639,7 +639,7 @@ namespace RogueBasin
                                     
                            
 
-                                /*
+                                
                             //Debug events
                             case 'w':
                                 //Select an item to equip
@@ -1502,7 +1502,13 @@ namespace RogueBasin
                 toUseItem = player.GetEquippedWeaponAsItem();
             }
 
-            if (toUse == null || !toUse.HasOperateAction())
+            if (toUse == null)
+            {
+                Game.MessageQueue.AddMessage("Need an item that can be operated.");
+                return false;
+            }
+
+            if (!toUse.HasOperateAction())
             {
                 Game.MessageQueue.AddMessage("Need an item that can be operated.");
                 LogFile.Log.LogEntryDebug("Can't use " + toUseItem.SingleItemDescription, LogDebugLevel.Medium);
