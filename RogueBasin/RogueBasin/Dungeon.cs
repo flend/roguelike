@@ -441,6 +441,29 @@ namespace RogueBasin
 
         public DungeonMaker DungeonMaker { get; set; }
 
+        Dictionary<int, bool> DoorStatus = new Dictionary<int, bool>();
+        private Combat combat;
+        private Movement movement;
+
+        public bool AllLocksOpen { get; set; }
+
+        public MapState MapState { get; set; }
+
+        public MonsterPlacement MonsterPlacement { get; private set; }
+
+        public bool PlayedMissionAborted { get; set; }
+        public bool PlayedMissionNoMoreAborts { get; set; }
+        public bool PlayedMissionDeath { get; set; }
+        public bool PlayedMissionComplete { get; set; }
+        public bool PlayedMissionCompleteWithSecondary { get; set; }
+        public bool PlayedMissionFailedDeath { get; set; }
+        public bool PlayedMissionFailedDeathButCompleted { get; set; }
+
+        public String PlayerDeathString { get; set; }
+        public bool PlayerDeathOccured { get; set; }
+
+        public bool FunMode { get; set; }
+
         public Dungeon()
         {
             SetupDungeon();
@@ -466,7 +489,10 @@ namespace RogueBasin
             Triggers = new Dictionary<Location, List<DungeonSquareTrigger>>();
 
             dungeonInfo = new DungeonInfo();
+
+            //System-type classes
             combat = new Combat(this);
+            movement = new Movement(this);
 
             //Should pull this out as an interface, and get TraumaRL to set it
             MonsterPlacement = new MonsterPlacement();
@@ -500,6 +526,7 @@ namespace RogueBasin
         }
 
         public Combat Combat { get { return combat; } }
+        public Movement Movement { get { return movement; } }
 
         /// <summary>
         /// Give the player a bonus turn before the monsters
@@ -1709,6 +1736,11 @@ namespace RogueBasin
             return contents;
         }
 
+        public MapTerrain GetTerrainAtLocation(Location location)
+        {
+            return GetTerrainAtPoint(location.Level, location.MapCoord);
+        }
+
         public MapTerrain GetTerrainAtPoint(int level, Point location)
         {
             //Not a level
@@ -1732,6 +1764,66 @@ namespace RogueBasin
             return levels[level].mapSquares[location.x, location.y].Terrain;
         }
 
+        public bool IsValidLocationInWorld(Location location)
+        {
+            if (location.Level < 0 || location.Level >= levels.Count)
+            {
+                return false;
+            }
+
+            if (location.MapCoord.x < 0 || location.MapCoord.x >= levels[location.Level].width)
+            {
+                return false;
+            }
+
+            if (location.MapCoord.y < 0 || location.MapCoord.y >= levels[location.Level].height)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Is the target either walkable or something we can interact with to make it potentially walkable (e.g. a door)?
+        /// </summary>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        public bool MapSquareIsWalkableOrInteractable(Location location)
+        {
+            if(!IsValidLocationInWorld(location))
+            {
+                return false;
+            }
+
+            if (IsOpenableTerrain(location))
+            {
+                return true;
+            }
+
+            return MapSquareIsWalkable(location);
+        }
+
+        public bool IsOpenableTerrain(Location location)
+        {
+            if(!IsValidLocationInWorld(location))
+            {
+                return false;
+            }
+
+            if(GetTerrainAtLocation(location) == MapTerrain.ClosedDoor ||
+                GetTerrainAtLocation(location) == MapTerrain.ClosedLock)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool MapSquareIsWalkable(Location location)
+        {
+            return MapSquareIsWalkable(location.Level, location.MapCoord);
+        }
         /// <summary>
         /// Is the requested square moveable into? Only deals with terrain, not creatures or items
         /// </summary>
@@ -1740,6 +1832,11 @@ namespace RogueBasin
         /// <returns></returns>
         public bool MapSquareIsWalkable(int level, Point location)
         {
+            if(level < 0 || level >= levels.Count)
+            {
+                return false;
+            }
+
             //Off the map
             if (location.x < 0 || location.x >= levels[level].width)
             {
@@ -3900,11 +3997,6 @@ namespace RogueBasin
             player.ResetTurnsMoving();
             player.ResetTurnsSinceAction();
         }
-
-
-        public String PlayerDeathString { get; set; }
-        public bool PlayerDeathOccured { get; set; }
-
         /// <summary>
         /// Can't kill the player immediately now have to wait until end of monster loop
         /// </summary>
@@ -3914,8 +4006,6 @@ namespace RogueBasin
             PlayerDeathOccured = true;
             PlayerDeathString = deathString;
         }
-
-        public bool FunMode { get; set; }
 
         /// <summary>
         /// It's all gone wrong!
@@ -4682,14 +4772,6 @@ namespace RogueBasin
         }
 
 
-        public bool PlayedMissionAborted { get; set; }
-        public bool PlayedMissionNoMoreAborts { get; set; }
-        public bool PlayedMissionDeath { get; set; }
-        public bool PlayedMissionComplete { get; set; }
-        public bool PlayedMissionCompleteWithSecondary { get; set; }
-        public bool PlayedMissionFailedDeath { get; set; }
-        public bool PlayedMissionFailedDeathButCompleted { get; set; }
-
 
         public bool MissionAborted()
         {
@@ -5148,12 +5230,7 @@ namespace RogueBasin
             return new Tuple<int, int>(hardCover, softCover);
         }
 
-        public bool AllLocksOpen { get; set; }
 
-        public MapState MapState { get; set; }
-
-        public MonsterPlacement MonsterPlacement { get; private set; }
-        
         internal bool DangerousFeatureAtLocation(int LocationLevel, Point newLocation)
         {
             var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(LocationLevel, newLocation)).Where(f => f is DangerousActiveFeature);
@@ -5162,8 +5239,6 @@ namespace RogueBasin
             return false;
         }
 
-        Dictionary<int, bool> DoorStatus = new Dictionary<int, bool>();
-        private Combat combat;
 
         internal void ShutDoor(int level)
         {

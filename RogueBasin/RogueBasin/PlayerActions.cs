@@ -82,7 +82,6 @@ namespace RogueBasin
 
         }
 
-
         public ActionResult RunToTargettedDestination()
         {
             if (!Game.Dungeon.IsSquareSeenByPlayer(targetting.CurrentTarget) && !Screen.Instance.SeeAllMap)
@@ -90,14 +89,14 @@ namespace RogueBasin
                 return new ActionResult(false, false);
             }
 
-            var player = Game.Dungeon.Player;
+            var canRunToTarget = Game.Dungeon.Movement.CanRunToTarget(targetting.CurrentTarget);
 
-            IEnumerable<Point> path = player.GetPlayerRunningPath(targetting.CurrentTarget.MapCoord);
-
-            if (!path.Any())
+            if(canRunToTarget != Movement.RunToTargetStatus.OK)
             {
                 return new ActionResult(false, false);
             }
+            
+            IEnumerable<Point> path = Game.Dungeon.Movement.GetPlayerRunningPath(targetting.CurrentTarget.MapCoord);
 
             return running.StartRunning(path);
         }

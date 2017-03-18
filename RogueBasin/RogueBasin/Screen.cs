@@ -62,8 +62,6 @@ namespace RogueBasin {
         /// </summary>
         int MaxShowRoomNumbering = 2;
 
-        public bool TargetInRange { get; set; }
-
         //Viewport in tile coordinates
         Point mapTopLeftBase;
         Point mapBotRightBase;
@@ -1308,17 +1306,26 @@ namespace RogueBasin {
                     (TargetAction == TargettingAction.MoveOrFire && TargetSubAction == TargettingAction.Move) ||
                     (TargetAction == TargettingAction.MoveOrThrow && TargetSubAction == TargettingAction.Move))
                 {
-                    var sq = Game.Dungeon.MapSquareContents(Target);
-
-                    var targetSprite = targetMoveTile;
-
-                    if (sq.monster != null)
-                    {
-                        targetSprite = targetMeleeTile;
-                    }
-
                     DrawTargettingOverSquaresAndCreatures(pathToTarget, pathMoveTile);
-                    DrawTargetTile(targetSprite);
+
+                    var canRunToTarget = Game.Dungeon.Movement.CanRunToTarget(Target);
+                    var meleeTargetAtLocation = Game.Dungeon.Movement.MeleeTargetAtMovementLocation(Target);
+                    
+                    if (canRunToTarget == Movement.RunToTargetStatus.OK)
+                    {
+                        if (meleeTargetAtLocation)
+                        {
+                            DrawTargetTile(targetMeleeTile);
+                        }
+                        else
+                        {
+                            DrawTargetTile(targetMoveTile);
+                        }
+                    }
+                    else
+                    {
+                        DrawTargetTile(pathMoveTile);
+                    }
                 }
             }
             else

@@ -15,7 +15,7 @@ namespace RogueBasin
 
         public override IEnumerable<Point> ToPoints(Player player, Dungeon dungeon, Location targetPoint)
         {
-            return player.GetPlayerRunningPath(targetPoint.MapCoord);
+            return dungeon.Movement.GetPlayerRunningPath(targetPoint.MapCoord);
         }
     }
 }

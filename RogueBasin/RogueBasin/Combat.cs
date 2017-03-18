@@ -22,8 +22,7 @@ namespace RogueBasin
 
         public FireOnTargetStatus CanFireOnTargetWithEquippedWeapon(Location target)
         {
-            Dungeon dungeon = Game.Dungeon;
-            Player player = Game.Dungeon.Player;
+            Player player = dungeon.Player;
 
             IEquippableItem weapon = player.GetEquippedRangedWeapon();
             Item weaponI = player.GetEquippedRangedWeaponAsItem();
@@ -67,8 +66,7 @@ namespace RogueBasin
 
         public ThrowToTargetStatus CanThrowToTargetWithEquippedUtility(Location target)
         {
-            Dungeon dungeon = Game.Dungeon;
-            Player player = Game.Dungeon.Player;
+            Player player = dungeon.Player;
 
             IEquippableItem toThrow = player.GetEquippedUtility();
             Item toThrowItem = player.GetEquippedUtilityAsItem();

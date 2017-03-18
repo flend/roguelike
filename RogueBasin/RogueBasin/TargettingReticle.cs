@@ -42,7 +42,6 @@
             SetTargettingMessage(message, confirmKey);
             SetTargettingState(newTarget, targetInfo, targetAction, confirmKey, message);
 
-            CheckTargetInRange();
             SetScreenTargettingMode();
             SetViewPanelToTargetAtSquare();
         }
@@ -53,11 +52,6 @@
                 return;
 
             Game.MessageQueue.AddMessage(message + " find a target. " + confirmKey + " to confirm. ESC to exit.");
-        }
-
-        private void CheckTargetInRange()
-        {
-            Screen.Instance.TargetInRange = currentTargetInfo.IsInRange(player, dungeon, currentTarget);
         }
 
         private void SetScreenTargettingMode()
