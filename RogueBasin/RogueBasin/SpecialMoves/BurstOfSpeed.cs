@@ -156,7 +156,7 @@ namespace RogueBasin.SpecialMoves
         public override void DoMove(Point deltaMove, bool noMove)
         {
             //Move the PC to the new location
-            Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
+            Game.Dungeon.Movement.MovePCAbsoluteNoInteractions(new Location(Game.Dungeon.Player.LocationLevel, squareToMoveTo));
             moveCounter = 0;
 
             //Give the player a small speed up providing they are not under the influence of any other speed up effect

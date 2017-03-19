@@ -1078,7 +1078,7 @@ namespace RogueBasin
 
                     if (wasDirection && (mod == KeyModifier.Numeric || mod == KeyModifier.Vi) && !(args.Mod.HasFlag(ModifierKeys.LeftShift) || args.Mod.HasFlag(ModifierKeys.RightShift) || args.Mod.HasFlag(ModifierKeys.LeftControl) || args.Mod.HasFlag(ModifierKeys.RightControl) || args.Mod.HasFlag(ModifierKeys.LeftAlt) || args.Mod.HasFlag(ModifierKeys.RightAlt)))
                     {
-                        var actionResultKey = Utility.TimeAdvancesOnMove(Game.Dungeon.PCMove(direction.x, direction.y));
+                        var actionResultKey = Utility.TimeAdvancesOnMove(Game.Dungeon.Movement.PCMoveRelative(direction));
                         timeAdvances = actionResultKey.timeAdvances;
                         centreOnPC = actionResultKey.centreOnPC;
                     }

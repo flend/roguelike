@@ -163,7 +163,7 @@ namespace RogueBasin.SpecialMoves
             ClearMove();
             
             //Move into the destination square like normal
-            Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove);
+            Game.Dungeon.Movement.MovePCAbsoluteNoInteractions(Game.Dungeon.Player.LocationLevel, locationAfterMove);
 
             //Stun everyone within the radius
 

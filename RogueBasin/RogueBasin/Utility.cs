@@ -503,23 +503,23 @@ namespace RogueBasin
         }
 
 
-        public static ActionResult TimeAdvancesOnMove(MoveResults moveResults)
+        public static ActionResult TimeAdvancesOnMove(Movement.MoveResults moveResults)
         {
             switch (moveResults)
             {
-                case MoveResults.AttackedMonster:
+                case Movement.MoveResults.AttackedMonster:
                     return new ActionResult(true, true);
-                case MoveResults.InteractedWithFeature:
+                case Movement.MoveResults.InteractedWithFeature:
                     return new ActionResult(true, true);;
-                case MoveResults.InteractedWithObstacle:
+                case Movement.MoveResults.InteractedWithObstacle:
                     return new ActionResult(false, true);;
-                case MoveResults.OpenedDoor:
+                case Movement.MoveResults.OpenedDoor:
                     return new ActionResult(false, true);;
-                case MoveResults.NormalMove:
+                case Movement.MoveResults.NormalMove:
                     return new ActionResult(true, true);;
-                case MoveResults.StoppedByObstacle:
+                case Movement.MoveResults.StoppedByObstacle:
                     return new ActionResult(false, true);;
-                case MoveResults.SwappedWithMonster:
+                case Movement.MoveResults.SwappedWithMonster:
                     return new ActionResult(true, true);;
             }
 

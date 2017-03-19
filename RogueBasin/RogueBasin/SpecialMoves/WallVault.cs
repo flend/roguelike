@@ -177,7 +177,7 @@ namespace RogueBasin.SpecialMoves
             Point locationAfterMove = Game.Dungeon.Player.LocationMap + deltaMove;
 
             //Move the PC to the new location
-            Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
+            Game.Dungeon.Movement.MovePCAbsoluteNoInteractions(new Location(Game.Dungeon.Player.LocationLevel, squareToMoveTo));
             moveCounter = 0;
 
             //Give the player a small speed up

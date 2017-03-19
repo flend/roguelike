@@ -45,7 +45,7 @@ namespace RogueBasin.Triggers
                 LogFile.Log.LogEntryDebug("Player Aborting level: " + level, LogDebugLevel.Medium);
 
                 
-                Game.Dungeon.MissionAborted();
+                //Game.Dungeon.MissionAborted();
 
                 return true;
             }

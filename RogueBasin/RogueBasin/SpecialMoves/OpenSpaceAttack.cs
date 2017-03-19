@@ -442,7 +442,7 @@ namespace RogueBasin.SpecialMoves
 
             //Move into destination square (already check this was OK)
             if(!noMove)
-                Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
+                Game.Dungeon.Movement.MovePCAbsoluteNoInteractions(Game.Dungeon.Player.LocationLevel, locationAfterMove);
 
             //Stop any complaints about the ID not being valid
             if (!target.Alive)

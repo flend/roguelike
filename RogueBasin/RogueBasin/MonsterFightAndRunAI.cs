@@ -1255,7 +1255,7 @@ namespace RogueBasin
             MapTerrain doorTerrain = Game.Dungeon.GetTerrainAtPoint(this.LocationLevel, nextStep);
     
             if(doorTerrain == MapTerrain.ClosedDoor) {
-                Game.Dungeon.OpenDoor(this.LocationLevel, nextStep);
+                Game.Dungeon.OpenDoor(new Location(this.LocationLevel, nextStep));
                 LogFile.Log.LogEntryDebug(this.Representation + " opened door", LogDebugLevel.Medium);
             }
 

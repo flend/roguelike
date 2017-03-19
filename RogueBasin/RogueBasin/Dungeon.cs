@@ -63,17 +63,6 @@ namespace RogueBasin
         }
     }
 
-    public enum MoveResults
-    {
-        StoppedByObstacle,
-        InteractedWithObstacle,
-        OpenedDoor,
-        AttackedMonster,
-        SwappedWithMonster,
-        StoppedByMonster,
-        InteractedWithFeature,
-        NormalMove
-    }
 
     public class DungeonProfile {
         public int dungeonStartLevel;
@@ -2038,111 +2027,7 @@ namespace RogueBasin
                 player = value;
             }
         }
-
-        /// <summary>
-        /// Move PC to an absolute square (doesn't check the contents). Runs triggers.
-        /// Doesn't do any checking at the mo, should return false if there's a problem.
-        /// </summary>
-        /// <param name="level"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        internal bool MovePCAbsolute(int level, int x, int y)
-        {
-            return MovePCAbsolute(level, x, y, false);
-        }
-
-        internal bool MovePCAbsolute(int level, Point location)
-        {
-            return MovePCAbsolute(level, location.x, location.y, false);
-        }
-
-        /// <summary>
-        /// Move PC to an absolute square (doesn't check the contents). Runs triggers.
-        /// Doesn't do any checking at the mo, should return false if there's a problem.
-        /// </summary>
-        /// <param name="level"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        internal bool MovePCAbsolute(int level, int x, int y, bool runTriggersAlways)
-        {
-            player.LocationLevel = level;
-
-            //Don't run triggers if we haven't moved
-
-            if (player.LocationMap.x == x && player.LocationMap.y == y && !runTriggersAlways)
-            {
-                return true;
-            }
-
-            player.LocationMap = new Point(x, y);
-
-            //Kill monsters if they are going to be under the PC
-            foreach (Monster monster in monsters)
-            {
-                if (monster.InSameSpace(player))
-                {
-                    KillMonster(monster, false);
-                }
-            }
-
-            RunDungeonTriggers(player.LocationLevel, player.LocationMap);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Move a creature to a location
-        /// </summary>
-        /// <param name="monsterToMove"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        internal bool MoveMonsterAbsolute(Monster monsterToMove, int level, Point location)
-        {
-            monsterToMove.LocationLevel = level;
-            monsterToMove.LocationMap = location;
-
-            //Do anything needed with the AI, not needed right now
-
-            return true;
-        }
-
-        /// <summary>
-        /// Move PC to another square on the same level. Doesn't do any checking at the mo
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        internal bool MovePCAbsoluteSameLevel(int x, int y)
-        {
-            return MovePCAbsoluteSameLevel(x, y, false);
-        }
-
-        /// <summary>
-        /// Move PC to another square on the same level. Doesn't do any checking at the mo
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        internal bool MovePCAbsoluteSameLevel(int x, int y, bool runTriggersAlways)
-        {
-
-            MovePCAbsolute(player.LocationLevel, x, y, runTriggersAlways);
-
-            return true;
-        }
-        /// <summary>
-        /// Move PC to another square on the same level. Doesn't do any checking at the mo
-        /// </summary>
-        internal bool MovePCAbsoluteSameLevel(Point location)
-        {
-            MovePCAbsolute(player.LocationLevel, location.x, location.y);
-
-            return true;
-        }
-
+        
         /// <summary>
         /// Return a random monster on the level, or null if none
         /// </summary>
@@ -2185,7 +2070,7 @@ namespace RogueBasin
             return specialMoves.Find(x => x.GetType() == specialMove);
         }
 
-        private bool InteractWithUseableFeature()
+        public bool InteractWithUseableFeature()
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
@@ -2205,7 +2090,7 @@ namespace RogueBasin
         /// Active features are typically triggered automatically
         /// </summary>
         /// <returns></returns>
-        private bool InteractWithActiveFeature()
+        public bool InteractWithActiveFeature()
         {
             Dungeon dungeon = Game.Dungeon;
             Player player = dungeon.Player;
@@ -2236,258 +2121,8 @@ namespace RogueBasin
             return successes.Any();
         }
 
-        /// <summary>
-        /// Process a relative PC move, from a keypress
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        internal MoveResults PCMove(int x, int y)
-        {
-            return PCMove(x, y, false);
-        }
 
-        /// <summary>
-        /// Process a relative PC move, from a keypress
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        internal MoveResults PCMove(int x, int y, bool runTriggersAlways)
-        {
-            Point newPCLocation = new Point(Player.LocationMap.x + x, Player.LocationMap.y + y);
-            Point deltaMove = newPCLocation - Player.LocationMap;
-            MoveResults moveResults = MoveResults.NormalMove;
-
-            //Moves off the map don't work
-
-            if (newPCLocation.x < 0 || newPCLocation.x >= levels[player.LocationLevel].width)
-            {
-                return MoveResults.StoppedByObstacle;
-            }
-
-            if (newPCLocation.y < 0 || newPCLocation.y >= levels[player.LocationLevel].height)
-            {
-                return MoveResults.StoppedByObstacle;
-            }
-
-            //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
-            SpecialMove moveDone = DoSpecialMove(newPCLocation);
-
-            bool okToMoveIntoSquare = true;
-
-            //Apply environmental effects
-            /*
-            if (player.LocationLevel < dungeonInfo.LevelNaming.Count && dungeonInfo.LevelNaming[player.LocationLevel] == "Arcology")
-            {
-                if (!player.IsEffectActive(typeof(PlayerEffects.BioProtect)))
-                {
-                    player.ApplyDamageToPlayerHitpoints(5);
-                }
-            }*/
-
-            bool stationaryAction = false;
-            bool attackAction = false;
-
-            //If there's no special move, do a conventional move
-            if (moveDone == null)
-            {
-                //If square is not walkable exit, except in special conditions
-                if (!MapSquareIsWalkable(player.LocationLevel, newPCLocation))
-                {
-                    //Is there a closed door? This is a move, so return
-                    if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedDoor)
-                    {
-                        OpenDoor(player.LocationLevel, newPCLocation);
-                        stationaryAction = true;
-                        okToMoveIntoSquare = false;
-                        moveResults = MoveResults.OpenedDoor;
-                    }
-                    else if (GetTerrainAtPoint(player.LocationLevel, newPCLocation) == MapTerrain.ClosedLock)
-                    {
-                        //Is there a lock at the new location? Interact
-                        var locksAtLocation = LocksAtLocation(player.LocationLevel, newPCLocation);
-
-                        //Try to open each lock
-                        foreach (var thisLock in locksAtLocation)
-                        {
-                            bool thisSuccess = true;
-                            if (!thisLock.IsOpen())
-                            {
-                                thisSuccess = thisLock.OpenLock(player);
-                                if (thisSuccess)
-                                    SetTerrainAtPoint(player.LocationLevel, newPCLocation, MapTerrain.OpenLock);
-                            }
-                        }
-
-                        stationaryAction = true;
-                        okToMoveIntoSquare = false;
-                        moveResults = MoveResults.InteractedWithObstacle;
-                    }
-                    else
-                    {
-                        okToMoveIntoSquare = false;
-                        moveResults = MoveResults.StoppedByObstacle;
-                    }
-                }
-
-                //Check for monsters in the square
-                SquareContents contents = MapSquareContents(player.LocationLevel, newPCLocation);
-
-                //Monster - check for charm / passive / normal status
-                if (contents.monster != null)
-                {
-                    Monster monster = contents.monster;
-
-                    if (monster.Charmed)
-                    {
-                        //Switch monster to PC position
-                        monster.LocationMap = new Point(Player.LocationMap.x, Player.LocationMap.y);
-
-                        //PC will move to monster's old location
-                        okToMoveIntoSquare = true;
-                        moveResults = MoveResults.SwappedWithMonster;
-
-                    }
-                    else if (monster.Passive)
-                    {
-                        if (!player.Running)
-                        {
-                            //Attack the passive creature.
-                            DoMeleeAttackOnMonster(deltaMove, newPCLocation);
-                            okToMoveIntoSquare = false;
-
-                            attackAction = true;
-                            stationaryAction = true;
-                            moveResults = MoveResults.AttackedMonster;
-                        }
-                        else
-                        {
-                            stationaryAction = true;
-                            okToMoveIntoSquare = false;
-                            moveResults = MoveResults.StoppedByMonster;
-                        }
-                    }
-                    else
-                    {
-                        //Monster hostile 
-
-                        DoMeleeAttackOnMonster(deltaMove, newPCLocation);
-
-                        okToMoveIntoSquare = false;
-
-                        stationaryAction = true;
-                        attackAction = true;
-                        moveResults = MoveResults.AttackedMonster;
-                    }
-                }
-
-                //Ranged melee weapons
-                if (player.GetEquippedMeleeWeapon() is Items.Pole)
-                {
-                    //Check 2 squares ahead
-                    for (int i = 0; i < 2; i++)
-                    {
-                        Point p = newPCLocation + deltaMove * (i + 1);
-
-                        SquareContents poleContents = MapSquareContents(player.LocationLevel, p);
-                        if (poleContents.monster != null && !poleContents.monster.Charmed)
-                        {
-                            //Pole will start from the origin anyway
-                            DoMeleeAttackOnMonster(deltaMove, newPCLocation);
-
-                            stationaryAction = true;
-                            attackAction = true;
-                            moveResults = MoveResults.AttackedMonster;
-                            break;
-                        }
-                    }
-                }
-
-                //Apply movement effects to counters
-                if (stationaryAction)
-                {
-                    if (attackAction && !player.LastMoveWasMeleeAttack)
-                    {
-                        
-                    }
-                    else
-                    {
-                        player.ResetTurnsMoving();
-                    }
-
-                    player.ResetTurnsSinceAction();
-                    player.AddTurnsInactive();
-
-                    if (attackAction)
-                        player.LastMoveWasMeleeAttack = true;
-                }
-                else
-                {
-                    player.LastMoveWasMeleeAttack = false;
-                    player.AddTurnsSinceAction();
-                    if (deltaMove == new Point(0, 0))
-                    {
-                        player.ResetTurnsMoving();
-                        player.AddTurnsInactive();
-                    }
-                    else
-                    {
-                        player.ResetTurnsInactive();
-                        player.AddTurnsMoving();
-                    }
-                }
-
-                //If not OK to move, return here
-                if (!okToMoveIntoSquare)
-                    return moveResults;
-
-                MovePCAbsoluteSameLevel(newPCLocation.x, newPCLocation.y, runTriggersAlways);
-
-                CheckForNewMonstersInFoV();
-
-                //Auto-pick up any items
-                if (contents.items.Count > 0)
-                {
-                    //Pick up first item only
-                    //Might help if the player makes a massive pile
-                    PickUpItemInSpace();
-                }
-
-                //If there is an active feature, auto interact
-                bool activeFeatureInteract = InteractWithActiveFeature();
-                
-                //If there is a useable feature, auto interact
-                bool useableFeatureInteract = InteractWithUseableFeature();
-
-                if (activeFeatureInteract || useableFeatureInteract)
-                {
-                    moveResults = MoveResults.InteractedWithFeature;
-                }
-            }
-
-            //Run any entering square messages
-            //Happens for both normal and special moves
-
-            //Tell the player if there are items here
-            //Don't tell the player again if they haven't moved
-
-            Item itemAtSpace = ItemAtSpace(player.LocationLevel, player.LocationMap);
-            if (itemAtSpace != null)
-            {
-                Game.MessageQueue.AddMessage("There is a " + itemAtSpace.SingleItemDescription + " here.");
-            }
-
-            //Tell the player if there are multiple items in the square
-            if (MultipleItemAtSpace(player.LocationLevel, player.LocationMap))
-            {
-                Game.MessageQueue.AddMessage("There are multiple items here.");
-            }
-
-            return moveResults;
-        }
-
-        private void CheckForNewMonstersInFoV()
+        public void CheckForNewMonstersInFoV()
         {
             var newMonstersInFoV = player.NewMonstersinFoV();
 
@@ -2501,7 +2136,7 @@ namespace RogueBasin
         /// From PCMove, where we do our melee attack on the monster in the square entered
         /// </summary>
         /// <param name="monster"></param>
-        private void DoMeleeAttackOnMonster(Point moveDelta, Point newPCLocation)
+        public void DoMeleeAttackOnMonster(Point moveDelta, Point newPCLocation)
         {
             //Attack at pc's direct move location
 
@@ -2604,7 +2239,7 @@ namespace RogueBasin
             throw new NotImplementedException();
         }
 
-        private SpecialMove DoSpecialMove(Point newPCLocation)
+        public SpecialMove DoSpecialMove(Point newPCLocation)
         {
             //New version
 
@@ -3742,19 +3377,19 @@ namespace RogueBasin
             return items.Where(i => i.IsLocatedAt(loc.Level, loc.MapCoord) && !i.InInventory);
         }
 
-        internal List<Lock> LocksAtLocation(int level, Point mapLocation)
+        internal List<Lock> LocksAtLocation(Location location)
         {
             List<Lock> locksAtLocation;
-            locks.TryGetValue(new Location(level, mapLocation), out locksAtLocation);
+            locks.TryGetValue(location, out locksAtLocation);
             if (locksAtLocation == null)
                 return new List<Lock>();
             return locksAtLocation;
 
         }
 
-        internal bool NonOpenLocksAtLocation(int level, Point mapLocation)
+        internal bool NonOpenLocksAtLocation(Location location)
         {
-            return LocksAtLocation(level, mapLocation).Select(l => !l.IsOpen()).Any();
+            return LocksAtLocation(location).Select(l => !l.IsOpen()).Any();
         }
 
         /// <summary>
@@ -3864,19 +3499,19 @@ namespace RogueBasin
         /// <param name="p"></param>
         /// <param name="doorLocation"></param>
         /// <returns></returns>
-        internal bool OpenDoor(int level, Point doorLocation)
+        internal bool OpenDoor(Location target)
         {
             try
             {
                 //Check there is a door here                
-                MapTerrain doorTerrain = GetTerrainAtPoint(player.LocationLevel, doorLocation);
+                MapTerrain doorTerrain = GetTerrainAtLocation(target);
 
                 if (doorTerrain != MapTerrain.ClosedDoor)
                 {
                     return false;
                 }
 
-                SetTerrainAtPoint(level, doorLocation, MapTerrain.OpenDoor);
+                SetTerrainAtPoint(target, MapTerrain.OpenDoor);
 
                 return true;
             }
@@ -3888,13 +3523,17 @@ namespace RogueBasin
             }
         }
 
+        public void SetTerrainAtPoint(Location location, MapTerrain newTerrain)
+        {
+            SetTerrainAtPoint(location.Level, location.MapCoord, newTerrain);
+        }
         /// <summary>
         /// Set a point to a new type of terrain and update pathing and fov
         /// </summary>
         /// <param name="level"></param>
         /// <param name="location"></param>
         /// <param name="newTerrain"></param>
-        private void SetTerrainAtPoint(int level, Point location, MapTerrain newTerrain)
+        public void SetTerrainAtPoint(int level, Point location, MapTerrain newTerrain)
         {
             //Update map
 
@@ -4621,47 +4260,6 @@ namespace RogueBasin
                 }
             }
         }
-
-        /// <summary>
-        /// Respawn the current dungeon. New seed on abort. Same seed on death
-        /// </summary>
-        /// <param name="respawnWithSameSeed"></param>
-        public void ResetCurrentMission(bool respawnWithSameSeed)
-        {
-
-            //Leave seed for another time
-
-            //Reset starting location
-
-            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
-
-            //Always do new seed for now
-            //Respawn the last dungeon the player was in
-            RespawnDungeon(Player.LocationLevel, respawnWithSameSeed);
-
-            //Reset starting location (in case the level changed)
-
-            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
-
-
-            //Reset dungeon level state
-            Game.Dungeon.DungeonInfo.Dungeons[Player.LocationLevel].PlayerLeftDock = false;
-            Game.Dungeon.DungeonInfo.Dungeons[Player.LocationLevel].LevelObjectiveComplete = false;
-
-            //End any events on any remaining monsters
-            RemoveAllMonsterEffects();
-
-            PlayerActionsBetweenMissions();
-            DungeonActionsBetweenMissions();
-
-            string fmt = "00";
-            Game.MessageQueue.AddMessage("Re-entering ZONE " + (Player.LocationLevel + 1).ToString(fmt) + " : " + Game.Dungeon.DungeonInfo.LookupMissionName(Player.LocationLevel) + ".");
-
-            //Run a normal turn to set off any triggers
-            Game.Dungeon.PCMove(0, 0);
-
-        }
-
         /// <summary>
         /// Wipe the this-adventure fov for the dungeon
         /// </summary>
@@ -4771,39 +4369,6 @@ namespace RogueBasin
             return Cleared.Count;
         }
 
-
-
-        public bool MissionAborted()
-        {
-            if (DungeonInfo.NoAborts == DungeonInfo.MaxAborts)
-            {
-                //No more aborts allowed
-                if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionNoMoreAborts)
-                {
-                    //Game.Base.SystemActions.PlayMovie("nomoreaborts", true);
-                    PlayedMissionNoMoreAborts = true;
-                }
-                Game.MessageQueue.AddMessage("No more aborts permitted.");
-                return false;
-
-            }
-
-            //Otherwise OK
-
-            DungeonInfo.NoAborts++;
-            DungeonInfo.TotalAborts++;
-
-            if (Game.Dungeon.Player.PlayItemMovies && !PlayedMissionAborted)
-            {
-                // Game.Base.SystemActions.PlayMovie("missionaborted", true);
-                PlayedMissionAborted = true;
-            }
-            Game.MessageQueue.AddMessage("Mission ABORTED.");
-            ResetCurrentMission(false);
-
-            return true;
-        }
-
         public IEnumerable<Feature> GetAllFeatures()
         {
             return features.SelectMany(f => f.Value);
@@ -4894,27 +4459,6 @@ namespace RogueBasin
             //For going to a new level this is no big deal, but it is important if we are respawning
             ResetSounds();
 
-        }
-
-        /// <summary>
-        /// Player starts the game
-        /// </summary>
-        public void MoveToFirstMission()
-        {
-            int newMissionLevel = 0;
-
-            //Move player to new level
-
-            player.LocationLevel = newMissionLevel;
-            player.LocationMap = Game.Dungeon.Levels[player.LocationLevel].PCStartLocation;
-
-            //Message
-
-            string fmt = "00";
-            Game.MessageQueue.AddMessage("Entering ZONE " + (newMissionLevel + 1).ToString(fmt) + " : " + Game.Dungeon.DungeonInfo.LookupMissionName(newMissionLevel) + ".");
-
-            //Run a normal turn to set off any triggers
-            Game.Dungeon.PCMove(0, 0, true);
         }
 
         /// <summary>

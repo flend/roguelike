@@ -188,7 +188,7 @@ namespace RogueBasin.SpecialMoves
             Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
 
             //Move the PC to the new location
-            Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
+            Game.Dungeon.Movement.MovePCAbsoluteNoInteractions(new Location(Game.Dungeon.Player.LocationLevel, squareToMoveTo));
             /*
             //Move into their square if the monster dies as normal
             

@@ -215,7 +215,7 @@ namespace RogueBasin.SpecialMoves
             //Move the creature to the new location if required
             if (squareToMoveMonsterTo.x != locationAfterMove.x || squareToMoveMonsterTo.y != locationAfterMove.y)
             {
-                Game.Dungeon.MoveMonsterAbsolute(monsterToMove, monsterToMove.LocationLevel, squareToMoveMonsterTo);
+                Game.Dungeon.Movement.MoveMonsterAbsolute(monsterToMove, monsterToMove.LocationLevel, squareToMoveMonsterTo);
             }
 
             moveCounter = 0;

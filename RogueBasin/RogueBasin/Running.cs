@@ -77,20 +77,20 @@ namespace RogueBasin
                 StopRunning();
             }
 
-            MoveResults results = Game.Dungeon.PCMove(relativeNextStep.x, relativeNextStep.y);
+            Movement.MoveResults results = Game.Dungeon.Movement.PCMoveRelative(relativeNextStep);
 
             switch (results)
             {
-                case MoveResults.AttackedMonster:
+                case Movement.MoveResults.AttackedMonster:
                     StopRunning();
                     break;
-                case MoveResults.InteractedWithFeature:
+                case Movement.MoveResults.InteractedWithFeature:
                     StopRunning();
                     break;
-                case MoveResults.InteractedWithObstacle:
+                case Movement.MoveResults.InteractedWithObstacle:
                     StopRunning();
                     break;
-                case MoveResults.OpenedDoor:
+                case Movement.MoveResults.OpenedDoor:
                     if (!Screen.Instance.SeeAllMap)
                     {
                         StopRunning();
@@ -102,14 +102,14 @@ namespace RogueBasin
                         runningPath = originalRunningPath;
                     }
                     break;
-                case MoveResults.NormalMove:
+                case Movement.MoveResults.NormalMove:
                     break;
-                case MoveResults.StoppedByObstacle:
+                case Movement.MoveResults.StoppedByObstacle:
                     StopRunning();
                     break;
-                case MoveResults.SwappedWithMonster:
+                case Movement.MoveResults.SwappedWithMonster:
                     break;
-                case MoveResults.StoppedByMonster:
+                case Movement.MoveResults.StoppedByMonster:
                     StopRunning();
                     break;
             }

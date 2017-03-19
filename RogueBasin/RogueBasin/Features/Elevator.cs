@@ -26,7 +26,7 @@ namespace RogueBasin.Features
 
             Game.MessageQueue.AddMessage("You take the elevator. Welcome to " + Game.Dungeon.DungeonInfo.LevelNaming[destLevel]);
 
-            dungeon.MovePCAbsolute(destLevel, destLocation);
+            dungeon.Movement.MovePCAbsoluteNoInteractions(destLevel, destLocation);
 
             return true;
         }

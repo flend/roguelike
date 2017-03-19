@@ -227,9 +227,8 @@ namespace RogueBasin.SpecialMoves
 
         public override void DoMove(Point deltaMove, bool noMove)
         {
-
             //Move the PC to the new location
-            Game.Dungeon.MovePCAbsolute(Game.Dungeon.Player.LocationLevel, squareToMoveTo.x, squareToMoveTo.y);
+            Game.Dungeon.Movement.MovePCAbsoluteNoInteractions(new Location(Game.Dungeon.Player.LocationLevel, squareToMoveTo));
             moveCounter = 0;
 
             LogFile.Log.LogEntryDebug("Evade complete", LogDebugLevel.Medium);

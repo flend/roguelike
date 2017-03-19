@@ -277,7 +277,7 @@ namespace RogueBasin.SpecialMoves
                 currentTargetID = -1;
 
             //Move into destination square (already checked this was OK)
-            Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
+            Game.Dungeon.Movement.MovePCAbsoluteNoInteractions(Game.Dungeon.Player.LocationLevel, locationAfterMove);
 
             LogFile.Log.LogEntryDebug("MultiAttack free attack: " + bonus, LogDebugLevel.Medium);
             

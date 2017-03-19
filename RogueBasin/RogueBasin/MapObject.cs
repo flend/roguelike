@@ -66,6 +66,11 @@ namespace RogueBasin
             {
                 return new Location(locationLevel, locationMap);
             }
+            set
+            {
+                locationLevel = value.Level;
+                locationMap = value.MapCoord;
+            }
         }
 
         /// <summary>

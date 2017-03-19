@@ -71,7 +71,7 @@ namespace RogueBasin.Spells
 
             //Otherwise move there
             Game.MessageQueue.AddMessage("Blink! The world shifts momentarily.");
-            dungeon.MovePCAbsoluteSameLevel(new Point(x, y));
+            dungeon.Movement.MovePCAbsoluteNoInteractions(Game.Dungeon.Player.LocationLevel, new Point(x, y));
 
             return true;
         }

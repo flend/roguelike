@@ -22,7 +22,7 @@ namespace RogueBasin
 
         public ActionResult DoNothing()
         {
-            return Utility.TimeAdvancesOnMove(Game.Dungeon.PCMove(0, 0));
+            return Utility.TimeAdvancesOnMove(Game.Dungeon.Movement.PCMoveRelative(new Point(0, 0)));
         }
 
         public bool UseUtility()

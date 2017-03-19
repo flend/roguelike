@@ -146,7 +146,7 @@ namespace RogueBasin.SpecialMoves
 
             if (okToMoveIntoSquare)
             {
-                Game.Dungeon.MovePCAbsoluteSameLevel(locationAfterMove.x, locationAfterMove.y);
+                Game.Dungeon.Movement.MovePCAbsoluteNoInteractions(Game.Dungeon.Player.LocationLevel, locationAfterMove);
             }
         }
 
