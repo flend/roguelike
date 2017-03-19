@@ -1309,11 +1309,12 @@ namespace RogueBasin {
                     DrawTargettingOverSquaresAndCreatures(pathToTarget, pathMoveTile);
 
                     var canRunToTarget = Game.Dungeon.Movement.CanRunToTarget(Target);
-                    var meleeTargetAtLocation = Game.Dungeon.Movement.MeleeTargetAtMovementLocation(Target);
+                    var willMeleeMonster = Game.Dungeon.Movement.GetInteractionsOnMovingToLocation(Target)
+                        .Contains(Movement.MoveInteractions.AttackMonster);
                     
                     if (canRunToTarget == Movement.RunToTargetStatus.OK)
                     {
-                        if (meleeTargetAtLocation)
+                        if (willMeleeMonster)
                         {
                             DrawTargetTile(targetMeleeTile);
                         }

@@ -42,6 +42,96 @@ namespace RogueBasin
             return PCMoveWithInteractions(newPCLocation);
         }
 
+        public enum MoveInteractions
+        {
+            NoMovePossible,
+            DoorOpen,
+            LockOpen,
+            StoppedByObstacle,
+            SwapWithMonster,
+            StoppedByMonster,
+            AttackMonster,
+            PickUpItem,
+            InteractActiveFeature,
+            InteractUseableFeature
+        }
+
+        public IEnumerable<MoveInteractions> GetInteractionsOnMovingToLocation(Location target)
+        {
+            Player player = dungeon.Player;
+
+            if (!dungeon.IsValidLocationInWorld(target))
+            {
+                return EnumerableEx.Return(MoveInteractions.NoMovePossible);
+            }
+
+            var interactions = new List<MoveInteractions>();
+
+            if (!dungeon.MapSquareIsWalkable(target))
+            {
+                if (dungeon.GetTerrainAtLocation(target) == MapTerrain.ClosedDoor)
+                {
+                    interactions.Add(MoveInteractions.DoorOpen);
+                }
+                else if (dungeon.GetTerrainAtLocation(target) == MapTerrain.ClosedLock)
+                {
+                    interactions.Add(MoveInteractions.LockOpen);
+                }
+                else
+                {
+                    return EnumerableEx.Return(MoveInteractions.StoppedByObstacle);
+                }
+            }
+
+            //Check for monsters in the square
+            SquareContents contents = dungeon.MapSquareContents(target);
+
+            //Monster - check for charm / passive / normal status
+            if (contents.monster != null)
+            {
+                Monster monster = contents.monster;
+
+                if (monster.Charmed)
+                {
+                    interactions.Add(MoveInteractions.SwapWithMonster);
+                }
+                else if (monster.Passive)
+                {
+                    if (!player.Running)
+                    {
+                        //Attack the passive creature.
+                        interactions.Add(MoveInteractions.AttackMonster);
+                    }
+                    else
+                    {
+                        interactions.Add(MoveInteractions.StoppedByMonster);
+                    }
+                }
+                else
+                {
+                    //Monster hostile 
+                    interactions.Add(MoveInteractions.AttackMonster);
+                }
+            }
+
+            if(contents.items.Count > 0)
+            {
+                interactions.Add(MoveInteractions.PickUpItem);
+            }
+
+            if (dungeon.UseableFeaturesAtLocation(target).Any())
+            {
+                interactions.Add(MoveInteractions.InteractUseableFeature);
+            }
+
+            if (dungeon.ActiveFeaturesAtLocation(target).Any())
+            {
+                interactions.Add(MoveInteractions.InteractActiveFeature);
+            }
+
+            return interactions;
+        }
+
         /// <summary>
         /// Process a relative PC move, from a keypress
         /// </summary>
@@ -89,116 +179,71 @@ namespace RogueBasin
             //If there's no special move, do a conventional move
             if (moveDone == null)
             {
-                //If square is not walkable exit, except in special conditions
-                if (!dungeon.MapSquareIsWalkable(target))
+                var moveInteractions = GetInteractionsOnMovingToLocation(target);
+                // (would be nicer? to include the targetted items in moveInteractions...)
+                var contents = dungeon.MapSquareContents(target);
+
+                if (moveInteractions.Contains(MoveInteractions.NoMovePossible) ||
+                    moveInteractions.Contains(MoveInteractions.StoppedByObstacle))
                 {
-                    //Is there a closed door? This is a move, so return
-                    if (dungeon.GetTerrainAtLocation(target) == MapTerrain.ClosedDoor)
-                    {
-                        dungeon.OpenDoor(target);
-                        stationaryAction = true;
-                        okToMoveIntoSquare = false;
-                        moveResults = MoveResults.OpenedDoor;
-                    }
-                    else if (dungeon.GetTerrainAtLocation(target) == MapTerrain.ClosedLock)
-                    {
-                        //Is there a lock at the new location? Interact
-                        var locksAtLocation = dungeon.LocksAtLocation(target);
-
-                        //Try to open each lock
-                        foreach (var thisLock in locksAtLocation)
-                        {
-                            bool thisSuccess = true;
-                            if (!thisLock.IsOpen())
-                            {
-                                thisSuccess = thisLock.OpenLock(player);
-                                if (thisSuccess)
-                                    dungeon.SetTerrainAtPoint(target, MapTerrain.OpenLock);
-                            }
-                        }
-
-                        stationaryAction = true;
-                        okToMoveIntoSquare = false;
-                        moveResults = MoveResults.InteractedWithObstacle;
-                    }
-                    else
-                    {
-                        okToMoveIntoSquare = false;
-                        moveResults = MoveResults.StoppedByObstacle;
-                    }
+                    return MoveResults.StoppedByObstacle;
                 }
 
-                //Check for monsters in the square
-                SquareContents contents = dungeon.MapSquareContents(target);
-
-                //Monster - check for charm / passive / normal status
-                if (contents.monster != null)
+                if (moveInteractions.Contains(MoveInteractions.DoorOpen))
                 {
-                    Monster monster = contents.monster;
-
-                    if (monster.Charmed)
-                    {
-                        //Switch monster to PC position
-                        monster.LocationMap = player.LocationMap;
-
-                        //PC will move to monster's old location
-                        okToMoveIntoSquare = true;
-                        moveResults = MoveResults.SwappedWithMonster;
-
-                    }
-                    else if (monster.Passive)
-                    {
-                        if (!player.Running)
-                        {
-                            //Attack the passive creature.
-                            dungeon.DoMeleeAttackOnMonster(deltaMove, target.MapCoord);
-                            okToMoveIntoSquare = false;
-
-                            attackAction = true;
-                            stationaryAction = true;
-                            moveResults = MoveResults.AttackedMonster;
-                        }
-                        else
-                        {
-                            stationaryAction = true;
-                            okToMoveIntoSquare = false;
-                            moveResults = MoveResults.StoppedByMonster;
-                        }
-                    }
-                    else
-                    {
-                        //Monster hostile 
-
-                        dungeon.DoMeleeAttackOnMonster(deltaMove, target.MapCoord);
-
-                        okToMoveIntoSquare = false;
-
-                        stationaryAction = true;
-                        attackAction = true;
-                        moveResults = MoveResults.AttackedMonster;
-                    }
+                    dungeon.OpenDoor(target);
+                    stationaryAction = true;
+                    okToMoveIntoSquare = false;
+                    moveResults = MoveResults.OpenedDoor;
                 }
 
-                //Ranged melee weapons - yuck
-                if (player.GetEquippedMeleeWeapon() is Items.Pole)
+                if (moveInteractions.Contains(MoveInteractions.LockOpen))
                 {
-                    //Check 2 squares ahead
-                    for (int i = 0; i < 2; i++)
+                    //Is there a lock at the new location? Interact
+                    var locksAtLocation = dungeon.LocksAtLocation(target);
+
+                    //Try to open each lock
+                    foreach (var thisLock in locksAtLocation)
                     {
-                        Point p = target.MapCoord + deltaMove * (i + 1);
-
-                        SquareContents poleContents = dungeon.MapSquareContents(player.LocationLevel, p);
-                        if (poleContents.monster != null && !poleContents.monster.Charmed)
+                        bool thisSuccess = true;
+                        if (!thisLock.IsOpen())
                         {
-                            //Pole will start from the origin anyway
-                            dungeon.DoMeleeAttackOnMonster(deltaMove, target.MapCoord);
-
-                            stationaryAction = true;
-                            attackAction = true;
-                            moveResults = MoveResults.AttackedMonster;
-                            break;
+                            thisSuccess = thisLock.OpenLock(player);
+                            if (thisSuccess)
+                                dungeon.SetTerrainAtPoint(target, MapTerrain.OpenLock);
                         }
                     }
+
+                    stationaryAction = true;
+                    okToMoveIntoSquare = false;
+                    moveResults = MoveResults.InteractedWithObstacle;
+                }
+                
+                if(moveInteractions.Contains(MoveInteractions.StoppedByMonster))
+                {
+                    stationaryAction = true;
+                    okToMoveIntoSquare = false;
+                    moveResults = MoveResults.StoppedByMonster;
+                }
+
+                if(moveInteractions.Contains(MoveInteractions.SwapWithMonster))
+                {
+                    //Switch monster to PC position
+                    contents.monster.LocationMap = player.LocationMap;
+
+                    //PC will move to monster's old location
+                    okToMoveIntoSquare = true;
+                    moveResults = MoveResults.SwappedWithMonster;
+                }
+
+                if (moveInteractions.Contains(MoveInteractions.AttackMonster))
+                {
+                    dungeon.DoMeleeAttackOnMonster(deltaMove, target.MapCoord);
+
+                    okToMoveIntoSquare = false;
+                    stationaryAction = true;
+                    attackAction = true;
+                    moveResults = MoveResults.AttackedMonster;
                 }
 
                 //Apply movement effects to counters
@@ -241,10 +286,11 @@ namespace RogueBasin
 
                 MovePCAbsoluteNoIteractions(target, false);
 
+                //Notify any monsters if they see the player
                 dungeon.CheckForNewMonstersInFoV();
 
                 //Auto-pick up any items
-                if (contents.items.Count > 0)
+                if (moveInteractions.Contains(MoveInteractions.PickUpItem))
                 {
                     //Pick up first item only
                     //Might help if the player makes a massive pile
@@ -252,10 +298,10 @@ namespace RogueBasin
                 }
 
                 //If there is an active feature, auto interact
-                bool activeFeatureInteract = dungeon.InteractWithActiveFeature();
+                bool activeFeatureInteract = dungeon.InteractWithActiveFeatures(player.Location);
 
                 //If there is a useable feature, auto interact
-                bool useableFeatureInteract = dungeon.InteractWithUseableFeature();
+                bool useableFeatureInteract = dungeon.InteractWithUseableFeatures(player.Location);
 
                 if (activeFeatureInteract || useableFeatureInteract)
                 {
@@ -384,18 +430,5 @@ namespace RogueBasin
             }
             return path.Skip(1);
         }
-
-        public bool MeleeTargetAtMovementLocation(Location target)
-        {
-            var sq = dungeon.MapSquareContents(target);
-
-            if (sq.monster != null)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
     }
 }

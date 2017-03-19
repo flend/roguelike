@@ -2070,37 +2070,41 @@ namespace RogueBasin
             return specialMoves.Find(x => x.GetType() == specialMove);
         }
 
-        public bool InteractWithUseableFeature()
+        public IEnumerable<UseableFeature> UseableFeaturesAtLocation(Location location)
         {
-            Dungeon dungeon = Game.Dungeon;
-            Player player = dungeon.Player;
+            var featuresAtSpace = GetFeaturesAtLocation(location);
 
-            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(player.LocationLevel, player.LocationMap));
+            return featuresAtSpace.Where(f => f as UseableFeature != null).Select(f => f as UseableFeature);
+        }
 
-            var useableFeatures = featuresAtSpace.Where(f => f as UseableFeature != null);
+        public bool InteractWithUseableFeatures(Location location)
+        {
+            var featuresAtSpace = UseableFeaturesAtLocation(location);
             
             //Interact with feature - these will normally put success / failure messages in queue
-            var successes = useableFeatures.Select(f => (f as UseableFeature).PlayerInteraction(player)).ToList();
+            var successes = featuresAtSpace.Select(f => f.PlayerInteraction(Player)).ToList();
 
             //Watch out for the short circuit
             return successes.Any();
+        }
+
+        public IEnumerable<ActiveFeature> ActiveFeaturesAtLocation(Location location)
+        {
+            var featuresAtSpace = GetFeaturesAtLocation(location);
+
+            return featuresAtSpace.Where(f => f as ActiveFeature != null).Select(f => f as ActiveFeature);
         }
 
         /// <summary>
         /// Active features are typically triggered automatically
         /// </summary>
         /// <returns></returns>
-        public bool InteractWithActiveFeature()
+        public bool InteractWithActiveFeatures(Location location)
         {
-            Dungeon dungeon = Game.Dungeon;
-            Player player = dungeon.Player;
-
-            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(player.LocationLevel, player.LocationMap));
-
-            var useableFeatures = featuresAtSpace.Where(f => f as ActiveFeature != null);
+            var useableFeatures = ActiveFeaturesAtLocation(location);
 
             //Interact with feature - these will normally put success / failure messages in queue
-            var successes = useableFeatures.Select(f => (f as ActiveFeature).PlayerInteraction(player)).ToList();
+            var successes = useableFeatures.Select(f => f.PlayerInteraction(player)).ToList();
 
             //Watch out for the short circuit
             return successes.Any();
@@ -2108,11 +2112,7 @@ namespace RogueBasin
 
         public bool MonsterInteractWithActiveFeature(Monster monster, int level, Point mapLocation)
         {
-            Dungeon dungeon = Game.Dungeon;
-
-            var featuresAtSpace = dungeon.GetFeaturesAtLocation(new Location(level, mapLocation));
-
-            var useableFeatures = featuresAtSpace.Where(f => f as ActiveFeature != null);
+            var useableFeatures = ActiveFeaturesAtLocation(new Location(level, mapLocation));
 
             //Interact with feature - these will normally put success / failure messages in queue
             var successes = useableFeatures.Select(f => (f as ActiveFeature).MonsterInteraction(monster)).ToList();
