@@ -114,7 +114,7 @@ namespace RogueBasin
                 }
             }
 
-            if(contents.items.Count > 0)
+            if(contents.items.Any())
             {
                 interactions.Add(MoveInteractions.PickUpItem);
             }
@@ -292,9 +292,7 @@ namespace RogueBasin
                 //Auto-pick up any items
                 if (moveInteractions.Contains(MoveInteractions.PickUpItem))
                 {
-                    //Pick up first item only
-                    //Might help if the player makes a massive pile
-                    dungeon.PickUpItemInSpace();
+                    dungeon.PickUpAllItemsInSpace(target);
                 }
 
                 //If there is an active feature, auto interact

@@ -1,4 +1,6 @@
-﻿namespace RogueBasin
+﻿using System.Linq;
+
+namespace RogueBasin
 {
     /// <summary>
     /// Retains the state about the current targetted action and target location
@@ -87,12 +89,19 @@
         {
             SquareContents sqC = dungeon.MapSquareContents(currentTarget);
             Screen.Instance.CreatureToView = sqC.monster; //may reset to null
-            if (sqC.items.Count > 0)
-                Screen.Instance.ItemToView = sqC.items[0];
+            if (sqC.items.Any())
+                Screen.Instance.ItemToView = sqC.items.ElementAt(0);
             else
                 Screen.Instance.ItemToView = null;
 
-            Screen.Instance.FeatureToView = sqC.feature; //may reset to null
+            if (sqC.features.Any())
+            {
+                Screen.Instance.FeatureToView = sqC.features.ElementAt(0);
+            }
+            else
+            {
+                Screen.Instance.FeatureToView = null;
+            }
             return sqC;
         }
     }

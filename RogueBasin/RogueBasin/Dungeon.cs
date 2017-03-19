@@ -46,9 +46,9 @@ namespace RogueBasin
         /// </summary>
         public Player player = null;
 
-        public Feature feature = null;
+        public IEnumerable<Feature> features = Enumerable.Empty<Feature>();
 
-        public List<Item> items = new List<Item>();
+        public IEnumerable<Item> items = Enumerable.Empty<Item>();
 
         /// <summary>
         /// Set if no monster or player
@@ -1678,37 +1678,19 @@ namespace RogueBasin
             SquareContents contents = new SquareContents();
 
             //Check if we're off the map
-            if (location.x < 0 || location.x >= levels[level].width || location.y < 0 || location.y > levels[level].height)
+            if (!IsValidLocationInWorld(new Location(level, location)))
             {
                 contents.offMap = true;
                 return contents;
             }
 
-            //Check creature that be blocking
-            foreach (Monster creature in monsters)
-            {
-                if (creature.LocationLevel == level &&
-                    creature.LocationMap.x == location.x && creature.LocationMap.y == location.y)
-                {
-                    contents.monster = creature;
-                    break;
-                }
-            }
+            contents.monster = MonsterAtSpace(level, location);
 
-            //Check creature that be blocking
-            foreach (Item item in items)
-            {
-                if (item.LocationLevel == level &&
-                    item.LocationMap.x == location.x && item.LocationMap.y == location.y && item.InInventory == false)
-                {
-                    contents.items.Add(item);
-                    break;
-                }
-            }
+            //Items
+            contents.items = ItemsAtLocation(new Location(level, location));
 
             //Check features
-            var features = GetFeaturesAtLocation(new Location(level, location));
-            contents.feature = features.Count() > 0 ? features.First() : null;
+            contents.features = GetFeaturesAtLocation(new Location(level, location));
                 
             //Check for PC blocking
             //Allow this to work before having the player placed (at beginning of game)
@@ -1719,6 +1701,7 @@ namespace RogueBasin
                     contents.player = player;
                 }
             }
+
             if (contents.monster == null && contents.player == null)
                 contents.empty = true;
 
@@ -2824,15 +2807,9 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Pick up an item if there is one in this square
-        /// </summary>
-        /// <returns></returns>
-        public bool PickUpItemInSpace()
+        public bool PickUpAllItemsInSpace(Location location)
         {
-            Player player = Player;
-
-            var itemToPickUp = ItemsAtLocation(player.Location).ToList();
+            var itemToPickUp = ItemsAtLocation(location).ToList();
 
             if (!itemToPickUp.Any())
                 return false;
@@ -4723,7 +4700,7 @@ namespace RogueBasin
                     if (contents.player != null)
                         continue;
 
-                    if (contents.items.Count > 0)
+                    if (contents.items.Any())
                         continue;
 
                     //Empty and walkable
