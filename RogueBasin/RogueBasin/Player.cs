@@ -2299,7 +2299,7 @@ namespace RogueBasin
             {
                 if (monster != null && damageOrStunTurns > 0)
                 {
-                    monster.ApplyStunDamageToMonster(this, damageOrStunTurns);
+                    Game.Dungeon.Combat.ApplyStunDamageToMonster(monster, this, damageOrStunTurns);
                 }
             }
             else

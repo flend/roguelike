@@ -267,6 +267,56 @@ namespace RogueBasin
             return ApplyDamageToMonster(dungeon.Player, monster, damage);
         }
 
+
+        /// <summary>
+        /// Apply stun damage (miss n-turns) to monster. All stun attacks are routed through here
+        /// </summary>
+        /// <param name="monster"></param>
+        /// <param name="stunTurns"></param>
+        /// <returns></returns>
+        public CombatResults ApplyStunDamageToMonster(Monster monster, Creature attackingCreature, int stunTurns)
+        {
+            //Wake monster up etc.
+            monster.AIForMonsterIsAttacked(monster, attackingCreature);
+
+            int monsterOrigStunTurns = monster.StunnedTurns;
+
+            //Do we hit the monster?
+            if (stunTurns > 0)
+            {
+                monster.StunnedTurns += stunTurns;
+
+                //Notify the creature that it has taken damage
+                //It may activate a special ability or stop running away etc.
+                monster.NotifyHitByCreature(monster, 0);
+
+                //Message string
+                string playerMsg2 = "";
+                if (!monster.Unique)
+                    playerMsg2 += "The ";
+                playerMsg2 += monster.SingleDescription + " is stunned!";
+                Game.MessageQueue.AddMessage(playerMsg2);
+
+                string debugMsg2 = "MStun: " + monsterOrigStunTurns + "->" + monster.StunnedTurns;
+                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
+
+                return CombatResults.NeitherDied;
+            }
+
+            //Miss
+
+            string playerMsg3 = "";
+            if (!monster.Unique)
+                playerMsg3 += "The ";
+            playerMsg3 += monster.SingleDescription + " shrugs off the attack.";
+            Game.MessageQueue.AddMessage(playerMsg3);
+            string debugMsg3 = "MStun: " + monsterOrigStunTurns + "->" + monster.StunnedTurns;
+            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
+
+            return CombatResults.NeitherDied;
+
+        }
+
         /// <summary>
         /// Apply damage to monster and deal with death. All damaging attacks are routed through here.
         /// </summary>

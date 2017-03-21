@@ -2344,7 +2344,7 @@ namespace RogueBasin
                     //Apply damage
                     if (originMonster != null)
                     {
-                        m.ApplyStunDamageToMonster(originMonster, stunDamage);
+                        Game.Dungeon.Combat.ApplyStunDamageToMonster(m, originMonster, stunDamage);
                     }
                 }
             }

@@ -731,54 +731,6 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// Apply stun damage (miss n-turns) to monster. All stun attacks are routed through here
-        /// </summary>
-        /// <param name="monster"></param>
-        /// <param name="stunTurns"></param>
-        /// <returns></returns>
-        public CombatResults ApplyStunDamageToMonster(Creature attackingCreature, int stunTurns)
-        {
-            //Wake monster up etc.
-            AIForMonsterIsAttacked(this, attackingCreature);
-
-            int monsterOrigStunTurns = this.StunnedTurns;
-
-            //Do we hit the monster?
-            if (stunTurns > 0)
-            {
-                this.StunnedTurns += stunTurns;
-
-                //Notify the creature that it has taken damage
-                //It may activate a special ability or stop running away etc.
-                this.NotifyHitByCreature(this, 0);
-
-                //Message string
-                string playerMsg2 = "";
-                if (!this.Unique)
-                    playerMsg2 += "The ";
-                playerMsg2 += this.SingleDescription + " is stunned!";
-                Game.MessageQueue.AddMessage(playerMsg2);
-
-                string debugMsg2 = "MStun: " + monsterOrigStunTurns + "->" + this.StunnedTurns;
-                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
-
-                return CombatResults.NeitherDied;
-            }
-
-            //Miss
-
-            string playerMsg3 = "";
-            if (!this.Unique)
-                playerMsg3 += "The ";
-            playerMsg3 += this.SingleDescription + " shrugs off the attack.";
-            Game.MessageQueue.AddMessage(playerMsg3);
-            string debugMsg3 = "MStun: " + monsterOrigStunTurns + "->" + this.StunnedTurns;
-            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
-
-            return CombatResults.NeitherDied;
-
-        }
 
         /// <summary>
         /// Monster has been attacked. Wake it up etc.
