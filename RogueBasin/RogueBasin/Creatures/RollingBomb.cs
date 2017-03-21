@@ -34,7 +34,7 @@ namespace RogueBasin.Creatures
             if (this.LocationLevel >= 6)
                 damage *= 2;
 
-            Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 3.0, damage, this);
+            Game.Dungeon.Combat.DoGrenadeExplosion(LocationLevel, LocationMap, 3.0, damage, this);
         }
         /// <summary>
         /// Only explodes when next to you

@@ -28,7 +28,7 @@ namespace RogueBasin.Items
 
             LogFile.Log.LogEntryDebug("Firing laser", LogDebugLevel.Medium);
 
-            return Game.Dungeon.FireLaserLineWeapon(target, this, Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase()));
+            return Game.Dungeon.Combat.FireLaserLineWeapon(target, this, Game.Dungeon.Player.ScaleRangedDamage(this, DamageBase()));
         }
 
         public TargettingInfo TargettingInfo()

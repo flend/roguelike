@@ -59,7 +59,7 @@ namespace RogueBasin.Creatures
                     var grenadeSquare = adjacentSquares.RandomElement();
                     Game.Dungeon.AddMonsterDynamic(grenadeCreature, currentTarget.LocationLevel, grenadeSquare);
 
-                    var targetSquares = Game.Dungeon.CalculateTrajectory(this, grenadeSquare);
+                    var targetSquares = Game.Dungeon.WeaponUtility.CalculateTrajectorySameLevel(this, grenadeSquare);
                     Screen.Instance.DrawAreaAttackAnimationProgressive(targetSquares, grenadeCreature.GameSprite);
                     return true;
 

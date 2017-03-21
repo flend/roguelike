@@ -63,7 +63,7 @@ namespace RogueBasin.Creatures
 
                 Game.Dungeon.AddSoundEffect(0.5, LocationLevel, LocationMap);
 
-                Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, range, damage, this);
+                Game.Dungeon.Combat.DoGrenadeExplosion(LocationLevel, LocationMap, range, damage, this);
 
                 SoundPlayer.Instance().EnqueueSound("explosion");
             }

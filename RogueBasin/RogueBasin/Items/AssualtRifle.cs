@@ -176,7 +176,7 @@ namespace RogueBasin.Items
         public bool FireItem(Point target)
         {
             Ammo--;
-            return Game.Dungeon.FirePistolLineWeapon(target, this, DamageBase());
+            return Game.Dungeon.Combat.FirePistolLineWeapon(target, this, DamageBase());
         }
 
         /// <summary>

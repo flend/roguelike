@@ -19,7 +19,7 @@ namespace RogueBasin.Items
         /// <returns></returns>
         public bool FireItem(Point target)
         {
-            Game.Dungeon.FireShotgunWeapon(target, this, 150, 15, 15);
+            Game.Dungeon.Combat.FireShotgunWeapon(target, this, 150, 15, 15);
 
             //Remove 1 ammo
             Ammo--;

@@ -79,8 +79,8 @@ namespace RogueBasin.Items
 
             //Find target
 
-            List<Point> targetSquares = Game.Dungeon.CalculateTrajectory(target);
-            Monster monster = Game.Dungeon.FirstMonsterInTrajectory(targetSquares);
+            List<Point> targetSquares = Game.Dungeon.WeaponUtility.CalculateTrajectorySameLevel(player, target);
+            Monster monster = Game.Dungeon.WeaponUtility.FirstMonsterInTrajectory(player.LocationLevel, targetSquares);
 
             //Find where it landed
 

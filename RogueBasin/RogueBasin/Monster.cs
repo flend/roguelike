@@ -711,7 +711,7 @@ namespace RogueBasin
         private void StandardShotGunAttack(Creature target)
         {
             var scaledDamage = ScaleRangedDamage(this.DamageBase());
-            Game.Dungeon.FireShotgunWeapon(this, target.LocationMap, scaledDamage, 0.0, Math.PI / 8, scaledDamage / 10, scaledDamage / 10);
+            Game.Dungeon.Combat.FireShotgunWeapon(this, target.LocationMap, scaledDamage, 0.0, Math.PI / 8, scaledDamage / 10, scaledDamage / 10);
             SoundPlayer.Instance().EnqueueSound("shotgun");
         }
 

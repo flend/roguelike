@@ -49,9 +49,9 @@ namespace RogueBasin
 
             //Check we are in range of target (not done above)
             int range = weapon.RangeFire();
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(dungeon.Player);
 
-            if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target.MapCoord, range, currentFOV))
+            if (!Utility.TestRangeFOVForWeapon(dungeon.Player, target.MapCoord, range, currentFOV))
             {
                 return FireOnTargetStatus.OutOfRange;
             }
@@ -71,7 +71,7 @@ namespace RogueBasin
             IEquippableItem toThrow = player.GetEquippedUtility();
             Item toThrowItem = player.GetEquippedUtilityAsItem();
 
-            CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
+            CreatureFOV currentFOV = dungeon.CalculateCreatureFOV(dungeon.Player);
 
             if (toThrow == null)
             {
@@ -87,7 +87,7 @@ namespace RogueBasin
 
             int range = toThrow.RangeThrow();
 
-            if (!Utility.TestRangeFOVForWeapon(Game.Dungeon.Player, target.MapCoord, range, currentFOV))
+            if (!Utility.TestRangeFOVForWeapon(dungeon.Player, target.MapCoord, range, currentFOV))
             {
                 return ThrowToTargetStatus.OutOfRange;
             }
@@ -373,7 +373,7 @@ namespace RogueBasin
                     string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
                     LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
 
-                    Game.Dungeon.KillMonster(monster, false);
+                    dungeon.KillMonster(monster, false);
 
                     return CombatResults.DefenderDied;
                 }
@@ -433,6 +433,341 @@ namespace RogueBasin
             }
 
             return attackerStr;
+        }
+
+        /// <summary>
+        /// Generic throw method for most grenade items
+        /// </summary>
+        public Point ThrowItemGrenadeLike(IEquippableItem item, int level, Point target, int damage, bool stunning = false)
+        {
+            Item itemAsItem = item as Item;
+
+            LogFile.Log.LogEntryDebug("Throwing " + itemAsItem.SingleItemDescription, LogDebugLevel.Medium);
+
+            Player player = dungeon.Player;
+
+            //Find target
+
+            List<Point> targetSquares = dungeon.WeaponUtility.CalculateTrajectorySameLevel(player, target);
+            Monster monster = dungeon.WeaponUtility.FirstMonsterInTrajectory(player.LocationLevel, targetSquares);
+
+            //Find where it landed
+
+            //Destination will be the last square in trajectory
+            Point destination;
+            if (targetSquares.Count > 0)
+                destination = targetSquares[targetSquares.Count - 1];
+            else
+                //Threw it on themselves!
+                destination = player.LocationMap;
+
+
+            //Stopped by a monster
+            if (monster != null)
+            {
+                destination = monster.LocationMap;
+            }
+
+            //Make throwing sound AT target location
+            dungeon.AddSoundEffect(item.ThrowSoundMagnitude(), dungeon.Player.LocationLevel, destination);
+
+            //if (Player.LocationLevel >= 6)
+            //    damage *= 2;
+
+            //Work out grenade splash and damage
+            if (stunning)
+            {
+                DoGrenadeExplosionStun(item, level, target, damage, dungeon.Player);
+            }
+            else
+            {
+                DoGrenadeExplosion(item, level, target, damage, dungeon.Player);
+            }
+
+            return destination;
+        }
+
+        public void DoGrenadeExplosion(int level, Point locationMap, double size, int damage, Creature originMonster, int animationDelay = 0)
+        {
+            Player player = dungeon.Player;
+
+            List<Point> grenadeAffects = dungeon.GetPointsForGrenadeTemplate(locationMap, level, size);
+
+            //Use FOV from point of explosion (this means grenades don't go round corners or through walls)
+            WrappedFOV grenadeFOV = dungeon.CalculateAbstractFOV(player.LocationLevel, locationMap, 0);
+
+            var grenadeAffectsFiltered = grenadeAffects.Where(sq => grenadeFOV.CheckTileFOV(player.LocationLevel, sq));
+
+            DoGrenadeExplosion(level, damage, originMonster, animationDelay, grenadeAffectsFiltered);
+        }
+
+        public void DoGrenadeExplosion(IEquippableItem item, int level, Point locationMap, int damage, Creature originMonster, int animationDelay = 0)
+        {
+            //Work out grenade splash and damage
+            var grenadeAffectsFiltered = item.TargettingInfo().TargetPoints(dungeon.Player, dungeon, new Location(level, locationMap));
+            DoGrenadeExplosion(level, damage, originMonster, animationDelay, grenadeAffectsFiltered);
+        }
+
+        private void DoGrenadeExplosion(int level, int damage, Creature originMonster, int animationDelay, IEnumerable<Point> grenadeAffectsFiltered)
+        {
+            Player player = dungeon.Player;
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Explosion, false, animationDelay);
+
+            foreach (Point sq in grenadeAffectsFiltered)
+            {
+                SquareContents squareContents = dungeon.MapSquareContents(level, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null && m.Alive)
+                {
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Grenade: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    if (originMonster != null && originMonster != dungeon.Player)
+                    {
+                        dungeon.Combat.ApplyDamageToMonster(originMonster, m, damage);
+                    }
+                    else
+                    {
+                        dungeon.Combat.PlayerAttackMonsterRanged(squareContents.monster, damage);
+                    }
+                }
+
+                dungeon.AddDecorationFeature(new Features.Scorch(), level, sq);
+            }
+
+            //And the player
+
+            if (grenadeAffectsFiltered.Where(p => p.x == dungeon.Player.LocationMap.x && p.y == dungeon.Player.LocationMap.y).Any())
+            {
+                if (originMonster != null)
+                {
+                    string combatResultsMsg = "MvP (" + originMonster.Representation + ") Grenade: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+                }
+                //Apply damage (uses damage base)
+                if (originMonster != null && originMonster != dungeon.Player)
+                {
+                    player.ApplyCombatDamageToPlayer((originMonster as Monster), damage, true);
+                    player.NotifyMonsterEvent(new MonsterEvent(MonsterEvent.MonsterEventType.MonsterAttacksPlayer, originMonster as Monster));
+                }
+                else
+                    player.ApplyCombatDamageToPlayer(damage);
+            }
+        }
+
+        public void DoGrenadeExplosionStun(IEquippableItem item, int level, Point locationMap, int stunDamage, Creature originMonster)
+        {
+            //Work out grenade splash and damage
+            var grenadeAffectsFiltered = item.TargettingInfo().TargetPoints(dungeon.Player, dungeon, new Location(level, locationMap));
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(grenadeAffectsFiltered, Screen.AttackType.Stun);
+
+            foreach (Point sq in grenadeAffectsFiltered)
+            {
+                SquareContents squareContents = dungeon.MapSquareContents(level, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null && m.Alive)
+                {
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Stun Grenade: Dam: " + stunDamage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    if (originMonster != null)
+                    {
+                        dungeon.Combat.ApplyStunDamageToMonster(m, originMonster, stunDamage);
+                    }
+                }
+            }
+
+            //And the player
+
+            if (grenadeAffectsFiltered.Where(p => p.x == dungeon.Player.LocationMap.x && p.y == dungeon.Player.LocationMap.y).Any())
+            {
+                if (originMonster != null)
+                {
+                    string combatResultsMsg = "MvP (" + originMonster.Representation + ") Stun Grenade: Dam: " + stunDamage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+                }
+
+                //No stun damage for players right now
+            }
+        }
+
+
+        public bool FireShotgunWeapon(Point target, Items.ShotgunTypeWeapon item, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
+        {
+            IEquippableItem equipItem = item as IEquippableItem;
+            return FireShotgunWeapon(dungeon.Player, target, damageBase, item.FireSoundMagnitude(), item.ShotgunSpreadAngle(), damageDropWithRange, damageDropWithInterveningMonster);
+        }
+
+        public bool FireShotgunWeapon(Creature gunner, Point target, int damageBase, double fireSoundMagnitude, double spreadAngle, int damageDropWithRange, int damageDropWithInterveningMonster)
+        {
+            Player player = dungeon.Player;
+
+            //The shotgun fires towards its target and does less damage with range
+
+            LogFile.Log.LogEntryDebug("---SHOTGUN FIRE---", LogDebugLevel.Medium);
+
+            //Get all squares in range and within FOV (shotgun needs a straight line route to fire)
+
+            CreatureFOV currentFOV = dungeon.CalculateNoRangeCreatureFOV(gunner);
+            List<Point> targetSquares = currentFOV.GetPointsForTriangularTargetInFOV(gunner.LocationMap, target, dungeon.Levels[gunner.LocationLevel], 10, spreadAngle);
+
+            //Draw attack
+            Screen.Instance.DrawAreaAttackAnimation(targetSquares, Screen.AttackType.Bullet);
+
+            //Make firing sound
+            if (gunner is Player)
+                dungeon.AddSoundEffect(fireSoundMagnitude, player.LocationLevel, player.LocationMap);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in targetSquares)
+            {
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    int damage = ShotgunDamage(gunner, m, damageBase, damageDropWithRange, damageDropWithInterveningMonster);
+
+                    string combatMessage = "MvM";
+                    if (gunner is Player)
+                        combatMessage = "PvM";
+
+                    string combatResultsMsg = combatMessage + " (" + m.Representation + ") Shotgun: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage to monsters
+                    if (damage > 0)
+                    {
+                        if (gunner is Player)
+                            //Cancels some player statuses
+                            dungeon.Combat.PlayerAttackMonsterRanged(squareContents.monster, damage);
+                        else
+                            dungeon.Combat.ApplyDamageToMonster(gunner, m, damage);
+                    }
+                }
+
+                if (squareContents.player != null && !(gunner is Player))
+                {
+
+                    int damage = ShotgunDamage(gunner, player, damageBase, damageDropWithRange, damageDropWithInterveningMonster);
+
+                    string combatResultsMsg = "MvP (" + gunner.Representation + ") Shotgun: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage to player
+                    if (damage > 0)
+                    {
+                        player.ApplyCombatDamageToPlayer(gunner as Monster, damage, true);
+                        player.NotifyMonsterEvent(new MonsterEvent(MonsterEvent.MonsterEventType.MonsterAttacksPlayer, gunner as Monster));
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private int ShotgunDamage(Creature gunner, Creature target, int damageBase, int damageDropWithRange, int damageDropWithInterveningMonster)
+        {
+            //Calculate range
+            int rangeToMonster = (int)Math.Floor(Utility.GetDistanceBetween(gunner.LocationMap, target.LocationMap));
+
+            //How many monsters between monster and gunner
+            var pointsFromPlayerToMonster = Utility.GetPointsOnLine(gunner.LocationMap, target.LocationMap);
+            //(exclude player and monster itself)
+            var numInterveningMonsters = Math.Max(pointsFromPlayerToMonster.Skip(1).Where(p => dungeon.MapSquareContents(gunner.LocationLevel, p).monster != null).Count() - 1, 0);
+
+            LogFile.Log.LogEntryDebug("Shotgun. Gunner: " + gunner.Representation + " Target at " + target.LocationMap + " intervening monsters: " + numInterveningMonsters, LogDebugLevel.Medium);
+
+            int damage = damageBase - rangeToMonster * damageDropWithRange;
+            damage = Math.Max(damage - numInterveningMonsters * damageDropWithInterveningMonster, 0);
+            return damage;
+        }
+
+
+        public bool FireLaserLineWeapon(Point target, RangedWeapon item, int damage)
+        {
+            Player player = dungeon.Player;
+
+            Point lineEnd = dungeon.GetEndOfLine(player.LocationMap, target, player.LocationLevel);
+
+            WrappedFOV fovForWeapon = dungeon.CalculateAbstractFOV(dungeon.Player.LocationLevel, dungeon.Player.LocationMap, 80);
+            List<Point> targetSquares = dungeon.GetPathLinePointsInFOV(dungeon.Player.LocationLevel, dungeon.Player.LocationMap, lineEnd, fovForWeapon);
+
+            //Draw attack
+            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) : targetSquares;
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, Screen.AttackType.Laser);
+
+            //Make firing sound
+            dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Attack all monsters in the area
+
+            foreach (Point sq in targetSquares)
+            {
+                SquareContents squareContents = dungeon.MapSquareContents(player.LocationLevel, sq);
+
+                Monster m = squareContents.monster;
+
+                //Hit the monster if it's there
+                if (m != null)
+                {
+                    string combatResultsMsg = "PvM (" + m.Representation + ") Laser: Dam: " + damage;
+                    LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
+
+                    //Apply damage
+                    dungeon.Combat.PlayerAttackMonsterRanged(squareContents.monster, damage);
+                }
+            }
+
+            //Remove 1 ammo
+            item.Ammo--;
+
+            return true;
+        }
+
+        public bool FirePistolLineWeapon(Point target, RangedWeapon item, int damageBase)
+        {
+            Player player = dungeon.Player;
+
+            //Make firing sound
+            dungeon.AddSoundEffect(item.FireSoundMagnitude(), player.LocationLevel, player.LocationMap);
+
+            //Find monster target
+
+            var targetSquares = dungeon.WeaponUtility.CalculateTrajectorySameLevel(player, target);
+            Monster monster = dungeon.WeaponUtility.FirstMonsterInTrajectory(player.LocationLevel, targetSquares);
+        
+            if (monster == null)
+            {
+                LogFile.Log.LogEntryDebug("No monster in target for pistol-like weapon. Ammo used anyway.", LogDebugLevel.Medium);
+                return true;
+            }
+
+            var targetSquaresToDraw = targetSquares.Count() > 1 ? targetSquares.GetRange(1, targetSquares.Count - 1) : targetSquares;
+
+            //Draw attack
+
+            Screen.Instance.DrawAreaAttackAnimation(targetSquaresToDraw, Screen.AttackType.Bullet, true);
+
+            //Apply damage
+            dungeon.Combat.PlayerAttackMonsterRanged(monster, damageBase);
+
+            return true;
         }
 
     }

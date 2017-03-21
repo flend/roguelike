@@ -556,6 +556,7 @@
     <Compile Include="UseableFeature.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Vector3.cs" />
+    <Compile Include="WeaponUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MoreLinq">

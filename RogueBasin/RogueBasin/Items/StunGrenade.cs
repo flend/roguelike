@@ -63,7 +63,7 @@ namespace RogueBasin.Items
             //Stun for 0 rounds
             Game.MessageQueue.AddMessage("The stun grenade explodes!");
 
-            Point dest = Game.Dungeon.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 6, true);
+            Point dest = Game.Dungeon.Combat.ThrowItemGrenadeLike(this, Game.Dungeon.Player.LocationLevel, target, 6, true);
             
             return dest;
         }

@@ -25,7 +25,7 @@ namespace RogueBasin.Creatures
         {
             Game.Dungeon.AddSoundEffect(0.5, LocationLevel, LocationMap);
 
-            Game.Dungeon.DoGrenadeExplosion(LocationLevel, LocationMap, 2.5, this.ScaleRangedDamage(DamageBase()), this);
+            Game.Dungeon.Combat.DoGrenadeExplosion(LocationLevel, LocationMap, 2.5, this.ScaleRangedDamage(DamageBase()), this);
         }
 
         public override Monster NewCreatureOfThisType()

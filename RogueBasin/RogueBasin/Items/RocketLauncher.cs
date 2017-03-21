@@ -26,9 +26,9 @@ namespace RogueBasin.Items
             Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), Game.Dungeon.Player.LocationLevel, Game.Dungeon.Player.LocationMap);
             Game.Dungeon.AddSoundEffect(FireSoundMagnitude(), Game.Dungeon.Player.LocationLevel, target);
 
-            Game.Dungeon.DoGrenadeExplosion(this, Game.Dungeon.Player.LocationLevel, target, scaledDamage, Game.Dungeon.Player, Screen.combationAnimationFrameDuration);
+            Game.Dungeon.Combat.DoGrenadeExplosion(this, Game.Dungeon.Player.LocationLevel, target, scaledDamage, Game.Dungeon.Player, Screen.combationAnimationFrameDuration);
 
-            var targetSquares = Game.Dungeon.CalculateTrajectory(Game.Dungeon.Player, target);
+            var targetSquares = Game.Dungeon.WeaponUtility.CalculateTrajectorySameLevel(Game.Dungeon.Player, target);
             Screen.Instance.DrawAreaAttackAnimationProgressive(targetSquares, "rocket");
 
             //Remove 1 ammo
