@@ -129,7 +129,7 @@ namespace RogueBasin.Spells
             LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
             //Apply damage
-            player.ApplyDamageToMonsterFromPlayer(monster, damage, true, false);
+            Game.Dungeon.Combat.ApplyDamageToMonsterFromPlayer(monster, damage, true, false);
         }
 
         private void HitPlayer()

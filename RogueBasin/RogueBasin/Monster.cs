@@ -704,7 +704,7 @@ namespace RogueBasin
                     SoundPlayer.Instance().EnqueueSound("punch");
                 SoundPlayer.Instance().EnqueueSound("gunshot");
 
-                return ApplyDamageToMonster(this, monster, damage);
+                return Game.Dungeon.Combat.ApplyDamageToMonster(this, monster, damage);
             }
         }
 
@@ -781,131 +781,10 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Apply damage to monster and deal with death. All damaging attacks are routed through here.
-        /// </summary>
-        /// <param name="monster"></param>
-        /// <param name="damage"></param>
-        /// <returns></returns>
-        public CombatResults ApplyDamageToMonster(Creature attackingCreature, Monster monster, int damage)
-        {
-            //Wake monster up etc.
-            AIForMonsterIsAttacked(monster, attackingCreature);
-
-            //Do we hit the monster?
-            if (damage > 0)
-            {
-                int monsterOrigHP = monster.Hitpoints;
-
-                monster.Hitpoints -= damage;
-
-                bool monsterDead = monster.Hitpoints <= 0;
-
-                //Add HP from the glove if wielded
-                if (attackingCreature == Game.Dungeon.Player)
-                    Game.Dungeon.Player.SpecialCombatEffectsOnMonster(monster, damage, monsterDead, false);
-
-                //Notify the creature that it has taken damage
-                //It may activate a special ability or stop running away etc.
-                if (attackingCreature != null)
-                {
-                    monster.NotifyHitByCreature(attackingCreature, damage);
-                }
-
-                //Is the monster dead, if so kill it?
-                if (monsterDead)
-                {
-                    //Add it to our list of kills (simply adding the whole object here)
-                    Game.Dungeon.Player.AddKill(monster);
-
-                    //Message string
-                    if (attackingCreature != null)
-                    {
-                        string attackerStr = AttackerString(attackingCreature);
-                        string playerMsg = attackerStr + " destroyed the ";
-                        playerMsg += monster.SingleDescription + ".";
-                        Game.MessageQueue.AddMessage(playerMsg);
-                         
-                    }
-                    else
-                    {
-                        Game.MessageQueue.AddMessage("The " + monster.SingleDescription + " dies.");
-                    }
-
-                    if (attackingCreature != null)
-                    {
-                        string mvm = AttackerMvMString(attackingCreature);
-                        string debugMsg4 = mvm + " " + attackingCreature == null ? "" : attackingCreature.Representation + " attacks " + this.Representation;
-                        LogFile.Log.LogEntryDebug(debugMsg4, LogDebugLevel.Medium);
-                    }
-                    string debugMsg = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " killed";
-                    LogFile.Log.LogEntryDebug(debugMsg, LogDebugLevel.Medium);
-
-                    Game.Dungeon.KillMonster(monster, false);
-
-                    return CombatResults.DefenderDied;
-                }
-
-                //Message string
-                string playerMsg2 = AttackerString(attackingCreature);
-                playerMsg2 += " hit the ";
-                playerMsg2 += monster.SingleDescription + ".";
-                Game.MessageQueue.AddMessage(playerMsg2);
-                if (attackingCreature != null)
-                {
-                    string mvm2 = AttackerMvMString(attackingCreature);
-                    string debugMsg6 = mvm2 + " " + attackingCreature == null ? "" : attackingCreature.Representation + " attacks " + this.Representation;
-                    LogFile.Log.LogEntryDebug(debugMsg6, LogDebugLevel.Medium);
-                }
-                string debugMsg2 = "MHP: " + monsterOrigHP + "->" + monster.Hitpoints + " injured";
-                LogFile.Log.LogEntryDebug(debugMsg2, LogDebugLevel.Medium);
-
-                return CombatResults.DefenderDamaged;
-            }
-
-            //Miss
-
-            string playerMsg3 = AttackerString(attackingCreature) + " missed the " + monster.SingleDescription + ".";
-            Game.MessageQueue.AddMessage(playerMsg3);
-            string debugMsg3 = "MHP: " + monster.Hitpoints + "->" + monster.Hitpoints + " missed";
-            LogFile.Log.LogEntryDebug(debugMsg3, LogDebugLevel.Medium);
-
-            return CombatResults.NeitherDied;
-        }
-
-        private string AttackerString(Creature attackingCreature)
-        {
-            String attackerStr = "";
-            if (attackingCreature is Monster)
-            {
-                attackerStr = (attackingCreature as Monster).SingleDescription;
-            }
-            if (attackingCreature is Player)
-            {
-                attackerStr = "You";
-            }
-            return attackerStr;
-        }
-
-        private string AttackerMvMString(Creature attackingCreature)
-        {
-            String attackerStr = "MvM";
-            if (attackingCreature == null)
-            {
-                return "TvM";
-            }
-            if (attackingCreature is Player)
-            {
-                attackerStr = "MvP";
-            }
-            
-            return attackerStr;
-        }
-
-        /// <summary>
         /// Monster has been attacked. Wake it up etc.
         /// </summary>
         /// <param name="monster"></param>
-        private void AIForMonsterIsAttacked(Monster monster, Creature attackingMonster)
+        public void AIForMonsterIsAttacked(Monster monster, Creature attackingMonster)
         {
             //Set the attacked by marker
             if (attackingMonster != null)

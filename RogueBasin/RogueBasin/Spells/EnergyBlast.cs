@@ -84,7 +84,7 @@ namespace RogueBasin.Spells
                 LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
 
                 //Apply damage
-                player.ApplyDamageToMonsterFromPlayer(squareContents.monster, damage, true, false);
+                Game.Dungeon.Combat.ApplyDamageToMonsterFromPlayer(squareContents.monster, damage, true, false);
                 
                 return true;
             }

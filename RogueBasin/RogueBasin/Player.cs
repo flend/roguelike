@@ -829,61 +829,6 @@ namespace RogueBasin
             return false;
         }
 
-        /// <summary>
-        /// Work out the damage from an attack with the specified one-time modifiers (could be from a special attack etc.)
-        /// Note ACmod positive is a bonus to the monster AC
-        /// </summary>
-        /// <param name="hitMod"></param>
-        /// <param name="damBase"></param>
-        /// <param name="damMod"></param>
-        /// <param name="ACmod"></param>
-        /// <returns></returns>
-        private int AttackWithModifiers(Monster monster, int hitMod, int damBase, int damMod, int ACmod)
-        {
-            //Flatline has a rather simple combat system
-            IEquippableItem item = GetEquippedRangedWeapon();
-
-            int baseDamage = 2;
-
-            if (item.HasMeleeAction())
-            {
-                baseDamage = item.MeleeDamage();
-            }
-
-            string combatResultsMsg = "PvM " + monster.Representation + " = " + baseDamage;
-
-            return baseDamage;
-
-            /*
-            int attackToHit = hitModifier + hitMod;
-            int attackDamageMod = damageModifier + damMod;
-            
-            int attackDamageBase;
-
-            if(damBase > damageBase)
-                attackDamageBase = damBase;
-            else
-                attackDamageBase = damageBase;
-
-            int monsterAC = monster.ArmourClass() + ACmod;
-            int toHitRoll = Utility.d20() + attackToHit;
-
-            if (toHitRoll >= monsterAC)
-            {
-                //Hit - calculate damage
-                int totalDamage = Utility.DamageRoll(attackDamageBase) + attackDamageMod;
-                string combatResultsMsg = "PvM " + monster.Representation + " ToHit: " + toHitRoll + "[+" + hitModifier + "+" + hitMod + "] AC: " + monsterAC + "(" + monster.ArmourClass() + "+" + ACmod + ") " + " Dam: 1d" + attackDamageBase + "+" + damageModifier + "+" + damMod + " = " + totalDamage;
-
-                //            string combatResultsMsg = "PvM Attack ToHit: " + toHitRoll + " AC: " + monster.ArmourClass() + " Dam: 1d" + damageBase + "+" + damageModifier + " MHP: " + monster.Hitpoints + " miss";
-                LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-                return totalDamage;
-            }*/
-
-            //Miss
-            //return 0;
-        }
-
         public bool CastSpell(Spell toCast, Point target)
         {
             //Check MP
@@ -1045,91 +990,6 @@ namespace RogueBasin
             return coverItems;
         }
 
-        /// <summary>
-        /// Normal attack on a monster. Takes care of killing them off if required.
-        /// </summary>
-        /// <param name="monster"></param>
-        /// <returns></returns>
-        public CombatResults AttackMonster(Monster monster)
-        {
-            return AttackMonsterWithModifiers(monster, 0, 0, 0, 0, false);
-        }
-
-        /// <summary>
-        /// Attack a monster with modifiers. Takes care of killing them off if required.
-        /// </summary>
-        /// <param name="monster"></param>
-        /// <returns></returns>
-        public CombatResults AttackMonsterWithModifiers(Monster monster, int hitModifierMod, int damageBaseMod, int damageModifierMod, int enemyACMod, bool specialMoveUsed)
-        {
-            //Do we need to recalculate combat stats?
-            if (this.RecalculateCombatStatsRequired)
-                this.CalculateCombatStats();
-
-            if (monster.RecalculateCombatStatsRequired)
-                monster.CalculateCombatStats();
-
-            //Attacking a monster with hand to hand give an instrinsic
-            CombatUse = true;
-
-            //Calculate damage from a normal attack
-
-            int damage = AttackWithModifiers(monster, hitModifierMod, damageBaseMod, damageModifierMod, enemyACMod);
-
-            return ApplyDamageToMonsterFromPlayer(monster, damage, false, specialMoveUsed);
-        }
-
-        public CombatResults AttackMonsterRanged(Monster monster, int damage)
-        {
-            var modifiedDamage = (int)Math.Ceiling(CalculateRangedAttackModifiersOnMonster(monster) * damage);
-            string combatResultsMsg = "PvM (ranged) " + monster.Representation + "base " + damage + " modified " + modifiedDamage;
-            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-            CancelStealthDueToAttack();
-            CancelBoostDueToAttack();
-
-            return ApplyDamageToMonsterFromPlayer(monster, modifiedDamage, false, false);
-        }
-
-        public CombatResults AttackMonsterThrown(Monster monster, int damage)
-        {
-            string combatResultsMsg = "PvM (thrown) " + monster.Representation + " = " + damage;
-            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-            CancelStealthDueToAttack();
-            CancelBoostDueToAttack();
-
-            return ApplyDamageToMonsterFromPlayer(monster, damage, false, false);
-        }
-
-        public CombatResults AttackMonsterMelee(Monster monster)
-        {
-
-            //Flatline has a rather simple combat system
-            IEquippableItem item = GetEquippedMeleeWeapon();
-
-            int baseDamage = 2;
-
-            if (item != null && item.HasMeleeAction())
-            {
-                baseDamage = item.MeleeDamage();
-            }
-
-            var modifiedDamage = ScaleMeleeDamage(GetEquippedMeleeWeapon() as Item, baseDamage);
-                //(int)Math.Ceiling(CalculateMeleeAttackModifiersOnMonster(monster) * baseDamage);
-
-            string combatResultsMsg = "PvM (melee) " + monster.Representation + " base " + baseDamage + " mod " + modifiedDamage;
-            LogFile.Log.LogEntryDebug(combatResultsMsg, LogDebugLevel.Medium);
-
-            CancelStealthDueToAttack();
-            //ResetTurnsMoving();
-
-            //Play sound
-            SoundPlayer.Instance().EnqueueSound("punch");
-
-            return ApplyDamageToMonsterFromPlayer(monster, modifiedDamage, false, false);
-        }
-
         public void CancelStealthDueToAttack()
         {
             if (Game.Dungeon.PlayerCheating)
@@ -1168,14 +1028,6 @@ namespace RogueBasin
             DisableWetware(typeof(Items.BoostWare), turnsToDisableBoostWareAfterUnequip);
 
         }
-
-        
-
-        public CombatResults ApplyDamageToMonsterFromPlayer(Monster monster, int damage, bool magicUse, bool specialMove)
-        {
-            return monster.ApplyDamageToMonster(this, monster, damage);
-        }
-        
 
         /// <summary>
         /// A monster has been killed by magic or combat. Add XP
@@ -1229,101 +1081,6 @@ namespace RogueBasin
                     LogFile.Log.LogEntryDebug("CombatXP up!", LogDebugLevel.Medium);
                     Game.MessageQueue.AddMessage("You feel your combat skill increase.");
                 }
-            }
-        }
-
-        /// <summary>
-        /// List of special combat effects that might happen to a HIT monster
-        /// </summary>
-        /// <param name="monster"></param>
-        public void SpecialCombatEffectsOnMonster(Monster monster, int damage, bool isDead, bool specialMove)
-        {
-            //If short sword is equipped, do a slow down effect (EXAMPLE)
-            /*
-            Item shortSword = null;
-            foreach (Item item in Inventory.Items)
-            {
-                if (item as Items.ShortSword != null)
-                {
-                    shortSword = item as Items.ShortSword;
-                    break;
-                }
-            }
-
-            //If we are using the short sword apply the slow effect
-            if (shortSword != null)
-            {
-                monster.AddEffect(new MonsterEffects.SlowDown(monster, 500, 50));
-            }*/
-
-            //If glove is equipped we leech some of the monster HP
-
-            Player player = Game.Dungeon.Player;
-            
-            Item glove = null;
-            foreach (Item item in Inventory.Items)
-            {
-                /*
-                if (item as Items.Glove != null)
-                {
-                    glove = item as Items.Glove;
-                    break;
-                }*/
-            }
-
-            if (glove != null && specialMove)
-            {
-                //The glove in PrincessRL only works on special moves
-
-                double hpGain;
-
-              //  if (player.AttackStat < 50)
-                    hpGain = damage / 10.0;
-              //  else
-              //      hpGain = damage / 5.0;
-
-                GainHPFromLeech((int)Math.Ceiling(hpGain));
-                
-
-
-                /*
-                //If the monster isn't dead we get 1/5th of the HP done
-                if (!isDead)
-                {
-                    double hpGain = damage / 5.0;
-
-                    if (hpGain > 0.9999)
-                    {
-                        GainHPFromLeech((int)Math.Ceiling(hpGain));
-                    }
-
-                    //If we're become 1 there's only a chance that we gain an HP
-                    else
-                    {
-                        int hpChance = (int) (hpGain * 100.0);
-                        if (Game.Random.Next(100) < hpChance)
-                            GainHPFromLeech(1);
-                    }
-                }
-
-                //If monster is dead we get 1/5 of the total HP
-                else
-                {
-                    double hpGain = monster.MaxHitpoints / 10.0;
-
-                    if (hpGain > 0.9999)
-                    {
-                        GainHPFromLeech((int)Math.Ceiling(hpGain));
-                    }
-
-                    //If we're become 1 there's only a chance that we gain an HP
-                    else
-                    {
-                        int hpChance = (int) (hpGain * 100.0);
-                        if (Game.Random.Next(100) < hpChance)
-                            GainHPFromLeech(1);
-                    }
-                }*/
             }
         }
 
@@ -2549,7 +2306,7 @@ namespace RogueBasin
             {
                 if (monster != null && damageOrStunTurns > 0)
                 {
-                    AttackMonsterThrown(monster, damageOrStunTurns);
+                    Game.Dungeon.Combat.PlayerAttackMonsterThrown(monster, damageOrStunTurns);
                 }
             }
 

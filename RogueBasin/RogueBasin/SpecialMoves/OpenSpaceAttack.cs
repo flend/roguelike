@@ -437,7 +437,7 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
+            CombatResults results = Game.Dungeon.Combat.PlayerMeleeAttackMonsterWithModifiers(target as Monster, bonus, 0, bonus, 0, true);
             Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
 
             //Move into destination square (already check this was OK)

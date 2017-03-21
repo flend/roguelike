@@ -131,7 +131,7 @@ namespace RogueBasin.SpecialMoves
 
             //Bonus to hit and damage
             Game.MessageQueue.AddMessage("CloseQuarters!");
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, noCardinals, 0, noCardinals, 0, true);
+            CombatResults results = Game.Dungeon.Combat.PlayerMeleeAttackMonsterWithModifiers(target, noCardinals, 0, noCardinals, 0, true);
             Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
             moveCounter = 0;
 

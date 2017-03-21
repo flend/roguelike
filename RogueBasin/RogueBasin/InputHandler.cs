@@ -496,7 +496,7 @@ namespace RogueBasin
                                 }
 
                                 if (timeAdvances)
-                                    playerActions.SpecialMoveNonMoveAction();
+                                    playerActions.NonMoveAction();
 
                                 centreOnPC = true;
                                 break;
@@ -517,7 +517,7 @@ namespace RogueBasin
                                 }
 
                                 if (timeAdvances)
-                                    playerActions.SpecialMoveNonMoveAction();
+                                    playerActions.NonMoveAction();
 
                                 centreOnPC = true;
                                 break;
@@ -558,7 +558,7 @@ namespace RogueBasin
                                 timeAdvances = playerActions.Examine();
 
                                 if (timeAdvances)
-                                    playerActions.SpecialMoveNonMoveAction();
+                                    playerActions.NonMoveAction();
 
                                 centreOnPC = true;
                                 break;

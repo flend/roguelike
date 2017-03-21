@@ -329,9 +329,9 @@ namespace RogueBasin
         /// <summary>
         /// Call when time moves on due to a PC action that isn't a move. This may cause some special moves to cancel.
         /// </summary>
-        public void SpecialMoveNonMoveAction()
+        public void NonMoveAction()
         {
-            Game.Dungeon.PCActionNoMove();
+            Game.Dungeon.Movement.PCActionNoMove();
         }
     }
 }

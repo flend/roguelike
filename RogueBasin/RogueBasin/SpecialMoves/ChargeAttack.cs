@@ -186,7 +186,7 @@ namespace RogueBasin.SpecialMoves
                 Game.MessageQueue.AddMessage("Close Quarters!");
             }
 
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, bonus, 0, bonus, 0, true);
+            CombatResults results = Game.Dungeon.Combat.PlayerMeleeAttackMonsterWithModifiers(target, bonus, 0, bonus, 0, true);
             Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
 
             moveCounter = 0;

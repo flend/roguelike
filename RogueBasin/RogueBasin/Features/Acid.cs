@@ -22,7 +22,7 @@ namespace RogueBasin.Features
         public override bool MonsterInteraction(Monster monster)
         {
             var damage = (int)Math.Round(monster.MaxHitpoints / 5.0);
-            monster.ApplyDamageToMonster(null, monster, damage);
+            Game.Dungeon.Combat.ApplyDamageToMonster(null, monster, damage);
 
             LogFile.Log.LogEntryDebug(Description + " does " + damage + " damage to monster on interaction", LogDebugLevel.Medium);
 

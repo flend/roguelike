@@ -159,7 +159,7 @@ namespace RogueBasin
             }
 
             //Check special moves. These take precidence over normal moves. Only if no special move is ready do we do normal resolution here
-            SpecialMove moveDone = dungeon.DoSpecialMove(target.MapCoord);
+            SpecialMove moveDone = DoSpecialMove(target.MapCoord);
 
             bool okToMoveIntoSquare = true;
 
@@ -238,7 +238,7 @@ namespace RogueBasin
 
                 if (moveInteractions.Contains(MoveInteractions.AttackMonster))
                 {
-                    dungeon.DoMeleeAttackOnMonster(deltaMove, target.MapCoord);
+                    dungeon.Combat.DoMeleeAttackOnMonster(deltaMove, target.MapCoord);
 
                     okToMoveIntoSquare = false;
                     stationaryAction = true;
@@ -427,6 +427,239 @@ namespace RogueBasin
                 return Enumerable.Empty<Point>();
             }
             return path.Skip(1);
+        }
+
+        /// <summary>
+        /// Equivalent of PCMove for an action that doesn't have a move (e.g. firing)
+        /// Tell the special moves that this was a non-move action
+        /// Note that this is not called from all action paths at the moment, so that should be done if we use SpecialMoves again
+        /// </summary>
+        public void PCActionNoMove()
+        {
+            Player player = dungeon.Player;
+            player.ResetTurnsInactive();
+            player.ResetTurnsMoving();
+            player.ResetTurnsSinceAction();
+
+            //Check special moves.
+
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (move.Known)
+                    move.CheckAction(false, new Point(0, 0), false);
+            }
+
+            //Are any moves ready, if so carry the first one out. All other are deleted (otherwise move interactions have to be worried about)
+
+            SpecialMove moveToDo = null;
+
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (move.Known && move.MoveComplete())
+                {
+                    moveToDo = move;
+                    break;
+                }
+            }
+
+            //Carry out move, if one is ready
+            if (moveToDo != null)
+            {
+                moveToDo.DoMove(new Point(-1, -1), false);
+
+                //Clear all moves
+                foreach (SpecialMove move in dungeon.SpecialMoves)
+                {
+                    move.ClearMove();
+                }
+            }
+        }
+
+        private SpecialMove DoSpecialMove(Point newPCLocation)
+        {
+            //New version
+            Player player = dungeon.Player;
+
+            //First check moves that have integrated movement
+
+            Point deltaMove = newPCLocation - player.LocationMap;
+
+            SpecialMove moveDone = null;
+            Point overrideRelativeMove = null;
+            bool noMoveSubsequently = false;
+            bool specialMoveSuccess = false;
+
+            //For moves that have a bonus attack, collect them in bonusAttack list
+            List<Point> bonusAttack = new List<Point>();
+
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (move.CausesMovement() && move.Known)
+                {
+                    bool moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                    if (moveSuccess && move.AddsAttack())
+                    {
+                        //Save any extra attacks
+                        if (move.AttackIsOn())
+                            bonusAttack.Add(move.RelativeAttackVector());
+                    }
+
+                    if (!moveSuccess)
+                    {
+                        //Test the move twice on first failure
+                        //The first check may cause a long chain to fail but the move could be a valid new start move
+                        //The second check picks this up
+                        move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                        if (moveSuccess && move.AddsAttack())
+                        {
+                            //Save any extra attacks
+                            if (move.AttackIsOn())
+                                bonusAttack.Add(move.RelativeAttackVector());
+                        }
+
+                    }
+                }
+            }
+
+            //Carry out movement special moves. Only 1 can trigger at a time (because their completions are orthogonal)
+
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (move.CausesMovement() && move.Known && move.MoveComplete())
+                {
+                    //Carry out the move. This will update the player's position so the new relative move makes sense
+                    move.DoMove(deltaMove, false);
+                    moveDone = move;
+                    specialMoveSuccess = true;
+
+                    //On success store the relativised move
+                    //e.g. for WallLeap, the real move was a move into the wall but the relativised move is an attack in the opposite direction on the monster leaped to
+                    overrideRelativeMove = move.RelativeMoveAfterMovement();
+                }
+            }
+
+            //If we had a success for one of the special movement moves, adopt the new relative move
+            if (overrideRelativeMove != null)
+            {
+                deltaMove = overrideRelativeMove;
+                //Tell subsequent moves that we have already had a special move movement. For simultaneous moves like OpenGround/Multi or OpenGround/Close
+                //don't move twice
+                noMoveSubsequently = true;
+            }
+
+            //Now check any remaining moves that have bonus attacks but don't cause movement
+
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (move.AddsAttack() && !move.CausesMovement() && move.Known)
+                {
+                    bool moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                    if (moveSuccess)
+                    {
+                        //Save any extra attacks
+                        if (move.AttackIsOn())
+                            bonusAttack.Add(move.RelativeAttackVector());
+                    }
+                    else
+                    {
+                        //Test the move twice on first failure
+                        //The first check may cause a long chain to fail but the move could be a valid new start move
+                        //The second check picks this up
+                        move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                        if (moveSuccess)
+                        {
+                            //Save any extra attacks
+                            if (move.AttackIsOn())
+                                bonusAttack.Add(move.RelativeAttackVector());
+                        }
+                    }
+                }
+            }
+
+            //Now check any moves that start with an attack. If they are not already in progress, then give them a chance to start again with the bonus attacks
+            //At the mo, bonus attacks only occur on moves which aren't normal attacks, so it's OK to check bonus attacks before checking normal attacks
+
+            foreach (Point attackVector in bonusAttack)
+            {
+                foreach (SpecialMove move in dungeon.SpecialMoves)
+                {
+                    if (move.StartsWithAttack() && move.Known && move.CurrentStage() == 0)
+                    {
+                        bool moveSuccess = move.CheckAction(true, attackVector, specialMoveSuccess);
+                    }
+                }
+            }
+
+            //Now check all remaining moves with the normal move
+
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (!move.CausesMovement() && !move.StartsWithAttack() && !move.AddsAttack() && !move.NotSimultaneous() && move.Known)
+                {
+                    //Test the move twice
+                    //The first check may cause a long chain to fail but the move could be a valid new start move
+                    //The second check picks this up
+
+                    bool moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                    if (moveSuccess)
+                    {
+                    }
+                    else
+                    {
+                        moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                        if (moveSuccess)
+                        {
+                        }
+                    }
+                }
+            }
+
+            //Carry out any moves which are ready (movement causing ones have already been done)
+            //Need to exclude ones which cause movement, since they have already been carried out (e.g. multi attack which isn't cancelled by an attack, i.e. still complete)
+
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (move.Known && move.MoveComplete() && !move.CausesMovement())
+                {
+                    moveDone = move;
+                    specialMoveSuccess = true;
+                    move.DoMove(deltaMove, noMoveSubsequently);
+                }
+            }
+
+            //Finally carry out the non-simultaneous ones
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (move.NotSimultaneous() && move.Known)
+                {
+                    //Test the move twice
+                    //The first check may cause a long chain to fail but the move could be a valid new start move
+                    //The second check picks this up
+
+                    bool moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+
+                    if (!moveSuccess)
+                    {
+                        moveSuccess = move.CheckAction(true, deltaMove, specialMoveSuccess);
+                    }
+                }
+            }
+
+            foreach (SpecialMove move in dungeon.SpecialMoves)
+            {
+                if (move.Known && move.NotSimultaneous() && move.MoveComplete())
+                {
+                    moveDone = move;
+                    move.DoMove(deltaMove, noMoveSubsequently);
+                }
+            }
+            return moveDone;
         }
     }
 }

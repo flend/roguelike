@@ -229,7 +229,7 @@ namespace RogueBasin.SpecialMoves
                 Game.MessageQueue.AddMessage("Close Quarters!");
             }
 
-            CombatResults results = Game.Dungeon.Player.AttackMonsterWithModifiers(target, 5, 0, 5 + bonus, -2 - bonus, true);
+            CombatResults results = Game.Dungeon.Combat.PlayerMeleeAttackMonsterWithModifiers(target, 5, 0, 5 + bonus, -2 - bonus, true);
             Screen.Instance.DrawMeleeAttack(Game.Dungeon.Player, target, results);
 
             //Move into their square if the monster dies as normal
