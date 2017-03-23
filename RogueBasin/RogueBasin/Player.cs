@@ -31,15 +31,6 @@ namespace RogueBasin
         public bool TempItemHelpMovieSeen = false;
 
         /// <summary>
-        /// How many worldClock ticks do we have to rescue our friend?
-        /// </summary>
-        public long TimeToRescueFriend { get; set; }
-
-
-        public int TotalPlotItems { get; set; }
-        public int PlotItemsFound { get; set; }
-
-        /// <summary>
         /// Play movies and give plot exerpts for items
         /// </summary>
         public bool PlayItemMovies { get; set; }

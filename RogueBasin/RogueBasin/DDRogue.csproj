@@ -61,6 +61,7 @@
     <Compile Include="DifficultyOrdering.cs" />
     <Compile Include="DirectedGraphWrapper.cs" />
     <Compile Include="GameActions.cs" />
+    <Compile Include="GameDifficulty.cs" />
     <Compile Include="GameTick.cs" />
     <Compile Include="GraphVizExporter.cs" />
     <Compile Include="InputEvents.cs" />
@@ -253,7 +254,6 @@
     <Compile Include="Dodge.cs" />
     <Compile Include="Dungeon.cs" />
     <Compile Include="DungeonEffect.cs" />
-    <Compile Include="DungeonMaker.cs" />
     <Compile Include="DungeonSquareTrigger.cs" />
     <Compile Include="Effect.cs" />
     <Compile Include="EquipmentSlot.cs" />
@@ -544,10 +544,6 @@
     </Compile>
     <Compile Include="Triggers\PrinceInABox.cs" />
     <Compile Include="Triggers\SchoolEntryTrigger.cs" />
-    <Compile Include="Triggers\SeeCorpses.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\SpotFriend.cs" />
     <Compile Include="Triggers\TerrainFlipTrigger.cs" />
     <Compile Include="Triggers\TownToWilderness.cs" />
     <Compile Include="Triggers\TreasureRoom.cs">

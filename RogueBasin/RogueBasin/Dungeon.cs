@@ -428,8 +428,6 @@ namespace RogueBasin
 
         System.Drawing.Color defaultPCColor = System.Drawing.Color.White;
 
-        public DungeonMaker DungeonMaker { get; set; }
-
         Dictionary<int, bool> DoorStatus = new Dictionary<int, bool>();
         private Combat combat;
         private Movement movement;
@@ -494,10 +492,6 @@ namespace RogueBasin
             PlayerHadBonusTurn = false;
 
             SetupSpecialMoves();
-
-            SetupSpells();
-
-            SetupHiddenNameMappings();
 
             player = new Player();
 
@@ -569,53 +563,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// How much of your previous life do you remember?
-        /// </summary>
-        /// <returns></returns>
-        public int PercentRemembered()
-        {
-            double total = player.PlotItemsFound / (double)player.TotalPlotItems * 100.0;
-            return (int)Math.Ceiling(total);
-        }
-
-        /// <summary>
-        /// Create obfuscated names for the potions etc.
-        /// </summary>
-        private void SetupHiddenNameMappings()
-        {
-            //Add all potions here
-            List<Item> allPotions = new List<Item>() { new Items.Potion(), new Items.PotionDamUp(), new Items.PotionMajDamUp(), new Items.PotionMajHealing(), new Items.PotionMajSightUp(),
-                new Items.PotionMajSpeedUp(),    new Items.PotionMajToHitUp(), new Items.PotionSightUp(), new Items.PotionSpeedUp(), new Items.PotionSuperDamUp(),
-                new Items.PotionSuperHealing(), new Items.PotionSuperSpeedUp(), new Items.PotionSuperToHitUp(), new Items.PotionToHitUp()};
-
-            List<string> descsUsed = new List<string>();
-
-            foreach (Item potion in allPotions)
-            {
-                string hiddenDesc;
-                do
-                {
-                    hiddenDesc = Utility.RandomHiddenDescription();
-                } while (descsUsed.Contains(hiddenDesc));
-
-                HiddenNameInfo info = new HiddenNameInfo(potion.SingleItemDescription, hiddenDesc + " " + potion.HiddenSuffix, null);
-                HiddenNameInfo.Add(info);
-                descsUsed.Add(hiddenDesc);
-            }
-        }
-
-        /// <summary>
-        /// Finds a currently alive monster by type. Returns first creature found, or null if none.
-        /// </summary>
-        /// <param name="monsterType"></param>
-        /// <returns></returns>
-        public Monster FindMonsterByType(Type monsterType)
-        {
-            Monster foundMonster = monsters.Find(m => m.GetType() == monsterType);
-            return foundMonster;
-        }
-
-        /// <summary>
         /// Find the closest creature to the map object
         /// </summary>
         /// <param name="originCreature"></param>
@@ -650,16 +597,6 @@ namespace RogueBasin
             }
 
             return closestCreature;
-        }
-
-        public int CalculateLevelSecurity(int level)
-        {
-            var camerasOnThisLevel = monsters.Where(m => m.LocationLevel == level && m.GetType() == typeof(Creatures.Camera));
-            var aliveCamerasOnThisLevel = camerasOnThisLevel.Where(m => m.Alive);
-
-            int levelSecurity = (int)Math.Ceiling((aliveCamerasOnThisLevel.Count() / (double)camerasOnThisLevel.Count()) * 100);
-
-            return levelSecurity;
         }
 
         /// <summary>
@@ -877,29 +814,6 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Add to the spells list
-        /// </summary>
-        private void SetupSpells()
-        {
-            spells.Add(new Spells.MagicMissile());
-            spells.Add(new Spells.MageArmour());
-            spells.Add(new Spells.Blink());
-            spells.Add(new Spells.SlowMonster());
-            spells.Add(new Spells.FireLance());
-            spells.Add(new Spells.FireBall());
-            spells.Add(new Spells.EnergyBlast());
-            spells.Add(new Spells.Exit());
-            spells.Add(new Spells.Light());
-            spells.Add(new Spells.ShowItems());
-
-
-            foreach (Spell move in spells)
-            {
-                move.Known = false;
-            }
-        }
-        
-        /// <summary>
         /// Save the game to disk. Throws exceptions
         /// </summary>
         /// <param name="saveGameName"></param>
@@ -930,7 +844,6 @@ namespace RogueBasin
                 saveGameInfo.nextUniqueSoundID = this.nextUniqueSoundID;
                 saveGameInfo.messageLog = Game.MessageQueue.GetMessageHistoryAsList();
                 saveGameInfo.effects = this.Effects;
-                saveGameInfo.dungeonMaker = this.DungeonMaker;
 
                 //Make maps into serializablemaps and store
                 List<SerializableMap> serializedLevels = new List<SerializableMap>();
@@ -988,26 +901,8 @@ namespace RogueBasin
             //Add to dungeoninfo
             dungeonInfo.SetupLevelInfo();
 
-            //Add TCOD version
-            //Do this at the end for speed
-            //fov.updateFovMap(levels.Count - 1, mapToAdd.FovRepresentaton);
-
+            //Note - need to calculate FoV after adding all maps
             return levels.Count - 1;
-        }
-
-        /// <summary>
-        /// Replace a map in memory. Not that much stuff actually caches map so this is probably OK
-        /// </summary>
-        /// <param name="mapToAdd"></param>
-        /// <returns></returns>
-        public int ReplaceMap(int level, Map newMap)
-        {
-            levels[level] = newMap;
-
-            //Add TCOD version
-            fov.updateFovMap(level, newMap.FovRepresentaton);
-
-            return level;
         }
 
         /// <summary>
@@ -1135,13 +1030,7 @@ namespace RogueBasin
             monsters.Add(monster);
         }
 
-
         public static double LevelScalingFactor = 0.5;
-        /// <summary>
-        /// Scale anything for monster level
-        /// </summary>
-        /// <param name="input"></param>
-        /// 
 
         public int LevelScalingCalculation(int input, int level) {
             return (int)Math.Ceiling(input * (1 + LevelScalingFactor * (level - 1)));
@@ -1177,7 +1066,7 @@ namespace RogueBasin
         /// <param name="level"></param>
         /// <param name="location"></param>
         /// <returns></returns>
-        public bool AddMonsterDynamic(Monster creature, int level, Point location, bool allowPlayer=false)
+        public bool AddMonsterDynamic(Monster creature, int level, Point location, bool allowPlayer = false)
         {
             //Try to add a creature at the requested location
             //This may fail due to something else being there or being non-walkable
@@ -1306,7 +1195,7 @@ namespace RogueBasin
         /// </summary>
         public void RemoveFeature(Feature feature)
         {
-            if(!features.ContainsKey(feature.Location)) {
+            if (!features.ContainsKey(feature.Location)) {
                 LogFile.Log.LogEntryDebug("RemoveFeature: feature " + feature.Description + " does not exist at: " + feature.Location, LogDebugLevel.High);
                 return;
             }
@@ -1402,7 +1291,7 @@ namespace RogueBasin
         {
             feature.LocationLevel = loc.Level;
             feature.LocationMap = loc.MapCoord;
-            
+
             List<Feature> featureListAtLocation;
             features.TryGetValue(loc, out featureListAtLocation);
 
@@ -1491,7 +1380,7 @@ namespace RogueBasin
 
                 feature.LocationLevel = level;
                 feature.LocationMap = location;
-                
+
                 AddFeatureAtLocation(thisLocation, feature);
                 return true;
             }
@@ -1532,7 +1421,7 @@ namespace RogueBasin
 
             //Check features
             contents.features = GetFeaturesAtLocation(new Location(level, location));
-                
+
             //Check for PC blocking
             //Allow this to work before having the player placed (at beginning of game)
             if (player != null && player.LocationMap != null)
@@ -1604,7 +1493,7 @@ namespace RogueBasin
         /// <returns></returns>
         public bool MapSquareIsWalkableOrInteractable(Location location)
         {
-            if(!IsValidLocationInWorld(location))
+            if (!IsValidLocationInWorld(location))
             {
                 return false;
             }
@@ -1619,12 +1508,12 @@ namespace RogueBasin
 
         public bool IsOpenableTerrain(Location location)
         {
-            if(!IsValidLocationInWorld(location))
+            if (!IsValidLocationInWorld(location))
             {
                 return false;
             }
 
-            if(GetTerrainAtLocation(location) == MapTerrain.ClosedDoor ||
+            if (GetTerrainAtLocation(location) == MapTerrain.ClosedDoor ||
                 GetTerrainAtLocation(location) == MapTerrain.ClosedLock)
             {
                 return true;
@@ -1645,7 +1534,7 @@ namespace RogueBasin
         /// <returns></returns>
         public bool MapSquareIsWalkable(int level, Point location)
         {
-            if(level < 0 || level >= levels.Count)
+            if (level < 0 || level >= levels.Count)
             {
                 return false;
             }
@@ -1757,21 +1646,6 @@ namespace RogueBasin
             }
         }
 
-        /// <summary>
-        /// For serialization only
-        /// </summary>
-        public List<Spell> Spells
-        {
-            get
-            {
-                return spells;
-            }
-            set
-            {
-                spells = value;
-            }
-        }
-
         //Get the list of creatures
         public List<Monster> Monsters
         {
@@ -1842,38 +1716,6 @@ namespace RogueBasin
                 player = value;
             }
         }
-        
-        /// <summary>
-        /// Return a random monster on the level, or null if none
-        /// </summary>
-        /// <param name="level"></param>
-        /// <returns></returns>
-        public Monster RandomMonsterOnLevel(int level)
-        {
-            //Fail if we have been asked for an invalid level
-            if (level < 0 || level > levels.Count)
-            {
-                LogFile.Log.LogEntry("RandomMonsterOnLevel: Level " + level + " does not exist");
-                return null;
-            }
-
-            List<Monster> monstersOnLevel = new List<Monster>();
-
-            foreach (Monster monster in monsters)
-            {
-                if (monster.LocationLevel == level)
-                {
-                    monstersOnLevel.Add(monster);
-                }
-            }
-
-            if (monstersOnLevel.Count == 0)
-            {
-                return null;
-            }
-
-            return monstersOnLevel[Game.Random.Next(monstersOnLevel.Count)];
-        }
 
         /// <summary>
         /// Return the instance of the special move class
@@ -1895,7 +1737,7 @@ namespace RogueBasin
         public bool InteractWithUseableFeatures(Location location)
         {
             var featuresAtSpace = UseableFeaturesAtLocation(location);
-            
+
             //Interact with feature - these will normally put success / failure messages in queue
             var successes = featuresAtSpace.Select(f => f.PlayerInteraction(Player)).ToList();
 
@@ -1936,12 +1778,11 @@ namespace RogueBasin
             return successes.Any();
         }
 
-
         public void CheckForNewMonstersInFoV()
         {
             var newMonstersInFoV = player.NewMonstersinFoV();
 
-            foreach(var m in newMonstersInFoV)
+            foreach (var m in newMonstersInFoV)
             {
                 player.NotifyMonsterEvent(new MonsterEvent(MonsterEvent.MonsterEventType.MonsterSeenByPlayer, m));
             }
@@ -2026,7 +1867,7 @@ namespace RogueBasin
                 Screen.Instance.DrawAreaAttackAnimation(grenadeAffects, Screen.AttackType.Explosion);
             }
         }
-        
+
 
         /// <summary>
         /// For debug :) purposes
@@ -2072,7 +1913,8 @@ namespace RogueBasin
             if (monster.Charmed)
                 Game.Dungeon.Player.RemoveCharmedCreature();
 
-            if (!autoKill) { 
+            if (!autoKill)
+            {
                 //Leave a corpse
                 AddMonsterCorpse(monster);
 
@@ -2083,83 +1925,6 @@ namespace RogueBasin
 
                 SoundPlayer.Instance().EnqueueSound("death");
             }
-                /*
-                if (monster.Unique)
-                {
-                    //We killed an objective
-                    bool a = monsters[0] is Creatures.ComputerNode;
-
-                    //Check if there are any living computer nodes on the level
-                    Monster livingNode = monsters.Find(x => x is Creatures.ComputerNode && x.Alive && x.LocationLevel == player.LocationLevel);
-                    if (livingNode == null)
-                    {
-                        //Set objective complete
-                        dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete = true;
-
-                        if (player.LocationLevel == 0)
-                        {
-                            Game.Base.SystemActions.PlayMovie("mission0done", true);
-                        }
-
-                        if (player.LocationLevel == 14)
-                        {
-                            //Last level
-
-                            //All remaining monsters explode
-                            ExplodeAllMonsters();
-
-                            Game.MessageQueue.AddMessage("It's done. The Space Hulk is yours. Fly back home a VICTOR!");
-                            dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveComplete = true;
-                            dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete = true;
-                        }
-                        else
-                        {
-                            Game.MessageQueue.AddMessage("All computer nodes destroyed. Primary objective complete! Return to docking bay.");
-                            LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " primary objective complete", LogDebugLevel.Medium);
-                        }
-                        
-                    }
-                
-                }*/
-
-                //No monsters left on level?
-                /*
-                Monster livingMonster = monsters.Find(x => x.Alive && x.LocationLevel == player.LocationLevel);
-
-                if (livingMonster == null)
-                {
-                    //Set secondary objective complete
-                    dungeonInfo.Dungeons[player.LocationLevel].LevelObjectiveKillAllMonstersComplete = true;
-
-                    Game.MessageQueue.AddMessage("All defenses disabled. Secondary objective complete! Return to docking bay.");
-                    LogFile.Log.LogEntryDebug("Level " + player.LocationLevel + " secondary objective complete", LogDebugLevel.Medium);
-                }
-
-                if (dungeonInfo.LastMission && monster.Unique)
-                {
-
-                    //OK we killed the dragon!
-
-                    //Kill all the monsters on this level
-                    foreach (Monster m in monsters)
-                    {
-                        //But not itself
-
-                        //Creatures.DragonUnique drag = m as Creatures.DragonUnique;
-
-                        if (m.LocationLevel == player.LocationLevel)
-                        {
-                            Creatures.DragonUnique drag = m as Creatures.DragonUnique;
-                            Creatures.Friend friend = m as Creatures.Friend;
-                            if (m != drag && m != friend)
-                                KillMonster(m, true);
-                        }
-                    }
-
-                    Game.Base.SystemActions.PlayMovie("dragondead", true);
-
-                    dungeonInfo.DragonDead = true;
-                }*/
         }
 
         private void AddMonsterCorpse(Monster monster)
@@ -2175,7 +1940,7 @@ namespace RogueBasin
 
         private void AddXPForMonster(Monster monster)
         {
-            
+
             var baseXP = monster.GetCombatXP();
             int modifiedXP = baseXP;
             if (player.Level < monster.Level)
@@ -2184,21 +1949,12 @@ namespace RogueBasin
             }
             else if (player.Level > monster.Level)
             {
-                modifiedXP = (int) Math.Ceiling(Math.Pow(2.0, (monster.Level - player.Level)) * baseXP);
+                modifiedXP = (int)Math.Ceiling(Math.Pow(2.0, (monster.Level - player.Level)) * baseXP);
             }
 
             player.CombatXP += modifiedXP;
-            
+
             LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (from base: " + baseXP + ")", LogDebugLevel.Medium);
-            /*
-            //Simpler system
-
-            var baseXP = monster.GetCombatXP();
-            var modifiedXP = (int)Math.Floor(baseXP * (1 + 0.5 * (monster.Level - 1)));
-            player.CombatXP += modifiedXP;
-
-            LogFile.Log.LogEntryDebug("Awarding XP: " + modifiedXP + " (mon level: " + monster.Level + ")", LogDebugLevel.Medium);
-             */
         }
 
         /// <summary>
@@ -2235,7 +1991,7 @@ namespace RogueBasin
                 Game.MessageQueue.AddMessage(item.SingleItemDescription + " picked up.");
 
                 item.OnPickup(player);
-                
+
                 if (item.DestroyedOnPickup())
                 {
                     Game.Dungeon.RemoveItemFromDungeon(item);
@@ -2324,10 +2080,6 @@ namespace RogueBasin
             pathFinding.PathFindingInternal.updateMap(levelNo, levels[levelNo].PathRepresentation);
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
         public void ResetCreatureFOVOnMap()
         {
             Map level = levels[Player.LocationLevel];
@@ -2439,7 +2191,7 @@ namespace RogueBasin
 
             return pointsToRet;
         }
-        
+
         /// <summary>
         /// Calculates the FOV for a creature if it was in the location
         public CreatureFOV CalculateCreatureFOV(Creature creature, Point location)
@@ -2554,7 +2306,7 @@ namespace RogueBasin
             // (may not be necessary) [and is certainly slow]
 
             //According to profiling this is *BY FAR* the slowest thing in the game
-            
+
             /*
             if (xl < 0)
                 xl = 0;
@@ -2724,27 +2476,10 @@ namespace RogueBasin
                     newSounds.Add(soundPair);
             }
 
-            /*
-            IList<long> keys = effects.Keys;
-            IList<SoundEffect> values = effects.Values;
-
-            int firstIndexGreater = keys.Count;
-            
-            for (int i = keys.Count - 1; i >= 0; i--)
-            {
-                if (keys[i] > soundAfterThisTime)
-                    firstIndexGreater = i;
-            }
-
-            for (int i = firstIndexGreater; i <= keys.Count; i++)
-            {
-                newSounds.Add(keys[i], values[i]);
-            }*/
-
             return newSounds;
         }
 
-        
+
         /// <summary>
         /// Return an item if there is one at the requested square, or return null if not
         /// </summary>
@@ -2838,41 +2573,10 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// Return a random walkable point in map level
-        /// </summary>
-        /// <param name="levelNo"></param>
-        /// <returns></returns>
-        public Point RandomWalkablePointInLevel(int level)
-        {
-            //Not a level
-            if (level < 0 || level > levels.Count)
-            {
-                string error = "Level " + level + "does not exist";
-                LogFile.Log.LogEntry(error);
-                throw new ApplicationException(error);
-            }
-
-            do
-            {
-                Map map = levels[level];
-
-                int x = Game.Random.Next(map.width);
-                int y = Game.Random.Next(map.height);
-
-                if (MapUtils.IsTerrainWalkable(map.mapSquares[x, y].Terrain))
-                {
-                    return new Point(x, y);
-                }
-            }
-            while (true);
-        }
-
-
-        /// <summary>
         /// Removes an item from the game entirely.
         /// </summary>
         /// <param name="itemToUse"></param>
-        public void RemoveItem(Item itemToUse)
+        private void RemoveItem(Item itemToUse)
         {
             items.Remove(itemToUse);
         }
@@ -2980,8 +2684,8 @@ namespace RogueBasin
 
 
 
-        
-        
+
+
         /// <summary>
         /// Can't kill the player immediately now have to wait until end of monster loop
         /// </summary>
@@ -3029,7 +2733,7 @@ namespace RogueBasin
             }
         }
 
-        
+
         public struct KillRecord
         {
             public int killCount;
@@ -3159,27 +2863,11 @@ namespace RogueBasin
             return splashSquares;
         }
 
-
-
-        /// <summary>
-        /// The player learns a new spell. Right now doesn't use the parameter (except as a reference) and just updates the Known parameter
-        /// </summary>
-        internal void LearnSpell(Spell moveToLearn)
-        {
-            foreach (Spell spell in spells)
-            {
-                if (spell.GetType() == moveToLearn.GetType())
-                {
-                    spell.Known = true;
-                }
-            }
-        }
-
         public void RunDungeonTriggers(int level, Point mapLocation)
         {
             var location = new Location(level, mapLocation);
 
-            if(!Triggers.ContainsKey(location))
+            if (!Triggers.ContainsKey(location))
                 return;
 
             var triggersAtPoint = Triggers[location];
@@ -3519,31 +3207,7 @@ namespace RogueBasin
                 }
             }
         }
-        /// <summary>
-        /// Wipe the this-adventure fov for the dungeon
-        /// </summary>
-        /// <param name="dungeonID"></param>
-        private void WipeThisRunFOV(int dungeonID)
-        {
-            //Kill all the creatures currently in there, except for the uniques
-            int dungeonStartLevel = Game.Dungeon.DungeonInfo.GetDungeonStartLevel(dungeonID);
-            int dungeonEndLevel = Game.Dungeon.DungeonInfo.GetDungeonEndLevel(dungeonID);
 
-            for (int i = dungeonStartLevel; i < dungeonEndLevel; i++)
-            {
-                int width = levels[i].width;
-                int height = levels[i].height;
-
-                for (int x = 0; x < width; x++)
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        levels[i].mapSquares[x, y].SeenByPlayerThisRun = false;
-                    }
-                }
-            }
-        }
-        
         /// <summary>
         /// Remove all temporary items
         /// </summary>
@@ -3628,7 +3292,7 @@ namespace RogueBasin
             return Cleared.Count;
         }
 
-        public IEnumerable<Feature> GetAllFeatures()
+        private IEnumerable<Feature> GetAllFeatures()
         {
             return features.SelectMany(f => f.Value);
         }
@@ -3693,52 +3357,11 @@ namespace RogueBasin
 
         }
 
-        public void PlayerActionsBetweenMissions()
-        {
-
-            //Heal the player
-            player.ResetAfterDeath();
-
-            //Remove all effects
-            player.RemoveAllEffects();
-
-            //Remove items
-            player.UnequipAndDestoryAllItems();
-        }
-
         private void ResetSounds()
         {
             effects.Clear();
             nextUniqueSoundID = 0;
 
-        }
-
-        public void DungeonActionsBetweenMissions()
-        {
-            //For going to a new level this is no big deal, but it is important if we are respawning
-            ResetSounds();
-
-        }
-
-        /// <summary>
-        /// Respawn a particular dungeon after the player leaves
-        /// </summary>
-        /// <param name="dungeonID"></param>
-        internal void RespawnDungeon(int dungeonID, bool useOldSeed)
-        {
-            //A bit wasteful
-            DungeonMaker.ReSpawnDungeon(dungeonID, useOldSeed);
-
-            LogFile.Log.LogEntryDebug("Respawning dungeon level " + dungeonID, LogDebugLevel.Medium);
-        }
-
-        /// <summary>
-        /// Check to see if any special moves which were previously on are now not due to the death or movement of a monster
-        /// Not implemented yet
-        /// </summary>
-        internal void CheckSpecialMoveValidity()
-        {
-            return;
         }
 
         public List<Point> GetWalkableAdjacentSquaresFreeOfCreatures(int locationLevel, Point locationMap)
