@@ -377,7 +377,6 @@
     <Compile Include="TerrainSets\CrossPiece.cs" />
     <Compile Include="TerrainSets\Pond.cs" />
     <Compile Include="TraumaLevelBuilder.cs" />
-    <Compile Include="Triggers\ArenaEntry.cs" />
     <Compile Include="Triggers\FeaturesToCreaturesTrigger.cs" />
     <Compile Include="UseableItemUseOnPickup.cs" />
     <Compile Include="IUseableItem.cs" />
@@ -508,47 +507,6 @@
     <Compile Include="TileCell.cs" />
     <Compile Include="TileMap.cs" />
     <Compile Include="TrainStats.cs" />
-    <Compile Include="Triggers\ApproachingTheDragon.cs" />
-    <Compile Include="Triggers\BackToSchool.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\DockDoor.cs" />
-    <Compile Include="Triggers\DungeonEntranceTrigger.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\FirstLevelEntry.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\LeaveByDock.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\Mission11Entry.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\Mission14Entry.cs" />
-    <Compile Include="Triggers\Mission1Entry.cs" />
-    <Compile Include="Triggers\Mission2Entry.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\Mission3Entry.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\Mission4Entry.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\Mission5Entry.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\Mission6Entry.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Triggers\PrinceInABox.cs" />
-    <Compile Include="Triggers\SchoolEntryTrigger.cs" />
-    <Compile Include="Triggers\TerrainFlipTrigger.cs" />
-    <Compile Include="Triggers\TownToWilderness.cs" />
-    <Compile Include="Triggers\TreasureRoom.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="UseableFeature.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Vector3.cs" />

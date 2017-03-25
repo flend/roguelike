@@ -384,28 +384,7 @@ namespace RogueBasin
                             case '5':
                                 Game.Dungeon.AddItem(new Items.PotionSpeedUp(), levelNo, new Point(i, row));
                                 break;
-                            case '6':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(4, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(4)), levelNo, new Point(i, row));
-                                break;
-                            case '7':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(5, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(5)), levelNo, new Point(i, row));
-                                break;
-                            case '8':
-                                addingSuccess = Game.Dungeon.AddFeature(new Features.StaircaseEntry(6, Game.Dungeon.DungeonInfo.GetDungeonStartLevel(6)), levelNo, new Point(i, row));
-                                break;
-                            case 'A':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Road, "river"));
-                                baseMap.mapSquares[i, row].Terrain = MapTerrain.River;
-                                break;
-                            case 'B':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Trees, "forest"));
-                                baseMap.mapSquares[i, row].Terrain = MapTerrain.Forest;
-                                break;
-                            case 'C':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.TerrainFlipTrigger(MapTerrain.Empty, "grave"));
-                                baseMap.mapSquares[i, row].Terrain = MapTerrain.Mountains;
-                                break;
-
+             
 
                             //case '%':
                               //  Game.Dungeon.AddDecorationFeature(new Features.Corpse(), levelNo, new Point(i, row));

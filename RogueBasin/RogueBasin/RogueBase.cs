@@ -120,8 +120,7 @@ namespace RogueBasin
 
         public void SetupGameWithNewDungeon()
         {
-            var dungeonInfo = new DungeonInfo();
-            var dungeon = new Dungeon(dungeonInfo);
+            var dungeon = new Dungeon();
             InitialiseGame(dungeon);
 
             dungeon.Difficulty = GameDifficulty.Medium;

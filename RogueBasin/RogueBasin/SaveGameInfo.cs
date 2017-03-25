@@ -108,7 +108,5 @@ namespace RogueBasin
         /// List of global events
         /// </summary>
         public List<SoundEffect> effects;
-
-        public DungeonInfo dungeonInfo;
     }
 }

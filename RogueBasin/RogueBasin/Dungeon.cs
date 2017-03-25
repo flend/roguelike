@@ -7,7 +7,7 @@ using System.IO;
 using System.Xml;
 using System.IO.Compression;
 using System.Linq;
-
+using System.Collections.Immutable;
 
 namespace RogueBasin
 {
@@ -63,298 +63,6 @@ namespace RogueBasin
         }
     }
 
-
-    public class DungeonProfile {
-        public int dungeonStartLevel;
-        public int dungeonEndLevel;
-
-        public bool subUniqueDefeated = false;
-        public bool masterUniqueDefeated = false;
-
-        public bool visited = false;
-        public bool open = false;
-
-        public bool PlayerLeftDock { get; set; }
-
-        public bool LevelObjectiveComplete { get; set; }
-
-        public bool LevelObjectiveKillAllMonstersComplete { get; set; }
-
-        public DungeonProfile()
-        {
-            PlayerLeftDock = false;
-            LevelObjectiveComplete = false;
-            LevelObjectiveKillAllMonstersComplete = false;
-        }
-    }
-
-    /// <summary>
-    /// Information about the state of dungeons in princessRL
-    /// </summary>
-    public class DungeonInfo
-    {
-        List<DungeonProfile> dungeons;
-
-        public bool LastMission { get; set; }
-
-        public bool DragonDead { get; set; }
-
-        /// <summary>
-        /// No of times the player has died
-        /// </summary>
-        public int NoDeaths { get; set; }
-
-        /// <summary>
-        /// No of times the player has aborted a mission (this mission)
-        /// </summary>
-        public int NoAborts { get; set; }
-
-        /// <summary>
-        /// No of times the player has aborted a mission (in all time)
-        /// </summary>
-        public int TotalAborts { get; set; }
-
-        /// <summary>
-        /// Max deaths before the real end
-        /// </summary>
-        public int MaxDeaths { get; set; }
-
-        /// <summary>
-        /// Max aborts until the real end
-        /// </summary>
-        public int MaxAborts { get; set; }
-
-        Dictionary<int, string> levelNaming = new Dictionary<int, string>();
-
-
-        //public List<bool> level3UniqueStatus;
-        //public List<bool> level4UniqueStatus;
-
-        //public int CurrentDungeon { get; set; }
-
-        public void SetL3UniqueDead(int dungeonID)
-        {
-            dungeons[dungeonID].subUniqueDefeated = true;
-
-            if (dungeons[dungeonID].masterUniqueDefeated)
-            {
-                Game.MessageQueue.AddMessage("The two toughest creatures have been defeated! Well done!");
-                LogFile.Log.LogEntryDebug("Master and sub unique defeated, dungeon " + dungeonID, LogDebugLevel.Medium);
-            }
-        }
-
-        public void SetL4UniqueDead(int dungeonID)
-        {
-            dungeons[dungeonID].masterUniqueDefeated = true;
-
-            if (dungeons[dungeonID].subUniqueDefeated)
-            {
-                Game.MessageQueue.AddMessage("The two toughest creatures have been defeated! Well done!");
-                LogFile.Log.LogEntryDebug("Master and sub unique defeated, dungeon " + dungeonID, LogDebugLevel.Medium);
-            }
-        }
-
-        public DungeonInfo()
-        {
-            dungeons = new List<DungeonProfile>();
-            //false = unique alive
-            //level3UniqueStatus = new List<bool>();
-            //false = unique alive
-            //level4UniqueStatus = new List<bool>();
-
-            LastMission = false;
-            //CurrentDungeon = -1;
-            DragonDead = false;
-
-            //Per mission respawns
-            MaxAborts = 2;
-            //Deaths in the game
-            MaxDeaths = 5;
-        }
-
-        /// <summary>
-        /// Flatline - each level has its own info.
-        /// This add a new profile so must be called each level
-        /// </summary>
-        public void SetupLevelInfo()
-        {
-            DungeonProfile thisDung = new DungeonProfile();
-            dungeons.Add(thisDung);
-        }
-
-        /// <summary>
-        /// Setup the dungeon level starts and unique status
-        /// </summary>
-        public void SetupDungeonStartAndEnd()
-        {
-            //In Princess RL there are 7 dungeons. This probably should be done in DungeonMaker
-            for (int i = 0; i < 7; i++)
-            {
-                DungeonProfile thisDung = new DungeonProfile();
-
-                thisDung.dungeonStartLevel = 2 + i * 4;
-                thisDung.dungeonEndLevel = 5 + i * 4;
-
-                dungeons.Add(thisDung);
-            }
-
-            /*
-            for (int i = 0; i < 6; i++)
-            {
-                level3UniqueStatus.Add(false);
-                level4UniqueStatus.Add(false);
-            }*/
-
-            //Setup the original open dungeons
-            dungeons[0].open = true;
-            dungeons[1].open = true;
-        }
-
-        /// <summary>
-        /// Setup the dungeon level starts and unique status
-        /// </summary>
-        public void SetupDungeonStartAndEndDebug()
-        {
-            DungeonProfile thisDung = new DungeonProfile();
-
-            thisDung.dungeonStartLevel = 1;
-            thisDung.dungeonEndLevel = 1;
-
-            dungeons.Add(thisDung);
-
-
-            /*
-            for (int i = 0; i < 6; i++)
-            {
-                level3UniqueStatus.Add(false);
-                level4UniqueStatus.Add(false);
-            }*/
-
-            //Setup the original open dungeons
-            dungeons[0].open = true;
-
-        }
-
-        public List<DungeonProfile> Dungeons
-        {
-            get
-            {
-                return dungeons;
-            }
-        }
-
-        /// <summary>
-        /// All dungeons are 4 levels deep
-        /// </summary>
-        /// <param name="levelNo"></param>
-        public int DungeonNumberFromLevelNo(int levelNo)
-        {
-
-            if (levelNo < 2)
-            {
-                LogFile.Log.LogEntryDebug("Asked for a dungeon with a non-dungeon level", LogDebugLevel.High);
-                return -1;
-            }
-
-            int dungeonNo = (int)Math.Floor((levelNo - 2) / 4.0);
-
-            return dungeonNo;
-        }
-
-
-        public int GetDungeonStartLevel(int dungeonNo)
-        {
-            try
-            {
-                return dungeons[dungeonNo].dungeonStartLevel;
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
-                return 0;
-            }
-        }
-
-        public void VisitedDungeon(int dungeonNo)
-        {
-            try
-            {
-                dungeons[dungeonNo].visited = true;
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
-            }
-        }
-
-        public void OpenDungeon(int dungeonNo)
-        {
-            try
-            {
-                dungeons[dungeonNo].open = true;
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
-            }
-        }
-
-        public bool IsDungeonVisited(int dungeonNo)
-        {
-            try
-            {
-                return dungeons[dungeonNo].visited;
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
-                return false;
-            }
-        }
-
-        public bool IsDungeonOpen(int dungeonNo)
-        {
-            try
-            {
-                return dungeons[dungeonNo].open;
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
-                return false;
-            }
-        }
-
-
-        public int GetDungeonEndLevel(int dungeonNo)
-        {
-            try
-            {
-                return dungeons[dungeonNo].dungeonEndLevel;
-            }
-            catch (Exception)
-            {
-                LogFile.Log.LogEntryDebug("Asked for an out of range dungeon " + dungeonNo, LogDebugLevel.High);
-                return 0;
-            }
-        }
-
-        public Dictionary<int, string> LevelNaming { get { return levelNaming; } set { levelNaming = value; } }
-
-        /// <summary>
-        /// Names for the areas
-        /// </summary>
-        /// <param name="level"></param>
-        /// <returns></returns>
-        internal string LookupMissionName(int level)
-        {
-            if (LevelNaming.ContainsKey(level))
-                return LevelNaming[level];
-            return "";
-        }
-    }
-
-
     /// <summary>
     /// Keeps or links to all the state in the game
     /// </summary>
@@ -385,17 +93,10 @@ namespace RogueBasin
 
         private List<Monster> summonedMonsters; //no need to serialize
 
-        DungeonInfo dungeonInfo;
-
         public bool Profiling { get; set; }
 
         long worldClock = 0;
-
-        /// <summary>
-        /// Count the days in the year
-        /// </summary>
-        public int dateCounter = 0;
-
+        
         /// <summary>
         /// Monster have a unique ID. This stores the next free ID. The player is 0.
         /// </summary>
@@ -438,19 +139,13 @@ namespace RogueBasin
         public MapState MapState { get; set; }
 
         public MonsterPlacement MonsterPlacement { get; private set; }
-
-        public bool PlayedMissionAborted { get; set; }
-        public bool PlayedMissionNoMoreAborts { get; set; }
-        public bool PlayedMissionDeath { get; set; }
-        public bool PlayedMissionComplete { get; set; }
-        public bool PlayedMissionCompleteWithSecondary { get; set; }
-        public bool PlayedMissionFailedDeath { get; set; }
-        public bool PlayedMissionFailedDeathButCompleted { get; set; }
-
+        
         public String PlayerDeathString { get; set; }
         public bool PlayerDeathOccured { get; set; }
 
         public bool FunMode { get; set; }
+
+        public Dictionary<int, string> levelNaming;
 
         public Dungeon()
         {
@@ -475,8 +170,6 @@ namespace RogueBasin
             spells = new List<Spell>();
             HiddenNameInfo = new List<HiddenNameInfo>();
             Triggers = new Dictionary<Location, List<DungeonSquareTrigger>>();
-
-            dungeonInfo = new DungeonInfo();
 
             //System-type classes
             combat = new Combat(this);
@@ -504,15 +197,11 @@ namespace RogueBasin
             Profiling = true;
         }
 
-        public Dungeon(DungeonInfo info)
-        {
-            SetupDungeon();
-            dungeonInfo = info;
-        }
-
         public Combat Combat { get { return combat; } }
         public Movement Movement { get { return movement; } }
         public WeaponUtility WeaponUtility { get { return weaponUtility; } }
+
+        public ImmutableDictionary<int, string> LevelReadableNames { get { return MapState.LevelGraph.LevelReadableNames; } }
 
         /// <summary>
         /// Give the player a bonus turn before the monsters
@@ -527,30 +216,6 @@ namespace RogueBasin
             {
                 PlayerHadBonusTurn = false;
                 playerBonusTurn = true;
-            }
-        }
-
-        public int DateCounter
-        {
-            get
-            {
-                return dateCounter;
-            }
-            set
-            {
-                dateCounter = value;
-            }
-        }
-
-        public DungeonInfo DungeonInfo
-        {
-            get
-            {
-                return dungeonInfo;
-            }
-            set
-            {
-                dungeonInfo = value;
             }
         }
 
@@ -837,9 +502,7 @@ namespace RogueBasin
                 saveGameInfo.spells = this.spells;
                 saveGameInfo.hiddenNameInfo = this.HiddenNameInfo;
                 saveGameInfo.worldClock = this.worldClock;
-                saveGameInfo.dateCounter = this.dateCounter;
                 saveGameInfo.difficulty = this.Difficulty;
-                saveGameInfo.dungeonInfo = this.dungeonInfo;
                 saveGameInfo.nextUniqueID = this.nextUniqueID;
                 saveGameInfo.nextUniqueSoundID = this.nextUniqueSoundID;
                 saveGameInfo.messageLog = Game.MessageQueue.GetMessageHistoryAsList();
@@ -897,9 +560,6 @@ namespace RogueBasin
         public int AddMap(Map mapToAdd)
         {
             levels.Add(mapToAdd);
-
-            //Add to dungeoninfo
-            dungeonInfo.SetupLevelInfo();
 
             //Note - need to calculate FoV after adding all maps
             return levels.Count - 1;
@@ -2723,7 +2383,6 @@ namespace RogueBasin
 
                 LogFile.Log.LogEntryDebug("Player killed", LogDebugLevel.Medium);
 
-                DungeonInfo.NoDeaths++;
                 Game.Base.SystemActions.DoEndOfGame(false, false, false);
                 //EndOfGame(false, false);
             }
@@ -3267,29 +2926,6 @@ namespace RogueBasin
             itemText.Add(ammoUsed + " " + new Items.AmmoPack().GroupItemDescription + " used.");
 
             return new Tuple<int, List<string>>(0, itemText);
-        }
-
-
-        /// <summary>
-        /// Total number of dungeons where we killed both uniques
-        /// </summary>
-        /// <returns></returns>
-        private int GetTotalDungeonsCleared()
-        {
-            List<DungeonProfile> Cleared = DungeonInfo.Dungeons.FindAll(x => x.masterUniqueDefeated && x.subUniqueDefeated);
-
-            return Cleared.Count;
-        }
-
-        /// <summary>
-        /// Total number of dungeons known
-        /// </summary>
-        /// <returns></returns>
-        private int GetTotalDungeonsExplored()
-        {
-            List<DungeonProfile> Cleared = DungeonInfo.Dungeons.FindAll(x => x.visited);
-
-            return Cleared.Count;
         }
 
         private IEnumerable<Feature> GetAllFeatures()

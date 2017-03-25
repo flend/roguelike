@@ -1634,11 +1634,11 @@ namespace RogueBasin {
                 DrawUIText(energyStr, playerTextUI_UsefulTL + playerEnergyTextOffset);
 
                 var playerLevelTextOffset = UIScale(new Point(col1XOffset, 2 * lineHeight));
-                var levelStr = "PLvl: " + player.LocationLevel + " (" + Game.Dungeon.DungeonInfo.LevelNaming[player.LocationLevel] + ")";
+                var levelStr = "PLvl: " + player.LocationLevel + " (" + Game.Dungeon.LevelReadableNames[player.LocationLevel] + ")";
                 DrawText(levelStr, playerTextUI_UsefulTL + playerLevelTextOffset);
 
                 var visibleLevelTextOffset = UIScale(new Point(col1XOffset, 3* lineHeight));
-                var visibleLevelStr = "VLvl: " + LevelToDisplay + " (" + Game.Dungeon.DungeonInfo.LevelNaming[LevelToDisplay] + ")";
+                var visibleLevelStr = "VLvl: " + LevelToDisplay + " (" + Game.Dungeon.LevelReadableNames[LevelToDisplay] + ")";
                 DrawText(visibleLevelStr, playerTextUI_UsefulTL + visibleLevelTextOffset);
 
                 var xChunkOffset = 50;

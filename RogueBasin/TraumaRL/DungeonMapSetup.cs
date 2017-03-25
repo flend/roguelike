@@ -164,7 +164,6 @@ namespace TraumaRL
         public void AddMapStatePropertiesToDungeon(MapState mapState)
         {
             Game.Dungeon.MapState = mapState;
-            Game.Dungeon.DungeonInfo.LevelNaming = mapState.LevelGraph.LevelReadableNames.ToDictionary(kv => kv.Key, kv => kv.Value);
         }
     }
 }
