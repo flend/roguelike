@@ -367,12 +367,6 @@ namespace RogueBasin
                             case 'x':
                                 baseMap.PCStartLocation = new Point(i, row);
                                 break;
-                            case '1':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.PrinceInABox());
-                                break;
-                            case '2':
-                                Game.Dungeon.AddTrigger(levelNo, new Point(i, row), new Triggers.ApproachingTheDragon());
-                                break;
 
                             case '3':
                                 Game.Dungeon.AddItem(new Items.Potion(), levelNo, new Point(i, row));

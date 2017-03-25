@@ -270,10 +270,6 @@
     <Compile Include="Features\SimpleObjective.cs" />
     <Compile Include="Features\Elevator.cs" />
     <Compile Include="Features\StandardDecorativeFeature.cs" />
-    <Compile Include="Features\StaircaseEntry.cs" />
-    <Compile Include="Features\StaircaseExit.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Features\StaircaseUp.cs">
       <SubType>Code</SubType>
     </Compile>
