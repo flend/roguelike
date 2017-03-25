@@ -1918,15 +1918,7 @@ namespace RogueBasin
             //Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
             Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
         }
-
-        /// <summary>
-        /// Add an exit staircase at the up staircase location
-        /// </summary>
-        internal void AddExitStaircaseOnly(int levelNo)
-        {
-            Game.Dungeon.AddFeature(new Features.StaircaseExit(levelNo), levelNo, upStaircase);
-        }
-
+       
         public override List<RoomCoords> GetAllRooms()
         {
             return rootNode.FindAllRooms();

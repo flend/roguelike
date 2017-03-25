@@ -7,12 +7,6 @@ namespace RogueBasin
     /// <summary>
     /// Non-pickupable objects in the dungeon
     /// </summary>
-    [System.Xml.Serialization.XmlInclude(typeof(Features.StaircaseDown))]
-    [System.Xml.Serialization.XmlInclude(typeof(Features.StaircaseUp))]
-    [System.Xml.Serialization.XmlInclude(typeof(Features.Corpse))]
-    [System.Xml.Serialization.XmlInclude(typeof(Features.DockBay))]
-    [System.Xml.Serialization.XmlInclude(typeof(Features.StaircaseEntry))]
-    [System.Xml.Serialization.XmlInclude(typeof(Features.StaircaseExit))]
     public abstract class Feature : MapObject
     {
 

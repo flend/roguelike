@@ -531,15 +531,7 @@ namespace RogueBasin
             Game.Dungeon.AddFeature(new Features.StaircaseUp(), levelNo, upStaircase);
             //Game.Dungeon.AddFeature(new Features.StaircaseDown(), levelNo, downStaircase);
         }
-
-        /// <summary>
-        /// Add an exit staircase at the up staircase location
-        /// </summary>
-        internal void AddExitStaircaseOnly(int levelNo)
-        {
-            Game.Dungeon.AddFeature(new Features.StaircaseExit(levelNo), levelNo, upStaircase);
-        }
-
+       
         /// <summary>
         /// Only used on the first level
         /// </summary>
