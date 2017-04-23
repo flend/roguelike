@@ -74,6 +74,7 @@
     <Compile Include="LevelRegister.cs" />
     <Compile Include="LevelTreeBuilder.cs" />
     <Compile Include="LevelType.cs" />
+    <Compile Include="LibRogueSharp\RogueSharpPathFindingWrapper.cs" />
     <Compile Include="MapGraphvizExport.cs" />
     <Compile Include="ExamineTargettingInfo.cs" />
     <Compile Include="GrenadeTargettingInfo.cs" />
@@ -517,6 +518,9 @@
     </Reference>
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+    </Reference>
+    <Reference Include="RogueSharp">
+      <HintPath>..\packages\RogueSharp.3.0.0\lib\portable40-net40+sl5+win8+wp8+wpa81\RogueSharp.dll</HintPath>
     </Reference>
     <Reference Include="SdlDotNet">
       <HintPath>..\TraumaRL\bin\Debug\SdlDotNet.dll</HintPath>

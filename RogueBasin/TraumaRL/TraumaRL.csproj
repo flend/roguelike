@@ -45,6 +45,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\QuickGraph.dll</HintPath>
     </Reference>
+    <Reference Include="RogueSharp, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RogueSharp.3.0.0\lib\portable40-net40+sl5+win8+wp8+wpa81\RogueSharp.dll</HintPath>
+    </Reference>
     <Reference Include="SdlDotNet">
       <HintPath>bin\Debug\SdlDotNet.dll</HintPath>
     </Reference>
