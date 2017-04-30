@@ -152,7 +152,23 @@ namespace TraumaRL
         {
             var mapInfo = mapState.MapInfo;
             var firstRoom = mapInfo.Room(mapState.StartVertex);
-            Game.Dungeon.Levels[mapState.StartLevel].PCStartLocation = new RogueBasin.Point(firstRoom.X + firstRoom.Room.Width / 2, firstRoom.Y + firstRoom.Room.Height / 2);
+
+            var pcStartPointInRoom = new Point(firstRoom.Room.Width / 2, firstRoom.Room.Height / 2);
+
+            //Remove any obstructions
+            var roomInfo = mapState.MapInfo.Populator.RoomInfo(mapState.StartVertex);
+            var blockingFeatures = roomInfo.FeaturesAt(pcStartPointInRoom);
+            if (!blockingFeatures.IsEmpty()) {
+                roomInfo.RemoveFeatures(blockingFeatures);
+            }
+
+            var blockingMonsters = roomInfo.MonstersAt(pcStartPointInRoom);
+            if (!blockingMonsters.IsEmpty())
+            {
+                roomInfo.RemoveMonsters(blockingMonsters);
+            }
+
+            Game.Dungeon.Levels[mapState.StartLevel].PCStartLocation = new RogueBasin.Point(firstRoom.X + pcStartPointInRoom.x, firstRoom.Y + pcStartPointInRoom.y);
 
             Game.Dungeon.Player.LocationLevel = mapState.StartLevel;
             Game.Dungeon.Player.LocationMap = Game.Dungeon.Levels[Game.Dungeon.Player.LocationLevel].PCStartLocation;

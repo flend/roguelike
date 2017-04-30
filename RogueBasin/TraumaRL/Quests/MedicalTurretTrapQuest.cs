@@ -73,7 +73,7 @@ namespace TraumaRL.Quests
                 var sqPC = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.SquarePC].NewFeature();
                 mapInfo.Populator.AddFeatureToRoom(mapInfo, turretRoom, turretLoc, sqPC);
 
-                if (Game.Random.Next(100) < 50)
+                if (Game.Random.Next(100) < 25)
                 {
                     concealedTurretFeatures.Add(sqPC);
                     var turret = new RogueBasin.Creatures.RotatingTurret();
