@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace RogueBasin.Algorithms
+﻿namespace RogueBasin.Algorithms
 {
     /** Provides field of view services */
     public interface IFieldOfView

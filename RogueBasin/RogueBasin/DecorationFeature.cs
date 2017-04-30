@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin
+﻿namespace RogueBasin
 {
     /// <summary>
     /// A fairly useless feature only used for window dressing!

@@ -1,18 +1,5 @@
 ﻿using System;
 
-using libtcodWrapper;
-using Console = System.Console;
-using System.Collections.Generic;
-using System.Windows.Forms;
-using System.IO;
-using System.Xml.Serialization;
-using System.IO.Compression;
-using System.Linq;
-using SdlDotNet.Core;
-using SdlDotNet.Graphics;
-using SdlDotNet.Input;
-using SdlDotNet.Audio;
-
 namespace RogueBasin
 {
 

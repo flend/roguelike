@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.SpecialMoves
+﻿namespace RogueBasin.SpecialMoves
 {
     /// <summary>
     /// Push off from a wall twice to push a monster a certain number of squares away until it hits an obstacle

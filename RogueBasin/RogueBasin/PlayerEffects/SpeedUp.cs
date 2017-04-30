@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.PlayerEffects
+﻿namespace RogueBasin.PlayerEffects
 {
     /// <summary>
     /// Speed up the player for a duration

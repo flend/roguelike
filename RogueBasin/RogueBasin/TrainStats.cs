@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin
+﻿namespace RogueBasin
 {
     /// <summary>
     /// Class for training stats. Works like a dialog, run the function then query the state for what happened. Does however make changes to player

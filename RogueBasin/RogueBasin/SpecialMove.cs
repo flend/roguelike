@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin
+﻿namespace RogueBasin
 {
     /// <summary>
     /// Base class for SpecialMoves. Shouldn't be instantiated. Instantiate a child.

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
-
-namespace RogueBasin.Spells
+﻿namespace RogueBasin.Spells
 {
     /// <summary>
     /// Reveals the location of items on this level

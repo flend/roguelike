@@ -1,6 +1,5 @@
-﻿using System;using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RogueBasin.Creatures

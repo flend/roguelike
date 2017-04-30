@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin
+﻿namespace RogueBasin
 {
     /// <summary>
     /// Base class for SpecialMoves. Shouldn't be instantiated. Instantiate a child.
     /// Contains checks for whether we know a move or not.
     /// </summary>
-    
+
     //I suspect we can't be abstract because of these - need to check
 
     //[System.Xml.Serialization.XmlInclude(typeof(SpecialMoves.StunBox))]

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin
+﻿namespace RogueBasin
 {
     /// <summary>
     /// Effects are stored on the creature. They carry out their effects via the OnStart() and OnEnd() methods

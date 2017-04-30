@@ -1,15 +1,8 @@
 ﻿using GraphMap;
-using libtcodWrapper;
 using RogueBasin;
 using System;
-using System.Drawing;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
-using System.Collections.Immutable;
 
 namespace TraumaRL
 {
@@ -93,9 +86,6 @@ namespace TraumaRL
 
             //Set maps in engine (needs to be done before placing items and monsters)
             dungeonMapSetup.SetupMapsInEngine(mapState);
-
-            //Pause here to attach the debugger
-            //MessageBox.Show("post engine");
 
             //Add items/monsters/features from room model into dungeon
             dungeonMapSetup.AddMapObjectsToDungeon(mapState.MapInfo);

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.SpecialMoves
+﻿namespace RogueBasin.SpecialMoves
 {
     /// <summary>
     /// OpenSpaceAttack. Starts with an attack then you move in a clockwise diagonal box around the monster

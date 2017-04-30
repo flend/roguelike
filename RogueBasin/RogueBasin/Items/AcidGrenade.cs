@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace RogueBasin.Items
 {

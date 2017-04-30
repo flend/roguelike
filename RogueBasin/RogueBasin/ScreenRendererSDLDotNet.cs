@@ -1,12 +1,9 @@
-﻿using System;
+﻿using SdlDotNet.Graphics;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
-using SdlDotNet.Graphics;
-using SdlDotNet.Core;
-using System.Reflection;
 using System.IO;
-using System.Windows.Forms;
+using System.Reflection;
 
 
 namespace RogueBasin

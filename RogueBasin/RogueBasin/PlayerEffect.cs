@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
-
-namespace RogueBasin
+﻿namespace RogueBasin
 {
     /// <summary>
     /// Represents a temporary effect on the player

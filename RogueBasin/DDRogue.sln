@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDRogue", "RogueBasin\DDRogue.csproj", "{3D08DD25-6DF5-49E7-966D-9C843399C6FC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libtcodWrapper", "libtcod-net\libtcodWrapper.csproj", "{85E2DED9-AA04-4A3B-8587-562D577A8EAB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphMap", "GraphMap\GraphMap.csproj", "{C01C4688-5271-42FA-A329-BFBB6BD59ABC}"
 EndProject
@@ -27,10 +25,6 @@ Global
 		{3D08DD25-6DF5-49E7-966D-9C843399C6FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D08DD25-6DF5-49E7-966D-9C843399C6FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D08DD25-6DF5-49E7-966D-9C843399C6FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{85E2DED9-AA04-4A3B-8587-562D577A8EAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85E2DED9-AA04-4A3B-8587-562D577A8EAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85E2DED9-AA04-4A3B-8587-562D577A8EAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85E2DED9-AA04-4A3B-8587-562D577A8EAB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C01C4688-5271-42FA-A329-BFBB6BD59ABC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C01C4688-5271-42FA-A329-BFBB6BD59ABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C01C4688-5271-42FA-A329-BFBB6BD59ABC}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RogueBasin.Features
+﻿namespace RogueBasin.Features
 {
     public class Elevator : UseableFeature
     {

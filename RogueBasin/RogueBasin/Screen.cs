@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
-using Console = System.Console;
-using System.IO;
-using System.Reflection;
-using System.Linq;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using Console = System.Console;
 
-namespace RogueBasin {
+namespace RogueBasin
+{
 
     /// <summary>
     /// Contains code that renders to the screen and some utility functions.
@@ -839,8 +839,7 @@ namespace RogueBasin {
 
         private System.Drawing.Color ColorInterpolate(System.Drawing.Color from, System.Drawing.Color to, double degree)
         {
-            libtcodWrapper.Color interpolated = libtcodWrapper.Color.Interpolate(libtcodWrapper.Color.FromRGB(from.R, from.G, from.B), libtcodWrapper.Color.FromRGB(to.R, to.G, to.B), degree);
-            return System.Drawing.Color.FromArgb(interpolated.Red, interpolated.Blue, interpolated.Green);
+            return ColorInterpolator.InterpolateBetween(from, to, degree);
         }
 
         private void DrawPC(int levelToDraw, Player player)
@@ -2664,137 +2663,7 @@ namespace RogueBasin {
             //ClearRect(msgDisplayTopLeft.x, msgDisplayTopLeft.y, msgDisplayBotRight.x - msgDisplayTopLeft.x - 1, msgDisplayBotRight.y - msgDisplayTopLeft.y - 1);
         }
 
-
-        /// <summary>
-        /// Get a string from the user. Uses the message bar
-        /// </summary>
-        /// <returns></returns>
-       
-        internal string GetUserString(string introMessage)
-        {
-
-            ClearMessageLine();
-
-            PrintMessage(introMessage + ": ");
-            FlushConsole();
-
-            bool continueInput = true;
-
-            int maxChars = 40;
-
-            string userString = "";
-
-            do
-            {
-                //Get user input
-                KeyPress userKey = Keyboard.WaitForKeyPress(true);
-
-                //Each state has different keys
-
-                        if (userKey.KeyCode == KeyCode.TCODK_CHAR)
-                        {
-                            char keyCode = (char)userKey.Character;
-                            if (userString.Length < maxChars)
-                            {
-                                userString += keyCode.ToString();
-                            }
-                        }
-                        else {
-                            //Special keys
-                            switch (userKey.KeyCode)
-                            {
-                                case KeyCode.TCODK_0:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "0";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_1:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "1";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_2:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "2";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_3:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "3";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_4:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "4";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_5:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "5";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_6:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "6";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_7:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "7";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_8:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "8";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_9:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += "9";
-                                    }
-                                    break;
-                                case KeyCode.TCODK_SPACE:
-                                    if (userString.Length < maxChars)
-                                    {
-                                        userString += " ";
-                                    }
-                                    break;
-
-
-                                case KeyCode.TCODK_ESCAPE:
-                                    //Exit
-                                    return null;
-                                case KeyCode.TCODK_BACKSPACE:
-                                    if (userString.Length != 0)
-                                    {
-                                        userString = userString.Substring(0, userString.Length - 1);
-                                    }
-                                    break;
-                                case KeyCode.TCODK_ENTER:
-                                case KeyCode.TCODK_KPENTER:
-                                    //Exit with what we have
-                                    return userString;
-                            }
-                        }
-
-                        PrintMessage(introMessage + ": " + userString + "_");
-                        FlushConsole();
-
-            } while (continueInput);
-
-            return null;
-        }
-
+        
         /// <summary>
         /// Draw the screen and run the message queue
         /// </summary>

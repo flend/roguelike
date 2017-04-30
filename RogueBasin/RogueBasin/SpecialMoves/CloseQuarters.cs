@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.SpecialMoves
+﻿namespace RogueBasin.SpecialMoves
 {
     public class CloseQuarters : SpecialMove
     {

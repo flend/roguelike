@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.Items
+﻿namespace RogueBasin.Items
 {
     public class PotionMajToHitUp : Item, IUseableItem
     {

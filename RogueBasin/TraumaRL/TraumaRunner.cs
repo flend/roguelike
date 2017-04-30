@@ -1,5 +1,4 @@
-﻿using GraphMap;
-using RogueBasin;
+﻿using RogueBasin;
 using System;
 
 namespace TraumaRL

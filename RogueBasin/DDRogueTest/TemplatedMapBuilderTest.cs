@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RogueBasin;
-using System.Reflection;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace DDRogueTest
 {

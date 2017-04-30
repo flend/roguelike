@@ -1,12 +1,7 @@
-﻿using System;
-using QuickGraph;
+﻿using QuickGraph;
 using QuickGraph.Graphviz;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Immutable;
 using RogueBasin;
+using System.Linq;
 
 namespace GraphMap
 {

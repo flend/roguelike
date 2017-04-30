@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
-
-namespace RogueBasin.PlayerEffects
+﻿namespace RogueBasin.PlayerEffects
 {
     public class SeeFOV : PlayerEffectSimpleDuration
     {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
-
-namespace RogueBasin.Creatures
+﻿namespace RogueBasin.Creatures
 {
     /// <summary>
     /// Chasing monster that doesn't attack and can be used as a shield???

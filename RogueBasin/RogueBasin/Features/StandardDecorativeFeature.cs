@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using libtcodWrapper;
-
-namespace RogueBasin.Features
+﻿namespace RogueBasin.Features
 {
     public class StandardDecorativeFeature : DecorationFeature
     {

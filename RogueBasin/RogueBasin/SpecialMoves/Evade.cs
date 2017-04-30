@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.SpecialMoves
+﻿namespace RogueBasin.SpecialMoves
 {
     /// <summary>
     /// Evade . then direction of monster evades rather than attacks

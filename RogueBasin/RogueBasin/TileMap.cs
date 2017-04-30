@@ -1,7 +1,5 @@
-﻿using System;
+﻿using RogueBasin;
 using System.Collections.Generic;
-using System.Text;
-using RogueBasin;
 
 namespace TileEngine
 {

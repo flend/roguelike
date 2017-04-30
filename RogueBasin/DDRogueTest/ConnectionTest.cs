@@ -1,6 +1,5 @@
-﻿using System;
+﻿using GraphMap;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GraphMap;
 
 namespace DDRogueTest
 {

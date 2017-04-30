@@ -1,11 +1,10 @@
-﻿using System;
+﻿using GraphMap;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Reflection;
 using RogueBasin;
-using System.IO;
-using GraphMap;
-using System.Linq;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace DDRogueTest
 {

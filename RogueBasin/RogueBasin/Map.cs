@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
-using GraphMap;
-using System.Linq;
 
 namespace RogueBasin
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.PlayerEffects
+﻿namespace RogueBasin.PlayerEffects
 {
     /// <summary>
     /// Hmmm, there's no guarantee that this is called as the last effect... oh well, not a lot I can do about that other than hack in an exception

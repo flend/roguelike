@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.MonsterEffects
+﻿namespace RogueBasin.MonsterEffects
 {
     public class SlowDown : MonsterEffectSimpleDuration
     {

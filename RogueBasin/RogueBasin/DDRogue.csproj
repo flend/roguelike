@@ -56,6 +56,7 @@
     <Compile Include="Algorithms\IPathFinder.cs" />
     <Compile Include="ArrayCache.cs" />
     <Compile Include="BasicLineTargetInfo.cs" />
+    <Compile Include="ColorInterpolator.cs" />
     <Compile Include="Combat.cs" />
     <Compile Include="CustomInputArgs.cs" />
     <Compile Include="DifficultyOrdering.cs" />
@@ -380,8 +381,6 @@
     <Compile Include="KeyValue.cs" />
     <Compile Include="LastMapGeneratorFromASCIIFile.cs" />
     <Compile Include="LibtcodColorFlags.cs" />
-    <Compile Include="LibTCOD\TCODFovWrapper.cs" />
-    <Compile Include="LibTCOD\TCODPathFindingWrapper.cs" />
     <Compile Include="Lock.cs" />
     <Compile Include="Locks\SimpleLockedDoor.cs" />
     <Compile Include="LogFile.cs" />
@@ -547,10 +546,6 @@
     <ProjectReference Include="..\GraphMap\GraphMap.csproj">
       <Project>{c01c4688-5271-42fa-a329-bfbb6bd59abc}</Project>
       <Name>GraphMap</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\libtcod-net\libtcodWrapper.csproj">
-      <Project>{85E2DED9-AA04-4A3B-8587-562D577A8EAB}</Project>
-      <Name>libtcodWrapper</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -986,7 +981,6 @@
     <EmbeddedResource Include="bin\Debug\movies\t_medicalturretsecuritylocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\t_medicalturretsecurityunlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\vaults\turret_trap1.room" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />

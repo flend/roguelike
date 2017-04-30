@@ -101,16 +101,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GraphMap\GraphMap.csproj">
       <Project>{c01c4688-5271-42fa-a329-bfbb6bd59abc}</Project>
       <Name>GraphMap</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\libtcod-net\libtcodWrapper.csproj">
-      <Project>{85e2ded9-aa04-4a3b-8587-562d577a8eab}</Project>
-      <Name>libtcodWrapper</Name>
     </ProjectReference>
     <ProjectReference Include="..\RogueBasin\DDRogue.csproj">
       <Project>{3d08dd25-6df5-49e7-966d-9c843399c6fc}</Project>

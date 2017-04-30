@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.SpecialMoves
+﻿namespace RogueBasin.SpecialMoves
 {
     /// <summary>
     /// This is a follow-up move to a vault involving an attack as the last move. It therefore replicates wall vault and adds a new last move (may be a nicer way to do this)

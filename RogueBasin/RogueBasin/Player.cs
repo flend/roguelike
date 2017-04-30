@@ -1,9 +1,7 @@
-﻿using System;
+﻿using MoreLinq;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using libtcodWrapper;
 using System.Linq;
-using MoreLinq;
 
 namespace RogueBasin
 {

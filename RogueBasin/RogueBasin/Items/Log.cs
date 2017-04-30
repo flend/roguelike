@@ -1,10 +1,4 @@
-﻿using libtcodWrapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace RogueBasin.Items
+﻿namespace RogueBasin.Items
 {
     public class Log : Item, IUseableItem
     {

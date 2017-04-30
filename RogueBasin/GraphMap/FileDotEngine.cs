@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using QuickGraph.Graphviz;
 using QuickGraph.Graphviz.Dot;
 using System.IO;
-using QuickGraph.Graphviz;
 
 namespace GraphMap
 {

@@ -1,7 +1,6 @@
-﻿using System;
+﻿using GraphMap;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GraphMap;
-using QuickGraph;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 

@@ -2,7 +2,6 @@
 
 using System;
 using System.Xml.Serialization;			// for various Xml attributes
-using System.Globalization;
 
 #endregion
 

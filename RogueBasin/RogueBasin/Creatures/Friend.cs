@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RogueBasin.Creatures
+﻿namespace RogueBasin.Creatures
 {
     public class Friend : MonsterNullAI
     {
