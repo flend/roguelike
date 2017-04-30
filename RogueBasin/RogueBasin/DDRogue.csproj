@@ -518,8 +518,8 @@
     <Reference Include="QuickGraph.Graphviz">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
     </Reference>
-    <Reference Include="RogueSharp">
-      <HintPath>..\packages\RogueSharp.3.0.0\lib\portable40-net40+sl5+win8+wp8+wpa81\RogueSharp.dll</HintPath>
+    <Reference Include="RogueSharp, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RogueSharp.4.0.0-pre\lib\portable-net40+sl50+win+wpa81+wp80\RogueSharp.dll</HintPath>
     </Reference>
     <Reference Include="SdlDotNet">
       <HintPath>..\TraumaRL\bin\Debug\SdlDotNet.dll</HintPath>
@@ -981,6 +981,7 @@
     <EmbeddedResource Include="bin\Debug\movies\t_medicalturretsecuritylocked0.amf" />
     <EmbeddedResource Include="bin\Debug\movies\t_medicalturretsecurityunlocked0.amf" />
     <EmbeddedResource Include="bin\Debug\vaults\turret_trap1.room" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\logdata\all_last.txt" />
