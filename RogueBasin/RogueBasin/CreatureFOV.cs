@@ -10,9 +10,9 @@ namespace RogueBasin
     /** Lightweight wrapper - stops classes uses Fov from altering the map */
     public class WrappedFOV
     {
-        TCODFovWrapper fov;
+        Algorithms.IFieldOfView fov;
 
-        public WrappedFOV(TCODFovWrapper fov)
+        public WrappedFOV(Algorithms.IFieldOfView fov)
         {
             this.fov = fov;
         }

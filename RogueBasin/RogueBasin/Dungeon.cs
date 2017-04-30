@@ -73,7 +73,7 @@ namespace RogueBasin
         List<Map> levels;
 
         Pathing pathFinding;
-        LibTCOD.TCODFovWrapper fov;
+        Algorithms.IFieldOfView fov;
 
         List<Monster> monsters;
         List<Item> items;
@@ -160,8 +160,9 @@ namespace RogueBasin
             features = new Dictionary<Location, List<Feature>>();
             locks = new Dictionary<Location, List<Lock>>();
 
-            pathFinding = new Pathing(this, new LibRogueSharp.RogueSharpPathFindingWrapper());
-            fov = new LibTCOD.TCODFovWrapper();
+            var rogueSharpPathAndFovWrapper = new LibRogueSharp.RogueSharpPathAndFoVWrapper();
+            pathFinding = new Pathing(this, rogueSharpPathAndFovWrapper);
+            fov = rogueSharpPathAndFovWrapper;
 
             ///DungeonEffects are indexed by the time that they occur
             effects = new List<SoundEffect>();
@@ -1732,12 +1733,11 @@ namespace RogueBasin
             //Set the light blocking flag based on the terrain
             levels[levelNo].RecalculateLightBlocking();
 
-            //Set the properties on the TCODMaps from our Maps
-            //New fov representation
-            fov.updateFovMap(levelNo, levels[levelNo].FovRepresentaton);
-
-            //Notify abstract path finding lib
+            //Update pathfinding library
             pathFinding.PathFindingInternal.updateMap(levelNo, levels[levelNo].PathRepresentation);
+
+            //Update FoV library
+            fov.updateFovMap(levelNo, levels[levelNo].FovRepresentaton);
         }
 
         public void ResetCreatureFOVOnMap()

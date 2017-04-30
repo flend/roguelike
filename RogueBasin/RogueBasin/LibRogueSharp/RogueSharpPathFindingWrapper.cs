@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RogueBasin.Algorithms;
 using RogueSharp;
 
 namespace RogueBasin.LibRogueSharp
@@ -19,7 +20,11 @@ namespace RogueBasin.LibRogueSharp
         }
     }
 
-    public class RogueSharpPathFindingWrapper : Algorithms.IPathFinder
+    /// <summary>
+    /// Implements pathfinding and FOV
+    /// The FOV code checks pathfinding has been called first
+    /// </summary>
+    public class RogueSharpPathAndFoVWrapper : Algorithms.IPathFinder, Algorithms.IFieldOfView
     {
         Dictionary<int, RogueSharp.Map> sharpMaps = new Dictionary<int, RogueSharp.Map>();
         Dictionary<int, RogueSharp.Map> sharpMapsIgnoringTerrain = new Dictionary<int, RogueSharp.Map>();
@@ -29,7 +34,7 @@ namespace RogueBasin.LibRogueSharp
 
         Dictionary<int, MapSize> levelTCODMapsSize = new Dictionary<int, MapSize>();
 
-        public RogueSharpPathFindingWrapper()
+        public RogueSharpPathAndFoVWrapper()
         {
         }
 
@@ -38,6 +43,11 @@ namespace RogueBasin.LibRogueSharp
             return pathNodes(level, origin, dest, permission, true).Count > 1;
         }
 
+        /// <summary>
+        /// Called before any FoV maps are setup. Resets isTransparent.
+        /// </summary>
+        /// <param name="level"></param>
+        /// <param name="terrainMap"></param>
         public void updateMap(int level, PathingMap terrainMap)
         {
             RogueSharp.Map sharpLevel = new RogueSharp.Map(terrainMap.Width, terrainMap.Height);
@@ -112,9 +122,12 @@ namespace RogueBasin.LibRogueSharp
 
         public void updateMapWithDangerousTerrain(int level, Point point, bool terrainPresent)
         {
-            sharpMaps[level].SetCellProperties(point.x, point.y, true, !terrainPresent);
-            sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, true, !terrainPresent);
-            sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, true, !terrainPresent);
+            VerifyPointOnMap(level, point);
+
+            var isTransparent = sharpMaps[level].GetCell(point.x, point.y).IsTransparent;
+            sharpMaps[level].SetCellProperties(point.x, point.y, isTransparent, !terrainPresent);
+            sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, isTransparent, !terrainPresent);
+            sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, isTransparent, !terrainPresent);
         }
         
         public bool getPathable(int level, Point point, Pathing.PathingPermission permission, bool ignoreDangerousTerrain)
@@ -149,41 +162,39 @@ namespace RogueBasin.LibRogueSharp
         //Should this be deprecated in favour of the dangerous terrain version?
         public void updateMap(int level, Point point, PathingTerrain newTerrain)
         {
-            if (sharpMaps.Count() == 0)
-            {
-                LogFile.Log.LogEntryDebug("updateMap called before pathfinding initially done.", LogDebugLevel.Medium);
-                return;
-            }
+            VerifyPointOnMap(level, point);
+
+            var isOriginalTerrainTransparent = sharpMaps[level].GetCell(point.x, point.y).IsTransparent;
 
             switch (newTerrain)
             {
                 case PathingTerrain.ClosedLock:
-                    sharpMaps[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringTerrain[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringClosedDoorsAndTerrain[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, true, true);
+                    sharpMaps[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringTerrain[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringClosedDoorsAndTerrain[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
                     break;
                 case PathingTerrain.ClosedDoor:
-                    sharpMaps[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringTerrain[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, true, true);
-                    sharpMapsIgnoringClosedDoorsAndTerrain[level].SetCellProperties(point.x, point.y, true, true);
-                    sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, true, true);
+                    sharpMaps[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringTerrain[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
+                    sharpMapsIgnoringClosedDoorsAndTerrain[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
+                    sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
                     break;
                 case PathingTerrain.Unwalkable:
-                    sharpMaps[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringTerrain[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringClosedDoorsAndTerrain[level].SetCellProperties(point.x, point.y, true, false);
-                    sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, true, false);
+                    sharpMaps[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringTerrain[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringClosedDoorsAndTerrain[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
+                    sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
                     break;
                 case PathingTerrain.Walkable:
-                    sharpMaps[level].SetCellProperties(point.x, point.y, true, true);
-                    sharpMapsIgnoringTerrain[level].SetCellProperties(point.x, point.y, true, true);
-                    sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, true, true);
-                    sharpMapsIgnoringClosedDoorsAndTerrain[level].SetCellProperties(point.x, point.y, true, true);
-                    sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, true, true);
+                    sharpMaps[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
+                    sharpMapsIgnoringTerrain[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
+                    sharpMapsIgnoringClosedDoors[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
+                    sharpMapsIgnoringClosedDoorsAndTerrain[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
+                    sharpMapsIgnoringClosedDoorsAndLocks[level].SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
                     break;
             }
         }
@@ -221,23 +232,25 @@ namespace RogueBasin.LibRogueSharp
                     break;
             }
 
+            var isOriginalTerrainTransparent = sharpMaps[level].GetCell(point.x, point.y).IsTransparent;
+
             switch (newTerrain)
             {
                 case PathingTerrain.ClosedLock:
                     if (mapToUse != sharpMapsIgnoringClosedDoorsAndLocks[level])
-                        mapToUse.SetCellProperties(point.x, point.y, true, true);
+                        mapToUse.SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
                     break;
                 case PathingTerrain.ClosedDoor:
                     if (mapToUse == sharpMaps[level] || mapToUse == sharpMapsIgnoringTerrain[level])
                     {
-                        mapToUse.SetCellProperties(point.x, point.y, true, false);
+                        mapToUse.SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
                     }
                     break;
                 case PathingTerrain.Unwalkable:
-                    mapToUse.SetCellProperties(point.x, point.y, true, false);
+                    mapToUse.SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, false);
                     break;
                 case PathingTerrain.Walkable:
-                    mapToUse.SetCellProperties(point.x, point.y, true, true);
+                    mapToUse.SetCellProperties(point.x, point.y, isOriginalTerrainTransparent, true);
                     break;
             }
         }
@@ -305,6 +318,72 @@ namespace RogueBasin.LibRogueSharp
             {
                 return returnNodes;
             }
+        }
+
+        void IFieldOfView.updateFovMap(int level, FovMap byteMap)
+        {
+            if (!sharpMaps.ContainsKey(level))
+            {
+                throw new ApplicationException("FoV code needs maps setup by pathfinding first.");
+            }
+
+            if (sharpMaps[level].Width != byteMap.Width || sharpMaps[level].Height != byteMap.Height)
+            {
+                throw new ApplicationException("FoV map must match existing pathfinding map dimensions");
+            }
+
+            for(int i = 0; i < byteMap.Height; i++)
+            {
+                for(int j = 0; j < byteMap.Width; j++)
+                {
+                    var isTransparent = byteMap.getCell(new Point(j, i)) == FOVTerrain.NonBlocking;
+                    var isWalkable = sharpMaps[level].GetCell(j, i).IsWalkable;
+                    sharpMaps[level].SetCellProperties(j, i, isTransparent, isWalkable);
+                }
+            }
+        }
+
+        void IFieldOfView.updateFovMap(int level, Point point, FOVTerrain newTerrain)
+        {
+            VerifyPointOnMap(level, point);
+
+            var isWalkable = sharpMaps[level].GetCell(point.x, point.y).IsWalkable;
+            var isTransparent = newTerrain == FOVTerrain.NonBlocking;
+
+            sharpMaps[level].SetCellProperties(point.x, point.y, isTransparent, isWalkable);
+        }
+
+        private void VerifyPointOnMap(int level, Point point)
+        {
+            if (!sharpMaps.ContainsKey(level))
+            {
+                throw new ApplicationException("Level not available in RogueSharp maps.");
+            }
+
+            if (point.x < 0 || point.x >= sharpMaps[level].Width
+                || point.y < 0 || point.y >= sharpMaps[level].Height)
+            {
+                throw new ApplicationException("Point off RogueSharp map: " + point);
+            }
+        }
+
+        void IFieldOfView.CalculateFOV(int level, Point origin, int sightRadius)
+        {
+            //sightRadius == 0 in TCOD means unlimited
+            var rogueSharpRadius = sightRadius;
+            if(sightRadius <= 0)
+            {
+                rogueSharpRadius = 10000;
+            }
+
+            VerifyPointOnMap(level, origin);
+            sharpMaps[level].ComputeFov(origin.x, origin.y, rogueSharpRadius, true);
+        }
+
+        bool IFieldOfView.CheckTileFOV(int level, Point pointToCheck)
+        {
+            VerifyPointOnMap(level, pointToCheck);
+            return sharpMaps[level].GetCell(pointToCheck.x, pointToCheck.y).IsInFov;
         }
     }
 

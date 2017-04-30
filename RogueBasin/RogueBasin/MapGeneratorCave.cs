@@ -302,7 +302,7 @@ namespace RogueBasin
             }
 
             //Try to walk a path between the 2 staircases
-            LibTCOD.TCODPathFindingWrapper pathFinder = new LibTCOD.TCODPathFindingWrapper();
+            Algorithms.IPathFinder pathFinder = new LibRogueSharp.RogueSharpPathAndFoVWrapper();
             pathFinder.updateMap(0, map);
             return pathFinder.arePointsConnected(0, firstPoint, secondPoint, Pathing.PathingPermission.Normal);
         }
