@@ -59,7 +59,7 @@ namespace RogueBasin.Creatures
 
                 //Spawn a zombie
                 var zombieCreature = new Creatures.Zomborg(summoner.Level);
-                Game.Dungeon.AddMonsterDynamic(zombieCreature, actualCorpse.LocationLevel, actualCorpse.LocationMap);
+                Game.Dungeon.AddMonsterDynamic(zombieCreature, new Location(actualCorpse.LocationLevel, actualCorpse.LocationMap));
 
                 Game.MessageQueue.AddMessage("The " + summoner.SingleDescription + " produces something horrible!");
                 LogFile.Log.LogEntryDebug(summoner.SingleDescription + " raises corpse", LogDebugLevel.Medium);

@@ -181,10 +181,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\GhoulUnique.cs" />
-    <Compile Include="Creatures\GoblinWitchdoctor.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Creatures\GoblinWitchdoctorUnique.cs" />
     <Compile Include="Creatures\Imp.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -196,10 +192,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Creatures\Mushroom.cs" />
-    <Compile Include="Creatures\Necromancer.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Creatures\NecromancerUnique.cs" />
     <Compile Include="Creatures\Nymph.cs" />
     <Compile Include="Creatures\Ogre.cs">
       <SubType>Code</SubType>
@@ -890,12 +882,12 @@
     <EmbeddedResource Include="bin\Debug\vaults\chamber6x4_1door.room" />
     <EmbeddedResource Include="bin\Debug\logentries\dr_droppedid1.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\dr_droppedid2.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gd_stash.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gd_delivery.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gds_stash.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gds_delivery.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\dr_lostid.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gd_crate.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gd_mishap.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gd_robots.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gds_crate.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gds_mishap.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gds_robots.amf" />
     <EmbeddedResource Include="bin\Debug\vaults\escape_pod1.room" />
     <EmbeddedResource Include="bin\Debug\logentries\dr_issued1.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\dr_issued2.amf" />
@@ -904,18 +896,13 @@
     <EmbeddedResource Include="bin\Debug\logentries\dr_whyid.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\el_standard.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\el_stupid.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gdn_cameras.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gdn_nodes.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gds_biohazard.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gds_dice.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gds_door.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gds_fatal.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\gds_inspection.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gd_fatal.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gd_inspection.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gn_armory.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gn_cover.amf" />
-    <EmbeddedResource Include="bin\Debug\logentries\gn_dodge.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gds_fatal2.amf" />
+    <EmbeddedResource Include="bin\Debug\logentries\gds_inspection2.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_mastervault1.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_mastervault2.amf" />
     <EmbeddedResource Include="bin\Debug\logentries\qe_mastervault3.amf" />

@@ -536,7 +536,7 @@ namespace RogueBasin
                     }
                 }
 
-                dungeon.AddDecorationFeature(new Features.Scorch(), level, sq);
+                dungeon.AddDecorationFeature(new Features.Scorch(), new Location(level, sq));
             }
 
             //And the player
