@@ -65,24 +65,24 @@ namespace TraumaRL.Quests
             mapInfo.Populator.AddItemToRoom(keycardItem, turretRoom, keycardLocation);
             
             //Add features (including concealed turrets)
-            var turretOrDecorationLocations = mapState.MapInfo.Room(turretRoom).Room.FeatureMarkerPoints("turret");
+            var turretOrDecorationPoints = mapState.MapInfo.Room(turretRoom).Room.FeatureMarkerPoints("turret");
             var concealedTurretFeatures = new List<Feature>();
-            var turrets = new Dictionary<Location, Monster>();
-            foreach (var turretLoc in turretOrDecorationLocations)
+            var turrets = new Dictionary<Point, Monster>();
+            foreach (var turretLoc in turretOrDecorationPoints)
             {
                 var sqPC = DecorationFeatureDetails.decorationFeatures[DecorationFeatureDetails.DecorationFeatures.SquarePC].NewFeature();
                 mapInfo.Populator.AddFeatureToRoom(mapInfo, turretRoom, turretLoc, sqPC);
 
-                if (Game.Random.Next(100) < 50)
+                if (Game.Random.Next(100) < 25)
                 {
                     concealedTurretFeatures.Add(sqPC);
                     var turret = new RogueBasin.Creatures.RotatingTurret();
-                    turrets.Add(new Location(turretLevel, turretLoc), turret);
+                    turrets.Add(turretLoc, turret);
                 }
             }
 
             //Add trigger
-            var keycardTrigger = new FeaturesToCreaturesTrigger(concealedTurretFeatures, turrets);
+            var keycardTrigger = new FeaturesToCreaturesTrigger(concealedTurretFeatures, turrets, turretRoom);
             mapInfo.Populator.AddTriggerToRoom(keycardTrigger, turretRoom, keycardLocation);
 
             //GRENADE ROOM

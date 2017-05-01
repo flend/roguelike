@@ -740,7 +740,7 @@ namespace RogueBasin
             if (WillPursue() && CanMove())
             {
                 //For some reason they are ignoring dangerous terrain so hack here
-                if (Game.Dungeon.DangerousFeatureAtLocation(this.LocationLevel, pathingResult.MonsterFinalLocation))
+                if (Game.Dungeon.DangerousFeatureAtLocation(new Location(this.LocationLevel, pathingResult.MonsterFinalLocation)))
                 {
                     ResetFollowingSound();
                     headingSetToSound = true;
@@ -838,7 +838,7 @@ namespace RogueBasin
                         bool validMove = false;
                         Point newLocation = new Point(LocationMap.x + moveX, LocationMap.y + moveY);
 
-                        validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation) && !Game.Dungeon.DangerousFeatureAtLocation(LocationLevel, newLocation);
+                        validMove = Game.Dungeon.MapSquareIsWalkable(LocationLevel, newLocation) && !Game.Dungeon.DangerousFeatureAtLocation(new Location(LocationLevel, newLocation));
 
                         //Give up if this is not a valid move
                         if (!validMove)

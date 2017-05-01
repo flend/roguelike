@@ -654,7 +654,7 @@ namespace RogueBasin
                     return false;
                 }
 
-                if (DangerousFeatureAtLocation(level, location))
+                if (DangerousFeatureAtLocation(new Location(level, location)))
                 {
                     LogFile.Log.LogEntryDebug("AddMonster failure: Dangerous terrain at square", LogDebugLevel.Medium);
                     return false;
@@ -718,30 +718,26 @@ namespace RogueBasin
         }
 
         /// <summary>
-        /// A creature does something that creates a new creature, e.g. raising summoning.
-        /// Adds to the summoning queue which is processed at the end
+        /// Add a monster created dynamically during a monster/player turn.
+        /// Adds to the summoning queue which is processed after all monsters have had a turn.
         /// </summary>
-        /// <param name="creature"></param>
-        /// <param name="level"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        public bool AddMonsterDynamic(Monster creature, int level, Point location, bool allowPlayer = false)
+        public bool AddMonsterDynamic(Monster creature, Location location, bool allowToSpawnUnderPlayer = false)
         {
             //Try to add a creature at the requested location
             //This may fail due to something else being there or being non-walkable
             try
             {
-                Map creatureLevel = levels[level];
+                Map creatureLevel = levels[location.Level];
 
                 //Check square is accessable
-                if (!MapSquareIsWalkable(level, location))
+                if (!MapSquareIsWalkable(location))
                 {
                     LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Square not enterable", LogDebugLevel.Medium);
                     return false;
                 }
 
                 //Check square has nothing else on it
-                SquareContents contents = MapSquareContents(level, location);
+                SquareContents contents = MapSquareContents(location);
 
                 if (contents.monster != null)
                 {
@@ -749,21 +745,20 @@ namespace RogueBasin
                     return false;
                 }
 
-                if (contents.player != null && !allowPlayer)
+                if (contents.player != null && !allowToSpawnUnderPlayer)
                 {
                     LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Player at this square", LogDebugLevel.Medium);
                     return false;
                 }
 
-                if (DangerousFeatureAtLocation(level, location))
+                if (DangerousFeatureAtLocation(location))
                 {
                     LogFile.Log.LogEntryDebug("AddMonsterDynamic failure: Dangerous terrain at square", LogDebugLevel.Medium);
                     return false;
                 }
 
                 //Otherwise OK
-                creature.LocationLevel = level;
-                creature.LocationMap = location;
+                creature.Location = location;
 
                 creature.CalculateSightRadius();
 
@@ -1015,32 +1010,28 @@ namespace RogueBasin
         /// <param name="level"></param>
         /// <param name="location"></param>
         /// <returns></returns>
-        public bool AddDecorationFeature(Feature feature, int level, Point location)
+        public bool AddDecorationFeature(Feature feature, Location location)
         {
             //Try to add a feature at the requested location
             try
             {
-                Map featureLevel = levels[level];
-                Location thisLocation = new Location(level, location);
-
                 //Check square is accessable
-                if (!MapSquareIsWalkable(level, location))
+                if (!MapSquareIsWalkable(location))
                 {
                     LogFile.Log.LogEntry("AddDecorationFeature: map square can't be entered");
                     return false;
                 }
 
                 //Don't obscure dangerous terrain
-                if (DangerousFeatureAtLocation(level, location))
+                if (DangerousFeatureAtLocation(location))
                 {
                     LogFile.Log.LogEntry("AddDecorationFeature: dangerous terrain, not adding");
                     return false;
                 }
 
-                feature.LocationLevel = level;
-                feature.LocationMap = location;
+                feature.Location = location;
 
-                AddFeatureAtLocation(thisLocation, feature);
+                AddFeatureAtLocation(location, feature);
                 return true;
             }
             catch (Exception ex)
@@ -1592,7 +1583,7 @@ namespace RogueBasin
 
             if (corpseToAdd != null)
             {
-                AddDecorationFeature(corpseToAdd, monster.LocationLevel, monster.LocationMap);
+                AddDecorationFeature(corpseToAdd, monster.Location);
             }
         }
 
@@ -3249,9 +3240,9 @@ namespace RogueBasin
         }
 
 
-        internal bool DangerousFeatureAtLocation(int LocationLevel, Point newLocation)
+        internal bool DangerousFeatureAtLocation(Location location)
         {
-            var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(new Location(LocationLevel, newLocation)).Where(f => f is DangerousActiveFeature);
+            var dangeousTerrainAtPoint = Game.Dungeon.GetFeaturesAtLocation(location).Where(f => f is DangerousActiveFeature);
             if (dangeousTerrainAtPoint.Count() > 0)
                 return true;
             return false;

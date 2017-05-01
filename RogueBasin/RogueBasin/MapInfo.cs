@@ -246,6 +246,11 @@ namespace RogueBasin
             features.Add(feature);
         }
 
+        public void RemoveFeatures(IEnumerable<FeatureRoomPlacement> featuresToRemove)
+        {
+            features = features.Except(featuresToRemove).ToList();
+        }
+
         public IEnumerable<FeatureRoomPlacement> Features
         {
             get {
@@ -258,9 +263,19 @@ namespace RogueBasin
             return features.Where(f => f.location == loc).Any();
         }
 
+        public IEnumerable<FeatureRoomPlacement> FeaturesAt(Point loc)
+        {
+            return features.Where(f => f.location == loc);
+        }
+
         public void AddMonster(MonsterRoomPlacement monster)
         {
             monsters.Add(monster);
+        }
+
+        public void RemoveMonsters(IEnumerable<MonsterRoomPlacement> monstersToRemove)
+        {
+            monsters = monsters.Except(monstersToRemove).ToList();
         }
 
         public IEnumerable<MonsterRoomPlacement> Monsters
@@ -269,6 +284,11 @@ namespace RogueBasin
             {
                 return monsters;
             }
+        }
+
+        public IEnumerable<MonsterRoomPlacement> MonstersAt(Point loc)
+        {
+            return monsters.Where(f => f.location == loc);
         }
 
         public void AddItem(ItemRoomPlacement item)
