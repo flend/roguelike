@@ -294,5 +294,10 @@ namespace RogueBasin.Items
         {
             return 0;
         }
+
+        public override int Index()
+        {
+            return 3;
+        }
     }
 }

@@ -39,6 +39,7 @@ namespace RogueBasin
         public ActionState ActionState { get { return actionState; } set { actionState = value; } }
 
         private Action<KeyboardEventArgs> SpecialScreenKeyboardHandler { get; set; }
+        private Action<MouseButtonEventArgs> SpecialScreenMouseButtonEventHandler { get; set; }
         private Action<bool> promptAction = null;
 
         public InputHandler(Running running, Targetting targetting, PlayerActions playerActions, GameActions gameActions, SystemActions systemActions)
@@ -73,8 +74,10 @@ namespace RogueBasin
             inputState = newState;
         }
 
-        private ActionResult TargettingMouseEvent(Point clickLocation, MouseButton mouseButton)
+        private ActionResult TargettingMouseEvent(MouseButtonEventArgs mouseArgs, MouseButton mouseButton)
         {
+            var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
+
             //If we clicked where we clicked before, it's confirmation
             //If we clicked elsewhere, it's a retarget, motion will take care of this
             if (clickLocation == targetting.CurrentTarget.MapCoord)
@@ -92,7 +95,7 @@ namespace RogueBasin
             return new ActionResult(false, false);
         }
 
-        private ActionResult HandleMapMovementClick(Point clickLocation, MouseButton mouseButtons)
+        private ActionResult HandleMapMovementClick(MouseButtonEventArgs mouseArgs, MouseButton mouseButtons)
         {
             if (mouseButtons == MouseButton.PrimaryButton)
             {
@@ -104,11 +107,13 @@ namespace RogueBasin
                     shifted = true;
                 }
 
-                return ExecuteTargettedAction(shifted);
+                return HandleMapPrimaryMouseClick(mouseArgs, shifted);
             }
             else
             {
                 //Secondary button - switch targetting modes
+                var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
+
                 if (mouseTargettingAction == TargettingAction.MoveOrFire)
                 {
                     mouseTargettingAction = TargettingAction.MoveOrThrow;
@@ -122,6 +127,24 @@ namespace RogueBasin
 
                 return new ActionResult(false, false);
             }
+        }
+
+        private ActionResult HandleMapPrimaryMouseClick(MouseButtonEventArgs mouseArgs, bool shifted)
+        {
+            //If on the UI
+            if(mouseArgs.Position.Y >= Screen.Instance.playerUI_TL.y)
+            {
+                return ExecuteUIPrimaryMouseClick(new Point(mouseArgs.Position), shifted);
+            }
+            else
+            {
+                return ExecuteTargettedAction(shifted);
+            }
+        }
+
+        private ActionResult ExecuteUIPrimaryMouseClick(Point clickLocation, bool shifted)
+        {
+            return gameActions.ItemSelectOverlay(this);
         }
 
         public void UpdateMapTargetting()
@@ -331,8 +354,6 @@ namespace RogueBasin
 
         private ActionResult PlayerAction(ActionState action, MouseButtonEventArgs mouseArgs)
         {
-            var clickLocation = Screen.Instance.PixelToCoord(mouseArgs.Position);
-
             bool timeAdvances = false;
             bool centreOnPC = false;
 
@@ -348,16 +369,20 @@ namespace RogueBasin
             switch (inputState)
             {
                 case InputState.Targetting:
-                    return TargettingMouseEvent(clickLocation, mouseArgs.Button);
+                    return TargettingMouseEvent(mouseArgs, mouseArgs.Button);
 
                 //Normal movement on the map
                 case InputState.MapMovement:
 
-                    return HandleMapMovementClick(clickLocation, mouseArgs.Button);
+                    return HandleMapMovementClick(mouseArgs, mouseArgs.Button);
 
                 case InputState.MovieDisplay:
 
                     MovieDisplayMouseEvent(mouseArgs);
+                    break;
+
+                case InputState.SpecialScreen:
+                    SpecialScreenMouseButtonEventHandler(mouseArgs);
                     break;
             }
 
@@ -1133,10 +1158,11 @@ namespace RogueBasin
             return new ActionResult(false, false);
         }
 
-        public void SetSpecialScreenAndHandler(Action specialScreen, Action<KeyboardEventArgs> specialScreenHandler)
+        public void SetSpecialScreenAndHandler(Action specialScreen, Action<KeyboardEventArgs> specialScreenKeyboardHandler, Action<MouseButtonEventArgs> specialScreenMouseButtonEventHandler)
         {
             Screen.Instance.SpecialScreen = specialScreen;
-            SpecialScreenKeyboardHandler = specialScreenHandler;
+            SpecialScreenKeyboardHandler = specialScreenKeyboardHandler;
+            SpecialScreenMouseButtonEventHandler = specialScreenMouseButtonEventHandler;
             inputState = InputState.SpecialScreen;
         }
 
@@ -1147,7 +1173,17 @@ namespace RogueBasin
             inputState = InputState.MapMovement;
         }
 
-
+        private void SpecialScreenMouseButtonEvent(MouseButtonEventArgs args)
+        {
+            if (SpecialScreenMouseButtonEventHandler != null)
+            {
+                SpecialScreenMouseButtonEventHandler(args);
+            }
+            else
+            {
+                ClearSpecialScreenAndHandler();
+            }
+        }
 
         private void SpecialScreenKeyboardEvent(KeyboardEventArgs args)
         {

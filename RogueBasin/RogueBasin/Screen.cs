@@ -73,72 +73,78 @@ namespace RogueBasin
         Point msgDisplayBotRight;
         public int msgDisplayNumLines;
 
-        Point hitpointsOffset;     
+        Point hitpointsOffset;
 
-        System.Drawing.Color inFOVTerrainColor = System.Drawing.Color.White;
-        System.Drawing.Color seenNotInFOVTerrainColor = System.Drawing.Color.Gray;
-        System.Drawing.Color neverSeenFOVTerrainColor;
-        System.Drawing.Color inMonsterFOVTerrainColor = System.Drawing.Color.Blue;
+        /// <summary>
+        /// UI coordinates (used by special screens)
+        /// </summary>
 
-        System.Drawing.Color statsColor = System.Drawing.Color.FromArgb(255, 108, 215, 224);
-        System.Drawing.Color nothingColor = System.Drawing.Color.Gray;
+        public Point playerUI_TL = new Point(0, 0);
+        public Point playerTextUI_TL = new Point(0, 0);
+        public Point playerTextUI_UsefulTL = new Point(0, 0);
+        public Point monsterTextUI_TL = new Point(0, 0);
 
-        System.Drawing.Color creatureColor = System.Drawing.Color.White;
-        System.Drawing.Color itemColor = System.Drawing.Color.Red;
-        System.Drawing.Color featureColor = System.Drawing.Color.White;
+        /// <summary>
+        /// Standard colours
+        /// </summary>
+        Color inFOVTerrainColor = Color.White;
+        Color seenNotInFOVTerrainColor = Color.Gray;
+        Color neverSeenFOVTerrainColor;
+        Color inMonsterFOVTerrainColor = Color.Blue;
 
-        System.Drawing.Color hiddenColor = System.Drawing.Color.Black;
+        public Color statsColor = Color.FromArgb(255, 108, 215, 224);
+        public Color nothingColor = Color.Gray;
 
-        System.Drawing.Color charmBackground = System.Drawing.Color.DarkKhaki;
-        System.Drawing.Color passiveBackground = System.Drawing.Color.DarkMagenta;
-        System.Drawing.Color uniqueBackground = System.Drawing.Color.DarkCyan;
-        System.Drawing.Color inRangeBackground = System.Drawing.Color.DeepSkyBlue;
-        System.Drawing.Color inRangeAndAggressiveBackground = System.Drawing.Color.Purple;
-        System.Drawing.Color stunnedBackground = System.Drawing.Color.DarkCyan;
-        System.Drawing.Color investigateBackground = System.Drawing.Color.DarkGreen;
-        System.Drawing.Color pursuitBackground = System.Drawing.Color.DarkRed;
-        System.Drawing.Color normalBackground = System.Drawing.Color.Black;
-        System.Drawing.Color normalForeground = System.Drawing.Color.White;
-        System.Drawing.Color targettedBackground = System.Drawing.Color.DarkSlateGray;
+        Color creatureColor = Color.White;
+        Color itemColor = Color.Red;
+        Color featureColor = Color.White;
 
-        System.Drawing.Color statsFrameColor = System.Drawing.Color.MediumSeaGreen;
-        System.Drawing.Color mapFrameColor = System.Drawing.Color.Khaki;
+        Color hiddenColor = Color.Black;
 
-        System.Drawing.Color targetBackground = System.Drawing.Color.White;
-        System.Drawing.Color targetForeground = System.Drawing.Color.Black;
+        Color charmBackground = Color.DarkKhaki;
+        Color passiveBackground = Color.DarkMagenta;
+        Color uniqueBackground = Color.DarkCyan;
+        Color inRangeBackground = Color.DeepSkyBlue;
+        Color inRangeAndAggressiveBackground = Color.Purple;
+        Color stunnedBackground = Color.DarkCyan;
+        Color investigateBackground = Color.DarkGreen;
+        Color pursuitBackground = Color.DarkRed;
+        Color normalBackground = Color.Black;
+        Color normalForeground = Color.White;
+        Color targettedBackground = Color.DarkSlateGray;
 
-        System.Drawing.Color literalColor = System.Drawing.Color.BurlyWood;
-        System.Drawing.Color literalTextColor = System.Drawing.Color.White;
+        Color statsFrameColor = Color.MediumSeaGreen;
+        Color mapFrameColor = Color.Khaki;
 
-        System.Drawing.Color headingColor = System.Drawing.Color.Yellow;
+        Color targetBackground = Color.White;
+        Color targetForeground = Color.Black;
 
-        System.Drawing.Color messageColor = System.Drawing.Color.SkyBlue;
-        System.Drawing.Color messageBackgroundColor = System.Drawing.Color.Black;
+        Color literalColor = Color.BurlyWood;
+        Color literalTextColor = Color.White;
+
+        Color headingColor = Color.Yellow;
+
+        Color messageColor = Color.SkyBlue;
+        Color messageBackgroundColor = Color.Black;
         double messageBackgroundAlpha = 0.6;
-        System.Drawing.Color titleColor = System.Drawing.Color.CadetBlue;
+        Color titleColor = Color.CadetBlue;
 
-        System.Drawing.Color soundColor = System.Drawing.Color.Yellow;
+        Color soundColor = Color.Yellow;
 
-        System.Drawing.Color normalMovieColor = System.Drawing.Color.MediumSeaGreen;
-        System.Drawing.Color flashMovieColor = System.Drawing.Color.Red;
+        Color normalMovieColor = Color.MediumSeaGreen;
+        Color flashMovieColor = Color.Red;
 
-        System.Drawing.Color promptColor = System.Drawing.Color.Orange;
+        Color promptColor = Color.Orange;
 
         int movieFrameWidth = 4;
 
-        const char heartChar = (char)567;
-        const char shieldChar = (char)561;
-        const char ammoChar = (char)568;
-        const char grenadeChar = (char)297;
-        const char batteryChar = (char)308;
-
-        System.Drawing.Color orangeActivatedColor = System.Drawing.Color.DarkOrange;
-        System.Drawing.Color batteryActivatedColor = System.Drawing.Color.SlateBlue;
-        System.Drawing.Color orangeHighlightedColor = System.Drawing.Color.Gold;
-        System.Drawing.Color orangeDisactivatedColor = System.Drawing.Color.SaddleBrown;
-        System.Drawing.Color disabledColor = System.Drawing.Color.DimGray;
-        System.Drawing.Color weaponColor = System.Drawing.Color.LightSteelBlue;
-        System.Drawing.Color heartColor = System.Drawing.Color.Crimson;
+        Color orangeActivatedColor = Color.DarkOrange;
+        Color batteryActivatedColor = Color.SlateBlue;
+        Color orangeHighlightedColor = Color.Gold;
+        Color orangeDisactivatedColor = Color.SaddleBrown;
+        Color disabledColor = Color.DimGray;
+        Color weaponColor = Color.LightSteelBlue;
+        Color heartColor = Color.Crimson;
         
         //Keep enough state so that we can draw each screen
         string lastMessage = "";
@@ -177,7 +183,7 @@ namespace RogueBasin
         public TargettingAction TargetAction { get; set; }
         public TargettingAction TargetSubAction { get; set; }
 
-        public System.Drawing.Color PCColor { get; set;}
+        public Color PCColor { get; set;}
 
         private bool seeAllMap = false;
         private bool seeDebugMarkers = false;
@@ -296,11 +302,11 @@ namespace RogueBasin
             MsgLogWrapWidth = 80;
 
             //Colors
-            neverSeenFOVTerrainColor = System.Drawing.Color.Gray;// Color.FromRGB(90, 90, 90);
+            neverSeenFOVTerrainColor = Color.Gray;// Color.FromRGB(90, 90, 90);
 
             TotalKills = null;
 
-            PCColor = System.Drawing.Color.White;
+            PCColor = Color.White;
 
             NeedsUpdate = true;
 
@@ -398,7 +404,7 @@ namespace RogueBasin
             renderer.Setup(ScreenWidth, ScreenHeight);
         }
 
-        public void ShowMessageLine(string msg, System.Drawing.Color color)
+        public void ShowMessageLine(string msg, Color color)
         {
             var textDimensions = TextDimensions(msg);
             DrawRect(new Rectangle(msgDisplayTopLeft.ToPoint(), textDimensions), messageBackgroundColor, messageBackgroundAlpha);
@@ -498,7 +504,7 @@ namespace RogueBasin
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="color"></param>
-        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor)
         {
             DrawPathLine(layerNo, start, end, foregroundColor, backgroundColor, (char)0);
         }
@@ -509,7 +515,7 @@ namespace RogueBasin
         /// <param name="start"></param>
         /// <param name="end"></param>
         /// <param name="color"></param>
-        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor, char drawChar)
+        protected void DrawPathLine(TileLevel layerNo, Point start, Point end, Color foregroundColor, Color backgroundColor, char drawChar)
         {
             //Draw the line overlay
 
@@ -690,7 +696,7 @@ namespace RogueBasin
             foreach (MovieFrame frame in movie.Frames)
             {
                 //Draw frame
-                DrawFramePixel(frameTL.x, frameTL.y, bufferedWidth, bufferedHeight, true, System.Drawing.Color.White, movieFrameWidth);
+                DrawFramePixel(frameTL.x, frameTL.y, bufferedWidth, bufferedHeight, true, Color.White, movieFrameWidth);
 
                 //Draw content
                 List<string> scanLines = frame.ScanLines;
@@ -706,11 +712,11 @@ namespace RogueBasin
             }
         }
 
-        public void DrawFramePixel(int x, int y, int width, int height, bool clear, System.Drawing.Color color, int lineWidth)
+        public void DrawFramePixel(int x, int y, int width, int height, bool clear, Color color, int lineWidth)
         {
             if (clear)
             {
-                renderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
+                renderer.DrawRectangle(new Rectangle(x, y, width, height), Color.Black);
             }
 
             for (int j = 0; j < lineWidth; j++) {
@@ -837,7 +843,7 @@ namespace RogueBasin
             return false;
         }
 
-        private System.Drawing.Color ColorInterpolate(System.Drawing.Color from, System.Drawing.Color to, double degree)
+        private Color ColorInterpolate(Color from, Color to, double degree)
         {
             return ColorInterpolator.InterpolateBetween(from, to, degree);
         }
@@ -848,7 +854,7 @@ namespace RogueBasin
                 return;
          
             Point PClocation = player.LocationMap;
-            System.Drawing.Color PCDrawColor = PCColor;
+            Color PCDrawColor = PCColor;
 
             if (SeeDebugMarkers)
             {
@@ -856,7 +862,7 @@ namespace RogueBasin
 
                 if (pcSquare.InMonsterFOV)
                 {
-                    PCDrawColor = ColorInterpolate(PCDrawColor, System.Drawing.Color.Red, 0.4);
+                    PCDrawColor = ColorInterpolate(PCDrawColor, Color.Red, 0.4);
                 }
             }
 
@@ -871,7 +877,7 @@ namespace RogueBasin
 
             if (hasActiveWetware != null)
             {
-                colorToUse = System.Drawing.Color.LightSkyBlue;
+                colorToUse = Color.LightSkyBlue;
 
                 if (hasActiveWetware.GetType() == typeof(Items.StealthWare))
                     pcRepresentation = (char)256;
@@ -1019,7 +1025,7 @@ namespace RogueBasin
             get; set;
         }
 
-        private System.Drawing.Color textColor = System.Drawing.Color.Khaki;
+        private Color textColor = Color.Khaki;
         
         int textLineNumber;
 
@@ -1027,10 +1033,10 @@ namespace RogueBasin
         {
             textLineNumber = 0;
 
-            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, System.Drawing.Color.Black, 1);
-            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, System.Drawing.Color.Blue, movieFrameWidth);
+            DrawFramePixel(0, 0, ScreenWidth, ScreenHeight, true, Color.Black, 1);
+            DrawFramePixel(ScreenWidth / 8, ScreenHeight / 8, 6 * ScreenWidth / 8, 6 * ScreenHeight / 8, true, Color.Blue, movieFrameWidth);
 
-            var titleColor = System.Drawing.Color.Khaki;
+            var titleColor = Color.Khaki;
 
             var centreXOffset = ScreenWidth / 4;
             var centreYOffset = ScreenHeight / 8;
@@ -1144,7 +1150,7 @@ namespace RogueBasin
              */
         }
 
-        private void DrawNextLine(string msg, Point centreOrigin, System.Drawing.Color color) {
+        private void DrawNextLine(string msg, Point centreOrigin, Color color) {
             var pt = centreOrigin + new Point(0, textLineNumber * 40);
             DrawLargeText(msg, new Point(pt.x, pt.y), LineAlignment.Center, color);
             textLineNumber++;
@@ -1371,16 +1377,16 @@ namespace RogueBasin
         /// </summary>
         void ClearRect(int x, int y, int width, int height)
         {
-            renderer.DrawRectangle(new Rectangle(x, y, width, height), System.Drawing.Color.Black);
+            renderer.DrawRectangle(new Rectangle(x, y, width, height), Color.Black);
         }
 
-        private void DrawUISpriteByCentre(string id, Point point)
+        public void DrawUISpriteByCentre(string id, Point point)
         {
             Size spriteDim = UISpriteSize(id);
             DrawUISprite(id, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2));
         }
 
-        private void DrawUISpriteByCentre(MapObject mapObject, Point point, double alpha = 1.0)
+        public void DrawUISpriteByCentre(MapObject mapObject, Point point, double alpha = 1.0)
         {
             
             if (mapObject.UISprite != null)
@@ -1395,7 +1401,7 @@ namespace RogueBasin
                 
                 //Apply an alphaing effect to the colors, since alphaing on Trauma sprites doesn't seem to work now
                 if(alpha < 0.99) {
-                   colors = new LibtcodColorFlags(ColorInterpolate(mapObject.RepresentationColor(), System.Drawing.Color.Black, alpha));
+                   colors = new LibtcodColorFlags(ColorInterpolate(mapObject.RepresentationColor(), Color.Black, alpha));
                 }
 
                 DrawTraumaUISprite(mapObject.Representation, new Point(point.x - spriteDim.Width / 2, point.y - spriteDim.Height / 2), colors, alpha);
@@ -1430,7 +1436,7 @@ namespace RogueBasin
             }
         }
 
-        private void DrawGraduatedBarVertical(string id, double fullness, Rectangle barArea, double spacing)
+        public void DrawGraduatedBarVertical(string id, double fullness, Rectangle barArea, double spacing)
         {
             Size barSize = UISpriteSize(id);
             double barSpacing = (barSize.Height * (spacing));
@@ -1444,35 +1450,74 @@ namespace RogueBasin
             }
         }
 
-        Point playerUI_TL = new Point(0, 0);
-        Point playerTextUI_TL = new Point(0, 0);
-        Point playerTextUI_UsefulTL = new Point(0, 0);
-        Point monsterTextUI_TL = new Point(0, 0);
-
-        private Point UIScale(Point p)
+        public Point UIScale(Point p)
         {
             return p * UIScaling;
         }
 
-        private int UIScale(int coord)
+        public int UIScale(int coord)
         {
             return (int)Math.Round(coord * UIScaling);
         }
 
-        private Size UIScale(Size size)
+        public Size UIScale(Size size)
         {
             return new Size(UIScale(size.Width), UIScale(size.Height));
         }
+
+        //Calculate some point offsets
+        public Point rangedWeaponUICenter;
+        public Size rangedWeaponUISize;
+        public Point playerRangedTextOffset;
+        public Point rangedHelpOffset;
+        public Point ammoBarOffset_TL;
+        public Size ammoBarArea;
+
+        public Point meleeWeaponUICenter;
+        public Point playerMeleeTextOffset;
+
+        public Point utilityUICenter;
+        public Size utilityNumBarArea;
+        public Point itemNoBarOffset_TL;
+        public Point utilityHelpOffset;
+        public Point utilityRotateLeftOffset;
+        public Point utilityRotateRightOffset;
+
+        public Point wetwareUICenter;
+        public Point energyBarOffset_TL;
+        public Point wetwareHelpOffset;
+        public Size wetwareChargeBarArea;
+        public Point wetwareRotateLeftOffset;
+        public Point wetwareRotateRightOffset;
 
         private void DrawUI()
         {
             Player player = Game.Dungeon.Player;
 
             //Calculate some point offsets
-            Point rangedWeaponUICenter = UIScale(new Point(160, 92));
-            Point meleeWeaponUICenter = UIScale(new Point(38, 92));
-            Point utilityUICenter = UIScale(new Point(300, 92));
-            Point wetwareUICenter = UIScale(new Point(390, 92));
+            rangedWeaponUICenter = UIScale(new Point(160, 92));
+            rangedWeaponUISize = UIScale(new Size(158, 62));
+            playerRangedTextOffset = UIScale(new Point(210, 117));
+            rangedHelpOffset = UIScale(new Point(218, 74));
+            ammoBarOffset_TL = UIScale(new Point(86, 67));
+            ammoBarArea = UIScale(new Size(20, 54));
+
+            meleeWeaponUICenter = UIScale(new Point(38, 92));
+            playerMeleeTextOffset = UIScale(new Point(40, 117));
+
+            utilityUICenter = UIScale(new Point(300, 92));
+            utilityNumBarArea = UIScale(new Size(20, 54));
+            itemNoBarOffset_TL = UIScale(new Point(255, 67));
+            utilityHelpOffset = UIScale(new Point(316, 74));
+            utilityRotateLeftOffset = UIScale(new Point(280, 117));
+            utilityRotateRightOffset = UIScale(new Point(316, 117));
+
+            wetwareUICenter = UIScale(new Point(390, 92));
+            energyBarOffset_TL = UIScale(new Point(345, 67));
+            wetwareHelpOffset = UIScale(new Point(406, 74));
+            wetwareChargeBarArea = UIScale(new Size(20, 54));
+            wetwareRotateLeftOffset = UIScale(new Point(370, 117));
+            wetwareRotateRightOffset = UIScale(new Point(406, 117));
 
             var lineHeight = 15;
 
@@ -1509,16 +1554,16 @@ namespace RogueBasin
                 
                 //Draw bullets
                 double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();
-                var ammoBarTL = playerUI_TL + UIScale(new Point(86, 67));
-                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
+                var ammoBarTL = playerUI_TL + ammoBarOffset_TL;
+                DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), ammoBarArea), 0.1);
 
                 //Ranged Damage base
-                var playerRangedTextOffset = UIScale(new Point(210, 117));
+                
                 var rangedStr = "DMG: " + rangedDamage;
                 DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
                 //Help
-                var rangedHelpOffset = UIScale(new Point(218, 74));
+                
                 var rangedHelp = "(F)";
                 DrawText(rangedHelp, playerUI_TL + rangedHelpOffset, LineAlignment.Center, statsColor);
             }
@@ -1534,9 +1579,8 @@ namespace RogueBasin
 
                 var meleeDamage = Game.Dungeon.Player.ScaleMeleeDamage(meleeWeapon, weaponE.MeleeDamage());
 
-                var playerRangedTextOffset = UIScale(new Point(40, 117));
                 var rangedStr = "DMG: " + meleeDamage;
-                DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
+                DrawSmallUIText(rangedStr, playerUI_TL + playerMeleeTextOffset, LineAlignment.Center, statsColor);
 
             }
 
@@ -1549,15 +1593,13 @@ namespace RogueBasin
 
                 //Draw no of items
                 double itemNoRatio = Math.Min(player.GetNoItemsOfSameType(utility) / (double)10.0, 1.0);
-                var itemNoBarTL = playerUI_TL + UIScale(new Point(255, 67));
-                DrawGraduatedBarVertical("ui_bullet", itemNoRatio, new Rectangle(itemNoBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
+                DrawGraduatedBarVertical("ui_bullet", itemNoRatio, new Rectangle((playerUI_TL + itemNoBarOffset_TL).ToPoint(), utilityNumBarArea), 0.1);
             }
 
-            var utilityHelpOffset = UIScale(new Point(316, 74));
             var utilityHelp = "(T)";
             DrawUIText(utilityHelp, playerUI_TL + utilityHelpOffset, LineAlignment.Center, statsColor);
-            DrawSmallUIText("(E)", playerUI_TL + UIScale(new Point(280, 117)), LineAlignment.Center, statsColor);
-            DrawSmallUIText("(R)", playerUI_TL + UIScale(new Point(316, 117)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("(E)", playerUI_TL + utilityRotateLeftOffset, LineAlignment.Center, statsColor);
+            DrawSmallUIText("(R)", playerUI_TL + utilityRotateRightOffset, LineAlignment.Center, statsColor);
 
             //Draw equipped wetware
             Item wetware = player.GetSelectedWetware();
@@ -1570,11 +1612,11 @@ namespace RogueBasin
                 
                 if (player.GetTurnsDisabledForSelectedWetware() > 0)
                 {
-                    wetwareRenderColor = new LibtcodColorFlags(ColorInterpolate(wetware.RepresentationColor(), System.Drawing.Color.Black, 0.5));
+                    wetwareRenderColor = new LibtcodColorFlags(ColorInterpolate(wetware.RepresentationColor(), Color.Black, 0.5));
                 }
                 else if (player.GetEquippedWetware() != null)
                 {
-                    wetwareRenderColor = new LibtcodColorFlags(ColorInterpolate(wetware.RepresentationColor(), System.Drawing.Color.Red, 0.5));
+                    wetwareRenderColor = new LibtcodColorFlags(ColorInterpolate(wetware.RepresentationColor(), Color.Red, 0.5));
                 }
 
                 DrawColourizedTraumaUISpriteByCentre(wetware, playerUI_TL + wetwareUICenter, wetwareRenderColor);
@@ -1582,15 +1624,14 @@ namespace RogueBasin
 
             //Draw energy
             double energyRatio = player.Energy / (double)player.MaxEnergy;
-            var energyBarTL = playerUI_TL + UIScale(new Point(345, 67));
-            DrawGraduatedBarVertical("ui_bullet", energyRatio, new Rectangle(energyBarTL.ToPoint(), UIScale(new Size(20, 54))), 0.1);
+            var energyBarTL = playerUI_TL + energyBarOffset_TL;
+            DrawGraduatedBarVertical("ui_bullet", energyRatio, new Rectangle(energyBarTL.ToPoint(), wetwareChargeBarArea), 0.1);
 
             //Draw wetware help
-            var wetwareHelpOffset = UIScale(new Point(406, 74));
             var wetwareHelp = "(W)";
             DrawUIText(wetwareHelp, playerUI_TL + wetwareHelpOffset, LineAlignment.Center, statsColor);
-            DrawSmallUIText("(A)", playerUI_TL + UIScale(new Point(370, 117)), LineAlignment.Center, statsColor);
-            DrawSmallUIText("(S)", playerUI_TL + UIScale(new Point(406, 117)), LineAlignment.Center, statsColor);
+            DrawSmallUIText("(A)", playerUI_TL + wetwareRotateLeftOffset, LineAlignment.Center, statsColor);
+            DrawSmallUIText("(S)", playerUI_TL + wetwareRotateRightOffset, LineAlignment.Center, statsColor);
 
 
             //Draw Shield
@@ -1668,57 +1709,57 @@ namespace RogueBasin
             renderer.DrawText(msg, p, largeTextSize, LineAlignment.Left, statsColor);
         }
 
-        public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, Color color)
         {
             renderer.DrawText(msg, p, largeTextSize, lineAlignment, color);
         }
 
-        public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, Color color)
         {
             renderer.DrawText(msg, p, smallTextSize, lineAlignment, color);
         }
 
-        public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, Color color)
         {
             renderer.DrawText(msg, p, largeTextSize, lineAlignment, color);
         }
 
-        public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color color)
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, Color color)
         {
             renderer.DrawText(msg, p, size, lineAlignment, color);
         }
 
-        public void DrawText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, Color foregroundColor, Color backgroundColor)
         {
             renderer.DrawText(msg, p, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
-        public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        public void DrawSmallText(string msg, Point p, LineAlignment lineAlignment, Color foregroundColor, Color backgroundColor)
         {
             renderer.DrawText(msg, p, smallTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
-        public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        public void DrawLargeText(string msg, Point p, LineAlignment lineAlignment, Color foregroundColor, Color backgroundColor)
         {
             renderer.DrawText(msg, p, largeTextSize, lineAlignment, foregroundColor, backgroundColor);
         }
 
-        public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor)
+        public void DrawText(string msg, Point p, LineAlignment lineAlignment, int size, Color foregroundColor, Color backgroundColor)
         {
             renderer.DrawText(msg, p, size, lineAlignment, foregroundColor, backgroundColor);
         }
 
-        void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color color)
+        void DrawTextWidth(string msg, Point p, int width, Color color)
         {
             renderer.DrawTextWidth(msg, p, largeTextSize, width, color);
         }
 
-        void DrawTextWidth(string msg, Point p, int width, System.Drawing.Color foregroundColor, System.Drawing.Color backgroundColor, double alpha)
+        void DrawTextWidth(string msg, Point p, int width, Color foregroundColor, Color backgroundColor, double alpha)
         {
             renderer.DrawTextWidth(msg, p, largeTextSize, width, foregroundColor, backgroundColor, alpha);
         }
 
-        void DrawRect(Rectangle rect, System.Drawing.Color color, double alpha = 1.0)
+        void DrawRect(Rectangle rect, Color color, double alpha = 1.0)
         {
             renderer.DrawRectangle(rect, color, alpha);
         }
@@ -1733,12 +1774,12 @@ namespace RogueBasin
             DrawUIText(msg, p, LineAlignment.Left, statsColor);
         }
 
-        private void DrawUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        private void DrawUIText(string msg, Point p, LineAlignment lineAlignment, Color color)
         {
             renderer.DrawText(msg, p, (int)Math.Round(largeTextSize * UIScaling), lineAlignment, color);
         }
 
-        private void DrawSmallUIText(string msg, Point p, LineAlignment lineAlignment, System.Drawing.Color color)
+        public void DrawSmallUIText(string msg, Point p, LineAlignment lineAlignment, Color color)
         {
             renderer.DrawText(msg, p, (int)Math.Round(smallTextSize * UIScaling), lineAlignment, color);
         }
@@ -1943,14 +1984,14 @@ namespace RogueBasin
                 MapSquare itemSquare = Game.Dungeon.Levels[item.LocationLevel].mapSquares[item.LocationMap.x, item.LocationMap.y];
 
                 //Use the item's colour if it has one
-                System.Drawing.Color itemColorToUse = item.GetColour();
+                Color itemColorToUse = item.GetColour();
 
                 IEquippableItem equipItem = item as IEquippableItem;
                 if (equipItem != null)
                 {
                     //Show no ammo items in a neutral colour
                     if (equipItem.HasFireAction() && equipItem.RemainingAmmo() == 0)
-                        itemColorToUse = System.Drawing.Color.Gray;
+                        itemColorToUse = Color.Gray;
                 }
 
                 //Color itemColorToUse = itemColor;
@@ -1966,7 +2007,7 @@ namespace RogueBasin
                 {
                     //Not in FOV now but seen this adventure
                     //Don't draw items in squares seen in previous adventures (since the items have respawned)
-                    itemColorToUse = ColorInterpolate(item.GetColour(), System.Drawing.Color.Black, 0.5);
+                    itemColorToUse = ColorInterpolate(item.GetColour(), Color.Black, 0.5);
                     spriteAlpha = 0.3;
                 }
                 else
@@ -2010,7 +2051,7 @@ namespace RogueBasin
                 //Colour depending on FOV (for development)
                 MapSquare featureSquare = Game.Dungeon.Levels[thisLock.LocationLevel].mapSquares[thisLock.LocationMap.x, thisLock.LocationMap.y];
 
-                System.Drawing.Color featureColor = thisLock.RepresentationColor();
+                Color featureColor = thisLock.RepresentationColor();
                 double spriteAlpha = 0.0;
 
                 bool drawFeature = true;
@@ -2022,7 +2063,7 @@ namespace RogueBasin
                 else if (featureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    featureColor = ColorInterpolate(featureColor, System.Drawing.Color.Black, 0.3);
+                    featureColor = ColorInterpolate(featureColor, Color.Black, 0.3);
                     spriteAlpha = 0.3;
                 }
                 else
@@ -2062,7 +2103,7 @@ namespace RogueBasin
                 //Colour depending on FOV (for development)
                 MapSquare featureSquare = Game.Dungeon.Levels[feature.LocationLevel].mapSquares[feature.LocationMap.x, feature.LocationMap.y];
 
-                System.Drawing.Color featureColor = feature.RepresentationColor();
+                Color featureColor = feature.RepresentationColor();
                 double spriteAlpha = 1.0;
                 bool drawFeature = true;
 
@@ -2074,7 +2115,7 @@ namespace RogueBasin
                 else if (featureSquare.SeenByPlayer)
                 {
                     //Not in FOV but seen
-                    featureColor = ColorInterpolate(featureColor, System.Drawing.Color.Black, 0.3);
+                    featureColor = ColorInterpolate(featureColor, Color.Black, 0.3);
                     spriteAlpha = 0.3;
 
                     //rootConsole.ForegroundColor = seenNotInFOVTerrainColor;
@@ -2120,7 +2161,7 @@ namespace RogueBasin
                 if (!creature.Alive)
                     continue;
 
-                System.Drawing.Color creatureColor = creature.RepresentationColor();
+                Color creatureColor = creature.RepresentationColor();
 
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
                 bool drawCreature = true;
@@ -2207,10 +2248,10 @@ namespace RogueBasin
 
                 //Colour depending on FOV (for development)
                 MapSquare creatureSquare = Game.Dungeon.Levels[creature.LocationLevel].mapSquares[creature.LocationMap.x, creature.LocationMap.y];
-                System.Drawing.Color creatureColor = creature.RepresentationColor();
+                Color creatureColor = creature.RepresentationColor();
 
-                System.Drawing.Color foregroundColor;
-                System.Drawing.Color backgroundColor;
+                Color foregroundColor;
+                Color backgroundColor;
 
                 //Shouldn't really do this here but see if we can get away with it
                 CreatureFOV currentFOV = Game.Dungeon.CalculateCreatureFOV(Game.Dungeon.Player);
@@ -2248,7 +2289,7 @@ namespace RogueBasin
                 {
                     if (creatureSquare.InMonsterFOV)
                     {
-                        creatureColor = ColorInterpolate(creatureColor, System.Drawing.Color.Red, 0.4);
+                        creatureColor = ColorInterpolate(creatureColor, Color.Red, 0.4);
                     }
 
                     //Draw waypoints
@@ -2276,7 +2317,7 @@ namespace RogueBasin
                 if (drawCreature)
                 {
                     foregroundColor = creatureColor;
-                    backgroundColor = System.Drawing.Color.Transparent;
+                    backgroundColor = Color.Transparent;
                     string overlapSprite = null;
 
                     //Overlay depends on status
@@ -2438,8 +2479,8 @@ namespace RogueBasin
                     int screenY = mapTopLeftBase.y + j;
 
                     char screenChar;
-                    System.Drawing.Color baseDrawColor;
-                    System.Drawing.Color drawColor;
+                    Color baseDrawColor;
+                    Color drawColor;
                     double spriteTransparency = 1.0;
                     bool drawSquare = true;
 
@@ -2520,7 +2561,7 @@ namespace RogueBasin
                     else if (map.mapSquares[i, j].SeenByPlayer)
                     {
                         //Not in FOV but seen
-                        drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.6);
+                        drawColor = ColorInterpolate(baseDrawColor, Color.Black, 0.6);
                         spriteTransparency = 0.5;
                     }
                     else
@@ -2528,7 +2569,7 @@ namespace RogueBasin
                         //Never in FOV
                         if (SeeDebugMarkers)
                         {
-                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Black, 0.7);
+                            drawColor = ColorInterpolate(baseDrawColor, Color.Black, 0.7);
                             spriteTransparency = 0.7;
                         }
                         else
@@ -2544,7 +2585,7 @@ namespace RogueBasin
                         //Draw player FOV explicitally
                         if (map.mapSquares[i, j].InPlayerFOV)
                         {
-                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Blue, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, Color.Blue, 0.6);
                             effectSprite = "greentarget";
                             effectTransparency = 0.5;
                         }
@@ -2552,7 +2593,7 @@ namespace RogueBasin
                         //Draw monster FOV
                         if (map.mapSquares[i, j].InMonsterFOV)
                         {
-                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Red, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, Color.Red, 0.6);
                             effectSprite = "redtarget";
                             effectTransparency = 0.5;
                         }
@@ -2560,7 +2601,7 @@ namespace RogueBasin
                         //Draw monster stealth radius
                         if (map.mapSquares[i, j].InMonsterStealthRadius)
                         {
-                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.OrangeRed, 0.6);
+                            drawColor = ColorInterpolate(baseDrawColor, Color.OrangeRed, 0.6);
                             effectSprite = "orangetarget";
                             effectTransparency = 0.5;
                         }
@@ -2570,13 +2611,13 @@ namespace RogueBasin
                         {
                             effectSprite = "sound";
                             effectTransparency = map.mapSquares[i, j].SoundMag;
-                            drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Yellow, map.mapSquares[i, j].SoundMag);
+                            drawColor = ColorInterpolate(baseDrawColor, Color.Yellow, map.mapSquares[i, j].SoundMag);
                         }
                     }
 
                     if (Game.Dungeon.Player.IsEffectActive(typeof(PlayerEffects.SeeFOV)) && map.mapSquares[i, j].InMonsterFOV)
                     {
-                        drawColor = ColorInterpolate(baseDrawColor, System.Drawing.Color.Green, 0.7);
+                        drawColor = ColorInterpolate(baseDrawColor, Color.Green, 0.7);
                     }
 
                     Point mapTerrainLoc = new Point(i, j);
@@ -2632,7 +2673,7 @@ namespace RogueBasin
         /// Print message in message bar
         /// </summary>
         /// <param name="message"></param>
-        internal void PrintMessage(string message, System.Drawing.Color color)
+        internal void PrintMessage(string message, Color color)
         {
             //Update state
             lastMessage = message;
@@ -2654,7 +2695,7 @@ namespace RogueBasin
             ClearRect(topLeft.x, topLeft.y, width, 1);
 
             //Display new message
-            DrawTextWidth(message, topLeft, width, System.Drawing.Color.White);
+            DrawTextWidth(message, topLeft, width, Color.White);
         }
 
         void ClearMessageBar()
@@ -2759,7 +2800,7 @@ namespace RogueBasin
         /// <param name="point"></param>
         /// <param name="point_3"></param>
         /// <param name="color"></param>
-        internal void DrawMissileAttack(Creature originCreature, Creature target, CombatResults result, System.Drawing.Color color)
+        internal void DrawMissileAttack(Creature originCreature, Creature target, CombatResults result, Color color)
         {
             if (!CombatAnimations)
                 return;
@@ -2777,14 +2818,14 @@ namespace RogueBasin
             //Calculate and draw the line overlay
             IEnumerable<Point> thisLineSquares = Utility.GetPointsOnLine(originCreature.LocationMap, target.LocationMap);
             DrawAreaAttackAnimation(thisLineSquares, AttackType.Bullet, true);    
-            //DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, System.Drawing.Color.Black);
+            //DrawPathLine(TileLevel.Animations, originCreature.LocationMap, target.LocationMap, color, Color.Black);
 
             //Flash the target if they were damaged
             //Draw them in either case so that we overwrite the missile animation on the target square with the creature
 
             if (targetSquare.InPlayerFOV)
             {
-                System.Drawing.Color colorToDraw = System.Drawing.Color.Red;
+                Color colorToDraw = Color.Red;
 
                 if (result == CombatResults.DefenderDamaged || result == CombatResults.DefenderDied)
                 {
@@ -2836,7 +2877,7 @@ namespace RogueBasin
                     if (isViewVisible(newTarget.LocationMap))
                     {
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)] = new TileEngine.TileCell(newTarget.GameSprite);
-                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(System.Drawing.Color.Red);
+                        tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].TileFlag = new LibtcodColorFlags(Color.Red);
                         tileMapLayer(TileLevel.Animations)[ViewRelative(newTarget.LocationMap)].Animation = new TileEngine.Animation(combationAnimationFrameDuration);
                     }
                 }*/

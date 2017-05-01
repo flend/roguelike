@@ -7,11 +7,11 @@ namespace RogueBasin
     {
         public static readonly Dictionary<int, Type> WeaponMapping = new Dictionary<int, Type> {
             
-            { 1, typeof(Items.Pistol) },
-            { 2, typeof(Items.Shotgun) },
-            { 3, typeof(Items.Laser) },
-            { 4, typeof(Items.AssaultRifle) },
-            { 5, typeof(Items.FragGrenade) },
+            { new Items.Pistol().Index(), typeof(Items.Pistol) },
+            { new Items.Shotgun().Index(), typeof(Items.Shotgun) },
+            { new Items.Laser().Index(), typeof(Items.Laser) },
+            { new Items.AssaultRifle().Index(), typeof(Items.AssaultRifle) },
+            { new Items.RocketLauncher().Index(), typeof(Items.RocketLauncher) },
             { 6, typeof(Items.StunGrenade) },
             { 7, typeof(Items.SoundGrenade) },
             { 8, typeof(Items.NanoRepair) },

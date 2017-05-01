@@ -35,7 +35,12 @@
 
         public int RemainingAmmo() {
             return Ammo;
-
         }
+
+        /// <summary>
+        /// Return a defined index used for sorting / maybe activation in future
+        /// </summary>
+        /// <returns></returns>
+        public abstract int Index();
     }
 }

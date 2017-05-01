@@ -301,5 +301,10 @@ namespace RogueBasin.Items
         {
             return new LineTargettingInfo(RangeFire());
         }
+
+        public override int Index()
+        {
+            return 1;
+        }
     }
 }

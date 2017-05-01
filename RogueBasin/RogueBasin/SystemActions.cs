@@ -109,7 +109,7 @@ namespace RogueBasin
 
             Game.Base.GameStarted = false;
 
-            inputHandler.SetSpecialScreenAndHandler(Screen.Instance.EndOfGameScreen, inputHandler.EndOfGameSelectionKeyHandler);
+            inputHandler.SetSpecialScreenAndHandler(Screen.Instance.EndOfGameScreen, inputHandler.EndOfGameSelectionKeyHandler, null);
         }
 
         public void QuitImmediately()

@@ -67,6 +67,7 @@
     <Compile Include="GraphVizExporter.cs" />
     <Compile Include="InputEvents.cs" />
     <Compile Include="InputHandler.cs" />
+    <Compile Include="ItemSelectOverlay.cs" />
     <Compile Include="LevelAndDifficulty.cs" />
     <Compile Include="LevelBuilder.cs" />
     <Compile Include="LevelGraph.cs" />

@@ -46,5 +46,11 @@
             Screen.Instance.ShowLogList = false;
         }
 
+        public ActionResult ItemSelectOverlay(InputHandler inputHandler)
+        {
+            var weaponOverlayScreen = new ItemSelectOverlay(inputHandler, Screen.Instance, Game.Dungeon.Player);
+            inputHandler.SetSpecialScreenAndHandler(weaponOverlayScreen.RenderItemSelectOverlay, weaponOverlayScreen.KeyboardEvent, weaponOverlayScreen.MouseButtonEvent);
+            return new ActionResult();
+        }
     }
 }

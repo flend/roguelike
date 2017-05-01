@@ -1850,6 +1850,11 @@ namespace RogueBasin
             return weaponSlot.equippedItem;
         }
 
+        public IEnumerable<Item> GetRangedWeaponsOrdered()
+        {
+            return Inventory.Items.Where(i => i is RangedWeapon).OrderBy(i => (i as RangedWeapon).Index());
+        }
+
         public Item GetEquippedMeleeWeaponAsItem()
         {
             EquipmentSlotInfo weaponSlot = this.EquipmentSlots.Find(x => x.slotType == EquipmentSlot.Melee);
