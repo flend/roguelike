@@ -1164,4 +1164,7 @@
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\tiles\throwpath.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\rangedweaponui.png" />
+  </ItemGroup>
 </Project>

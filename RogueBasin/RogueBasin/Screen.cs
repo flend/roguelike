@@ -1469,6 +1469,7 @@ namespace RogueBasin
         public Point rangedWeaponUICenter;
         public Size rangedWeaponUISize;
         public Point playerRangedTextOffset;
+        public Point rangedIndexOffset;
         public Point rangedHelpOffset;
         public Point ammoBarOffset_TL;
         public Size ammoBarArea;
@@ -1498,6 +1499,7 @@ namespace RogueBasin
             rangedWeaponUICenter = UIScale(new Point(160, 92));
             rangedWeaponUISize = UIScale(new Size(158, 62));
             playerRangedTextOffset = UIScale(new Point(210, 117));
+            rangedIndexOffset = UIScale(new Point(118, 74));
             rangedHelpOffset = UIScale(new Point(218, 74));
             ammoBarOffset_TL = UIScale(new Point(86, 67));
             ammoBarArea = UIScale(new Size(20, 54));
@@ -1562,6 +1564,10 @@ namespace RogueBasin
                 var rangedStr = "DMG: " + rangedDamage;
                 DrawSmallUIText(rangedStr, playerUI_TL + playerRangedTextOffset, LineAlignment.Center, statsColor);
 
+                //Index
+                var indexStr = "(" + weaponR.Index().ToString() +")";
+                DrawText(indexStr, playerUI_TL + rangedIndexOffset, LineAlignment.Center, statsColor);
+                
                 //Help
                 
                 var rangedHelp = "(F)";

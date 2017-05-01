@@ -53,6 +53,8 @@ namespace RogueBasin
             IEquippableItem weaponE = weapon as IEquippableItem;
             RangedWeapon weaponR = weapon as RangedWeapon;
 
+            var rangedWeaponUICentre = new Point(screen.playerUI_TL.x + screen.rangedWeaponUICenter.x, screen.playerUI_TL.y + screen.rangedWeaponUICenter.y) + yOffset;
+            screen.DrawUISpriteByCentre("rangedweaponui", rangedWeaponUICentre);
             screen.DrawUISpriteByCentre(weapon, new Point(screen.playerUI_TL.x + screen.rangedWeaponUICenter.x, screen.playerUI_TL.y + screen.rangedWeaponUICenter.y) + yOffset);
 
             var rangedDamage = player.ScaleRangedDamage(weaponE, weaponE.DamageBase());
@@ -67,10 +69,11 @@ namespace RogueBasin
             var rangedStr = "DMG: " + rangedDamage;
             screen.DrawSmallUIText(rangedStr, screen.playerUI_TL + screen.playerRangedTextOffset + yOffset, LineAlignment.Center, screen.statsColor);
 
-            //Help
+            //Index
 
-            var rangedHelp = "(F)";
-            screen.DrawText(rangedHelp, screen.playerUI_TL + screen.rangedHelpOffset + yOffset, LineAlignment.Center, screen.statsColor);
+            var indexStr = "(" + weaponR.Index().ToString() + ")";
+            screen.DrawText(indexStr, screen.playerUI_TL + screen.rangedIndexOffset + yOffset, LineAlignment.Center, screen.statsColor);
+
         }
     }
 }
