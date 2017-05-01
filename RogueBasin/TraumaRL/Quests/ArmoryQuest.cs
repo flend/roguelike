@@ -356,14 +356,14 @@ namespace TraumaRL.Quests
             var itemsGiven = new List<Item>();
 
             var player = Game.Dungeon.Player;
-            player.GiveItemNotFromDungeon(new RogueBasin.Items.Fists());
-            player.GiveItemNotFromDungeon(new RogueBasin.Items.Pistol());
+            player.GiveItemNotFromDungeonIfTypeNotInInventory(new RogueBasin.Items.Fists());
+            player.GiveItemNotFromDungeonIfTypeNotInInventory(new RogueBasin.Items.Pistol());
 
             var level1WareToGive = level1Ware.RandomElement();
 
             itemsGiven.Add(level1WareToGive);
 
-            player.GiveItemNotFromDungeon(level1WareToGive);
+            player.GiveItemNotFromDungeonIfTypeNotInInventory(level1WareToGive);
 
             return itemsGiven;
         }

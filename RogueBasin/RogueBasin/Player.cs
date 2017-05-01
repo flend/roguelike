@@ -287,7 +287,7 @@ namespace RogueBasin
                     break;
                 case RogueBasin.PlayerClass.Sneaker:
                     GameSprite = "nerd";
-                    Inventory.AddItemNotFromDungeon(new Items.StealthWare());
+                    GiveItemNotFromDungeonIfTypeNotInInventory(new Items.StealthWare());
                     break;
             }
         }
@@ -1614,33 +1614,14 @@ namespace RogueBasin
                 //We destroy obselete ware
                 if (IsObselete(oldItem))
                 {
-                    LogFile.Log.LogEntryDebug("Item discarded: " + oldItem.SingleItemDescription, LogDebugLevel.Low);
+                    LogFile.Log.LogEntryDebug("Item discarded: " + oldItem.SingleItemDescription, LogDebugLevel.Medium);
                     //Game.MessageQueue.AddMessage("Discarding obselete " + oldItem.SingleItemDescription + ".");
 
                     UnequipAndDestroyItem(oldItem);
                 }
                 else
                 {
-
-                    //Drop old item
-                    bool dropPreviousItem = false;
-
-                    if (dropPreviousItem)
-                    {
-                        if (oldItemEquippable.EquipmentSlots.Where(x => x == EquipmentSlot.Utility).Any())
-                        {
-                            //Don't drop utilities
-                            UnequipItem(oldItem);
-                        }
-                        else
-                        {
-                            UnequipAndDropItem(oldItem);
-                        }
-                    }
-                    else
-                    {
-                        UnequipItem(oldItem);
-                    }
+                    UnequipItem(oldItem);
                 }
                     
                 //This slot is now free
@@ -1669,20 +1650,21 @@ namespace RogueBasin
         private bool IsObselete(Item oldItem)
         {
             //Pistol is never dropped
-            if (oldItem is Items.Pistol)
-                return true;
+            /* 
+           if (oldItem is Items.Pistol)
+               return true;
 
-            if (oldItem is Items.Fists)
-                return true;
-                     /*   
-            if (oldItem is Items.Pistol && IsWeaponTypeAvailable(typeof(Items.HeavyPistol)))
-                return true;
+           if (oldItem is Items.Fists)
+               return true;
 
-            if (oldItem is Items.Shotgun && IsWeaponTypeAvailable(typeof(Items.HeavyShotgun)))
-                return true;
+           if (oldItem is Items.Pistol && IsWeaponTypeAvailable(typeof(Items.HeavyPistol)))
+               return true;
 
-            if (oldItem is Items.Laser && IsWeaponTypeAvailable(typeof(Items.HeavyLaser)))
-                return true;*/
+           if (oldItem is Items.Shotgun && IsWeaponTypeAvailable(typeof(Items.HeavyShotgun)))
+               return true;
+
+           if (oldItem is Items.Laser && IsWeaponTypeAvailable(typeof(Items.HeavyLaser)))
+               return true;*/
             return false;
         }
 
@@ -1904,45 +1886,48 @@ namespace RogueBasin
         {
             if (level == 3)
             {
-                Inventory.AddItemNotFromDungeon(new Items.StealthWare());
-                Inventory.AddItemNotFromDungeon(new Items.ShieldWare(3));
-                Inventory.AddItemNotFromDungeon(new Items.AimWare(3));
-                Inventory.AddItemNotFromDungeon(new Items.BoostWare(3));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.StealthWare());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.ShieldWare(3));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.AimWare(3));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.BoostWare(3));
             }
 
             if (level == 2)
             {
-                Inventory.AddItemNotFromDungeon(new Items.StealthWare());
-                Inventory.AddItemNotFromDungeon(new Items.ShieldWare(2));
-                Inventory.AddItemNotFromDungeon(new Items.AimWare(2));
-                Inventory.AddItemNotFromDungeon(new Items.BoostWare(2));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.StealthWare());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.ShieldWare(2));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.AimWare(2));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.BoostWare(2));
             }
 
             if (level == 1)
             {
-                Inventory.AddItemNotFromDungeon(new Items.StealthWare());
-                Inventory.AddItemNotFromDungeon(new Items.ShieldWare(1));
-                Inventory.AddItemNotFromDungeon(new Items.AimWare(1));
-                Inventory.AddItemNotFromDungeon(new Items.BoostWare(1));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.StealthWare());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.ShieldWare(1));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.AimWare(1));
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.BoostWare(1));
             }
 
-            Inventory.AddItemNotFromDungeon(new Items.BioWare());
+            GiveItemNotFromDungeonIfTypeNotInInventory(new Items.BioWare());
         }
 
-        public void GiveItemNotFromDungeon(Item item)
+        public void GiveItemNotFromDungeonIfTypeNotInInventory(Item item)
         {
-            Inventory.AddItemNotFromDungeon(item);
+            if (!Inventory.ContainsItemOfType(item.GetType()))
+            {
+                Inventory.AddItemNotFromDungeon(item);
+            }
         }
 
         public void GiveAllWeapons(int level)
         {
             if (level == 1)
             {
-                Inventory.AddItemNotFromDungeon(new Items.Vibroblade());
-                Inventory.AddItemNotFromDungeon(new Items.AssaultRifle());
-                Inventory.AddItemNotFromDungeon(new Items.Pistol());
-                Inventory.AddItemNotFromDungeon(new Items.Shotgun());
-                Inventory.AddItemNotFromDungeon(new Items.Laser());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.Vibroblade());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.AssaultRifle());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.Pistol());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.Shotgun());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.Laser());
 
                 EquipInventoryItemType(typeof(Items.Vibroblade));
                 
@@ -1950,29 +1935,28 @@ namespace RogueBasin
 
             if (level == 2)
             {
-
-                Inventory.AddItemNotFromDungeon(new Items.HeavyPistol());
-                Inventory.AddItemNotFromDungeon(new Items.HeavyShotgun());
-                Inventory.AddItemNotFromDungeon(new Items.HeavyLaser());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.HeavyPistol());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.HeavyShotgun());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.HeavyLaser());
             }
 
             for (int i = 0; i < 5; i++)
             {
-                Inventory.AddItemNotFromDungeon(new Items.FragGrenade());
-                Inventory.AddItemNotFromDungeon(new Items.StunGrenade());
-                Inventory.AddItemNotFromDungeon(new Items.SoundGrenade());
-                Inventory.AddItemNotFromDungeon(new Items.NanoRepair());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.FragGrenade());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.StunGrenade());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.SoundGrenade());
+                GiveItemNotFromDungeonIfTypeNotInInventory(new Items.NanoRepair());
             }
                         
         }
         public void EquipStartupWeapons() {
 
             //Melee - Start with fists equipped
-            Inventory.AddItemNotFromDungeon(new Items.Fists());
+            GiveItemNotFromDungeonIfTypeNotInInventory(new Items.Fists());
             Game.Dungeon.Player.EquipInventoryItemType(typeof(Items.Fists));
 
             //Ranged - Start with pistol equipped
-            Inventory.AddItemNotFromDungeon(new Items.Pistol());
+            GiveItemNotFromDungeonIfTypeNotInInventory(new Items.Pistol());
             Game.Dungeon.Player.EquipInventoryItemType(typeof(Items.Pistol));
         }
 
@@ -2659,14 +2643,6 @@ namespace RogueBasin
         internal bool IsAimActive()
         {
             return TurnsMoving == 0 && TurnsInactive > 0 && IsEffectActive(typeof(PlayerEffects.Aim));
-        }
-
-        internal void GivePistol()
-        {
-            LogFile.Log.LogEntryDebug("Giving player default pistol", LogDebugLevel.Medium);
-            var pistol = new Items.Pistol();
-            Inventory.AddItemNotFromDungeon(pistol);
-            EquipAndReplaceItem(pistol);
         }
     }
 }
