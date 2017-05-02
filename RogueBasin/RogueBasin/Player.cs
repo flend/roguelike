@@ -1832,9 +1832,9 @@ namespace RogueBasin
             return weaponSlot.equippedItem;
         }
 
-        public IEnumerable<Item> GetRangedWeaponsOrdered()
+        public IEnumerable<RangedWeapon> GetRangedWeaponsOrdered()
         {
-            return Inventory.Items.Where(i => i is RangedWeapon).OrderBy(i => (i as RangedWeapon).Index());
+            return Inventory.Items.Where(i => i is RangedWeapon).OrderBy(i => (i as RangedWeapon).Index()).Select(i => i as RangedWeapon);
         }
 
         public Item GetEquippedMeleeWeaponAsItem()
