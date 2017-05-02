@@ -38,8 +38,8 @@ namespace RogueBasin
 
         public ActionState ActionState { get { return actionState; } set { actionState = value; } }
 
-        private Action<KeyboardEventArgs> SpecialScreenKeyboardHandler { get; set; }
-        private Action<MouseButtonEventArgs> SpecialScreenMouseButtonEventHandler { get; set; }
+        private Func<KeyboardEventArgs, SpecialScreenActionResult> SpecialScreenKeyboardHandler { get; set; }
+        private Func<MouseButtonEventArgs, SpecialScreenActionResult> SpecialScreenMouseButtonEventHandler { get; set; }
         private Action<bool> promptAction = null;
 
         public InputHandler(Running running, Targetting targetting, PlayerActions playerActions, GameActions gameActions, SystemActions systemActions)
@@ -382,7 +382,13 @@ namespace RogueBasin
                     break;
 
                 case InputState.SpecialScreen:
-                    SpecialScreenMouseButtonEventHandler(mouseArgs);
+                    var result = SpecialScreenMouseButtonEventHandler(mouseArgs);
+                    if(result.endSpecialScreen)
+                    {
+                        ClearSpecialScreenAndHandler();
+                    }
+                    return result.AsActionResult();
+
                     break;
             }
 
@@ -1158,7 +1164,8 @@ namespace RogueBasin
             return new ActionResult(false, false);
         }
 
-        public void SetSpecialScreenAndHandler(Action specialScreen, Action<KeyboardEventArgs> specialScreenKeyboardHandler, Action<MouseButtonEventArgs> specialScreenMouseButtonEventHandler)
+        public void SetSpecialScreenAndHandler(Action specialScreen, Func<KeyboardEventArgs, SpecialScreenActionResult> specialScreenKeyboardHandler, 
+            Func<MouseButtonEventArgs, SpecialScreenActionResult> specialScreenMouseButtonEventHandler)
         {
             Screen.Instance.SpecialScreen = specialScreen;
             SpecialScreenKeyboardHandler = specialScreenKeyboardHandler;
@@ -1605,13 +1612,15 @@ namespace RogueBasin
             }
         }
 
-        public void EndOfGameSelectionKeyHandler(KeyboardEventArgs args)
+        public SpecialScreenActionResult EndOfGameSelectionKeyHandler(KeyboardEventArgs args)
         {
             if (args.Key == Key.Return)
             {
-                ClearSpecialScreenAndHandler();
                 Game.Base.SystemActions.RestartGameAfterDeath();
+                return new SpecialScreenActionResult(true);
             }
+
+            return new SpecialScreenActionResult();
         }
 
 

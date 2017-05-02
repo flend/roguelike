@@ -23,12 +23,12 @@ namespace RogueBasin
             this.screen = screen;
         }
 
-        public void KeyboardEvent(KeyboardEventArgs keyboardArgs)
+        public SpecialScreenActionResult KeyboardEvent(KeyboardEventArgs keyboardArgs)
         {
-            inputHandler.ClearSpecialScreenAndHandler();
+            return new SpecialScreenActionResult(true);
         }
 
-        public void MouseButtonEvent(MouseButtonEventArgs mouseArgs)
+        public SpecialScreenActionResult MouseButtonEvent(MouseButtonEventArgs mouseArgs)
         {
             if (mouseArgs.Button == MouseButton.PrimaryButton)
             {
@@ -40,16 +40,21 @@ namespace RogueBasin
                     if(rectangle.Contains(mouseArgs.Position))
                     {
                         Game.Dungeon.Player.EquipInventoryItemType(weaponType);
-                        inputHandler.ClearSpecialScreenAndHandler();
+                        return new SpecialScreenActionResult(true);
                     }
                 }
             }
+
+            return new SpecialScreenActionResult(false);
         }
 
         public void RenderItemSelectOverlay()
         {
             //Draw all available ranged weapons
             var rangedWeapons = player.GetRangedWeaponsOrdered();
+            var equippedRangedWeapon = Enumerable.Repeat(player.GetEquippedRangedWeapon() as RangedWeapon, 1);
+            var rangedWeaponsExceptEquipped = rangedWeapons.Except(equippedRangedWeapon);
+            var rangedWeaponsStartingWithEquipped = equippedRangedWeapon.Concat(rangedWeaponsExceptEquipped);
 
             var ySpacing = 30;
             var xSpacing = 30;
@@ -64,12 +69,13 @@ namespace RogueBasin
             int xCoord = 0;
             int yCoord = 0;
 
-            foreach(var weapon in rangedWeapons)
+            foreach(var weapon in rangedWeaponsStartingWithEquipped)
             {
                 var panelOffset = new Point(xOffset * xCoord, -1 * yOffset * yCoord);
                 var panelCentre = new Point(screen.playerUI_TL.x + screen.rangedWeaponUICenter.x, screen.playerUI_TL.y + screen.rangedWeaponUICenter.y) + panelOffset;
-
-                var panelRectange = new Rectangle(panelCentre.ToPoint(), screen.rangedWeaponUISize);
+                var panelTL = panelCentre - new Point(screen.rangedWeaponUISize.Width / 2, screen.rangedWeaponUISize.Height / 2);
+            
+                var panelRectange = new Rectangle(panelTL.ToPoint(), screen.rangedWeaponUISize);
 
                 panelLocations[weapon.GetType()] = panelRectange;
 

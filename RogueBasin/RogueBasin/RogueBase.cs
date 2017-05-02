@@ -15,6 +15,32 @@ namespace RogueBasin
         }
     }
 
+    public struct SpecialScreenActionResult
+    {
+        public readonly bool timeAdvances;
+        public readonly bool centreOnPC;
+        public readonly bool endSpecialScreen;
+
+        public SpecialScreenActionResult(bool endSpecialScreen)
+        {
+            this.endSpecialScreen = endSpecialScreen;
+            this.timeAdvances = false;
+            this.centreOnPC = false;
+        }
+
+        public SpecialScreenActionResult(bool timeAdvances, bool centreOnPC, bool endSpecialScreen)
+        {
+            this.timeAdvances = timeAdvances;
+            this.centreOnPC = centreOnPC;
+            this.endSpecialScreen = endSpecialScreen;
+        }
+
+        public ActionResult AsActionResult()
+        {
+            return new ActionResult(timeAdvances, centreOnPC);
+        }
+    }
+
     public enum ActionState
     {
         Running,
