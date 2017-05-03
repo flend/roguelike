@@ -52,7 +52,7 @@ namespace RogueBasin
         {
             //Draw all available ranged weapons
             var rangedWeapons = player.GetRangedWeaponsOrdered();
-            var equippedRangedWeapon = Enumerable.Repeat(player.GetEquippedRangedWeapon() as RangedWeapon, 1);
+            var equippedRangedWeapon = EnumerableEx.Return(player.GetEquippedRangedWeapon() as RangedWeapon);
             var rangedWeaponsExceptEquipped = rangedWeapons.Except(equippedRangedWeapon);
             var rangedWeaponsStartingWithEquipped = equippedRangedWeapon.Concat(rangedWeaponsExceptEquipped);
 

@@ -388,8 +388,6 @@ namespace RogueBasin
                         ClearSpecialScreenAndHandler();
                     }
                     return result.AsActionResult();
-
-                    break;
             }
 
             return new ActionResult(timeAdvances, centreOnPC);
