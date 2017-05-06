@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -524,5 +525,10 @@ namespace RogueBasin
 
             return new ActionResult(false, false);
         }
+    }
+
+    public static class RectangleExtensions
+    {
+        public static Point TopLeft(this Rectangle rect) { return new Point(rect.Location); }
     }
 }

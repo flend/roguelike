@@ -24,11 +24,12 @@ namespace RogueBasin
         InputState inputState = InputState.MapMovement;
         ActionState actionState = ActionState.Interactive;
 
-        Targetting targetting;
-        Running running;
-        PlayerActions playerActions;
-        GameActions gameActions;
-        SystemActions systemActions;
+        private readonly Targetting targetting;
+        private readonly Running running;
+        private readonly PlayerActions playerActions;
+        private readonly GameActions gameActions;
+        private readonly SystemActions systemActions;
+        private readonly GuiInputHandler guiInputHandler;
 
         TargettingAction mouseTargettingAction = TargettingAction.MoveOrFire;
 
@@ -49,6 +50,8 @@ namespace RogueBasin
             this.playerActions = playerActions;
             this.gameActions = gameActions;
             this.systemActions = systemActions;
+            this.guiInputHandler = new GuiInputHandler(this, playerActions, gameActions, systemActions)
+;
         }
 
         public void FPrompt(string introMessage, Action<bool> action)
@@ -132,19 +135,14 @@ namespace RogueBasin
         private ActionResult HandleMapPrimaryMouseClick(MouseButtonEventArgs mouseArgs, bool shifted)
         {
             //If on the UI
-            if(mouseArgs.Position.Y >= Screen.Instance.playerUI_TL.y)
+            if(guiInputHandler.PositionInUI(new Point(mouseArgs.Position)))
             {
-                return ExecuteUIPrimaryMouseClick(new Point(mouseArgs.Position), shifted);
+                return guiInputHandler.PrimaryMouseClick(new Point(mouseArgs.Position), shifted);
             }
             else
             {
                 return ExecuteTargettedAction(shifted);
             }
-        }
-
-        private ActionResult ExecuteUIPrimaryMouseClick(Point clickLocation, bool shifted)
-        {
-            return gameActions.ItemSelectOverlay(this);
         }
 
         public void UpdateMapTargetting()

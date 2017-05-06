@@ -61,7 +61,7 @@ namespace RogueBasin
             var yOffset = screen.rangedWeaponUISize.Height + screen.UIScale(ySpacing);
             var xOffset = screen.rangedWeaponUISize.Width + screen.UIScale(xSpacing);
 
-            var bottomPanelCentre = screen.playerUI_TL + screen.rangedWeaponUICenter;
+            var bottomPanelCentre = new Point(screen.playerUIRect.Location) + screen.rangedWeaponUICenter;
 
             var yPanelsMax = Math.Floor((double)(bottomPanelCentre.y - screen.rangedWeaponUISize.Height / 2) / (screen.rangedWeaponUISize.Height + ySpacing)) + 1;
             var xPanelsMax = Math.Floor((double)(screen.ScreenWidth - bottomPanelCentre.x - screen.rangedWeaponUISize.Width / 2) / (screen.rangedWeaponUISize.Width + xSpacing)) + 1;
@@ -72,7 +72,8 @@ namespace RogueBasin
             foreach(var weapon in rangedWeaponsStartingWithEquipped)
             {
                 var panelOffset = new Point(xOffset * xCoord, -1 * yOffset * yCoord);
-                var panelCentre = new Point(screen.playerUI_TL.x + screen.rangedWeaponUICenter.x, screen.playerUI_TL.y + screen.rangedWeaponUICenter.y) + panelOffset;
+                var playerUITL = screen.playerUIRect.TopLeft();
+                var panelCentre = playerUITL + screen.rangedWeaponUICenter + panelOffset;
                 var panelTL = panelCentre - new Point(screen.rangedWeaponUISize.Width / 2, screen.rangedWeaponUISize.Height / 2);
             
                 var panelRectange = new Rectangle(panelTL.ToPoint(), screen.rangedWeaponUISize);
@@ -100,26 +101,27 @@ namespace RogueBasin
             IEquippableItem weaponE = weapon as IEquippableItem;
             RangedWeapon weaponR = weapon as RangedWeapon;
 
-            var rangedWeaponUICentre = new Point(screen.playerUI_TL.x + screen.rangedWeaponUICenter.x, screen.playerUI_TL.y + screen.rangedWeaponUICenter.y) + offset;
+            var uiRectTL = screen.playerUIRect.TopLeft();
+            var rangedWeaponUICentre = uiRectTL + screen.rangedWeaponUICenter + offset;
             screen.DrawUISpriteByCentre("rangedweaponui", rangedWeaponUICentre);
-            screen.DrawUISpriteByCentre(weapon, new Point(screen.playerUI_TL.x + screen.rangedWeaponUICenter.x, screen.playerUI_TL.y + screen.rangedWeaponUICenter.y) + offset);
+            screen.DrawUISpriteByCentre(weapon, rangedWeaponUICentre);
 
             var rangedDamage = player.ScaleRangedDamage(weaponE, weaponE.DamageBase());
 
             //Draw bullets
             double weaponAmmoRatio = weaponE.RemainingAmmo() / (double)weaponE.MaxAmmo();
-            var ammoBarTL = screen.playerUI_TL + screen.ammoBarOffset_TL + offset;
+            var ammoBarTL = uiRectTL + screen.ammoBarOffset_TL + offset;
             screen.DrawGraduatedBarVertical("ui_bullet", weaponAmmoRatio, new Rectangle(ammoBarTL.ToPoint(), screen.ammoBarArea), 0.1);
 
             //Ranged Damage base
 
             var rangedStr = "DMG: " + rangedDamage;
-            screen.DrawSmallUIText(rangedStr, screen.playerUI_TL + screen.playerRangedTextOffset + offset, LineAlignment.Center, screen.statsColor);
+            screen.DrawSmallUIText(rangedStr, uiRectTL + screen.playerRangedTextOffset + offset, LineAlignment.Center, screen.statsColor);
 
             //Index
 
             var indexStr = "(" + weaponR.Index().ToString() + ")";
-            screen.DrawText(indexStr, screen.playerUI_TL + screen.rangedIndexOffset + offset, LineAlignment.Center, screen.statsColor);
+            screen.DrawText(indexStr, uiRectTL + screen.rangedIndexOffset + offset, LineAlignment.Center, screen.statsColor);
 
         }
     }

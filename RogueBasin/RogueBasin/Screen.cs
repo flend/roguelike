@@ -73,13 +73,13 @@ namespace RogueBasin
         Point msgDisplayBotRight;
         public int msgDisplayNumLines;
 
-        Point hitpointsOffset;
-
         /// <summary>
-        /// UI coordinates (used by special screens)
+        /// UI coordinates (used by special screens and input handlers)
         /// </summary>
 
-        public Point playerUI_TL = new Point(0, 0);
+        Point playerUI_TL = new Point(0, 0);
+        Point playerUI_BR = new Point(0, 0);
+        public Rectangle playerUIRect = new Rectangle();
         public Point playerTextUI_TL = new Point(0, 0);
         public Point playerTextUI_UsefulTL = new Point(0, 0);
         public Point monsterTextUI_TL = new Point(0, 0);
@@ -1525,7 +1525,9 @@ namespace RogueBasin
 
             //Draw the UI background
             Size uiLeftDim = UISpriteSize("ui_left_extended");
+
             playerUI_TL = new Point(0, ScreenHeight - uiLeftDim.Height);
+            playerUIRect = new Rectangle(playerUI_TL.ToPoint(), new Size(ScreenWidth, uiLeftDim.Height));
 
             DrawUISprite("ui_left_extended", new Point(playerUI_TL.x, playerUI_TL.y));
 
