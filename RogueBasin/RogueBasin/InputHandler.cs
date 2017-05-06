@@ -98,18 +98,24 @@ namespace RogueBasin
             return new ActionResult(false, false);
         }
 
-        private ActionResult HandleMapMovementClick(MouseButtonEventArgs mouseArgs, MouseButton mouseButtons)
+        private ActionResult HandleMapMovementClick(MouseButtonEventArgs mouseArgs, MouseButton mouseButton)
         {
-            if (mouseButtons == MouseButton.PrimaryButton)
+            bool shifted = false;
+
+            var keyboardState = new KeyboardState();
+            if (keyboardState.IsKeyPressed(Key.LeftShift) || keyboardState.IsKeyPressed(Key.RightShift))
             {
-                bool shifted = false;
+                shifted = true;
+            }
 
-                var keyboardState = new KeyboardState();
-                if (keyboardState.IsKeyPressed(Key.LeftShift) || keyboardState.IsKeyPressed(Key.RightShift))
-                {
-                    shifted = true;
-                }
+            //If action on the UI
+            if (guiInputHandler.PositionInUI(new Point(mouseArgs.Position)))
+            {
+                return guiInputHandler.HandleMouseClick(mouseArgs, shifted);
+            }
 
+            if (mouseButton == MouseButton.PrimaryButton)
+            {
                 return HandleMapPrimaryMouseClick(mouseArgs, shifted);
             }
             else
@@ -133,16 +139,8 @@ namespace RogueBasin
         }
 
         private ActionResult HandleMapPrimaryMouseClick(MouseButtonEventArgs mouseArgs, bool shifted)
-        {
-            //If on the UI
-            if(guiInputHandler.PositionInUI(new Point(mouseArgs.Position)))
-            {
-                return guiInputHandler.PrimaryMouseClick(new Point(mouseArgs.Position), shifted);
-            }
-            else
-            {
-                return ExecuteTargettedAction(shifted);
-            }
+        { 
+            return ExecuteTargettedAction(shifted);
         }
 
         public void UpdateMapTargetting()
