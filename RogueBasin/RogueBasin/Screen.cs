@@ -1468,6 +1468,7 @@ namespace RogueBasin
         //Calculate some point offsets
         public Point rangedWeaponUICenter;
         public Size rangedWeaponUISize;
+        public Rectangle rangedWeaponUIRectAbs;
         public Point playerRangedTextOffset;
         public Point rangedIndexOffset;
         public Point rangedHelpOffset;
@@ -1478,6 +1479,9 @@ namespace RogueBasin
         public Point playerMeleeTextOffset;
 
         public Point utilityUICenter;
+        public Size utilityUISize;
+        public Point utilityUIBackgroundOffset;
+        public Rectangle utilityUIRectAbs;
         public Size utilityNumBarArea;
         public Point itemNoBarOffset_TL;
         public Point utilityHelpOffset;
@@ -1495,24 +1499,36 @@ namespace RogueBasin
         {
             Player player = Game.Dungeon.Player;
 
-            //Calculate some point offsets
+            //Calculate UI coords
+            playerUI_TL = UIScale(new Point(0, ScreenHeight - 140));
+            playerUIRect = new Rectangle(playerUI_TL.ToPoint(), new Size(ScreenWidth, 140));
+
             rangedWeaponUICenter = UIScale(new Point(160, 92));
-            rangedWeaponUISize = UIScale(new Size(158, 62));
+            rangedWeaponUISize = UIScale(new Size(166, 70));
             playerRangedTextOffset = UIScale(new Point(210, 117));
             rangedIndexOffset = UIScale(new Point(118, 74));
             rangedHelpOffset = UIScale(new Point(218, 74));
             ammoBarOffset_TL = UIScale(new Point(86, 67));
             ammoBarArea = UIScale(new Size(20, 54));
 
+            rangedWeaponUIRectAbs = new Rectangle(new Point(playerUIRect.TopLeft() + new Point(rangedWeaponUICenter.x - rangedWeaponUISize.Width / 2,
+                rangedWeaponUICenter.y - rangedWeaponUISize.Height / 2)).ToPoint()
+                , rangedWeaponUISize);
+
             meleeWeaponUICenter = UIScale(new Point(38, 92));
             playerMeleeTextOffset = UIScale(new Point(40, 117));
 
             utilityUICenter = UIScale(new Point(300, 92));
+            utilityUISize = UIScale(new Size(86, 70));
+            utilityUIBackgroundOffset = UIScale(new Point(-11, 0));
             utilityNumBarArea = UIScale(new Size(20, 54));
             itemNoBarOffset_TL = UIScale(new Point(255, 67));
             utilityHelpOffset = UIScale(new Point(316, 74));
             utilityRotateLeftOffset = UIScale(new Point(280, 117));
             utilityRotateRightOffset = UIScale(new Point(316, 117));
+
+            utilityUIRectAbs = new Rectangle(new Point(playerUIRect.TopLeft() + new Point(utilityUICenter.x - utilityUISize.Width / 2 - utilityUIBackgroundOffset.x,
+                utilityUICenter.y - utilityUISize.Height / 2)).ToPoint(), utilityUISize);
 
             wetwareUICenter = UIScale(new Point(390, 92));
             energyBarOffset_TL = UIScale(new Point(345, 67));
@@ -1525,9 +1541,6 @@ namespace RogueBasin
 
             //Draw the UI background
             Size uiLeftDim = UISpriteSize("ui_left_extended");
-
-            playerUI_TL = new Point(0, ScreenHeight - uiLeftDim.Height);
-            playerUIRect = new Rectangle(playerUI_TL.ToPoint(), new Size(ScreenWidth, uiLeftDim.Height));
 
             DrawUISprite("ui_left_extended", new Point(playerUI_TL.x, playerUI_TL.y));
 

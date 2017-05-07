@@ -68,7 +68,8 @@
     <Compile Include="GuiInputHandler.cs" />
     <Compile Include="InputEvents.cs" />
     <Compile Include="InputHandler.cs" />
-    <Compile Include="ItemSelectOverlay.cs" />
+    <Compile Include="UtilitySelectOverlay.cs" />
+    <Compile Include="WeaponSelectOverlay.cs" />
     <Compile Include="LevelAndDifficulty.cs" />
     <Compile Include="LevelBuilder.cs" />
     <Compile Include="LevelGraph.cs" />
@@ -1167,5 +1168,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="bin\Debug\graphics\ui\rangedweaponui.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="bin\Debug\graphics\ui\utilityui.png" />
   </ItemGroup>
 </Project>

@@ -303,9 +303,9 @@ namespace RogueBasin
             return IsInventoryTypeAvailable(wetWareType);
         }
 
-        internal bool IsInventoryTypeAvailable(Type wetWareType)
+        internal bool IsInventoryTypeAvailable(Type itemType)
         {
-            var wetwareInInventory = Inventory.GetItemsOfType(wetWareType);
+            var wetwareInInventory = Inventory.GetItemsOfType(itemType);
 
             if (wetwareInInventory.Count() == 0)
             {
@@ -375,11 +375,16 @@ namespace RogueBasin
             return Inventory.Items.Where(i => i.GetType() == itemType.GetType()).Count();
         }
 
-        public void EquipNextUtilityInventoryItem(int inventoryPositionChange)
+        public IEnumerable<Item> GetDistinctUtilityItemsOrdered()
         {
             var allUtilityItems = Inventory.Items.Where(i => (i as IEquippableItem) != null && (i as IEquippableItem).EquipmentSlots.Contains(EquipmentSlot.Utility));
-            var orderedUtilityItemsTypes = allUtilityItems.DistinctBy(i => i.SingleItemDescription).OrderBy(i => i.SingleItemDescription);
-            
+            return allUtilityItems.DistinctBy(i => i.GetType()).OrderBy(i => i.SingleItemDescription);
+        }
+
+        public void EquipNextUtilityInventoryItem(int inventoryPositionChange)
+        {
+            var orderedUtilityItemsTypes = GetDistinctUtilityItemsOrdered();
+
             if (orderedUtilityItemsTypes.Count() == 0)
             {
                 UtilityInventoryPosition = 0;
@@ -1326,13 +1331,13 @@ namespace RogueBasin
             //Check if we have this item
             var wetwareOfTypeInInventory = Inventory.GetItemsOfType(wetwareTypeToEquip);
 
-            if (wetwareOfTypeInInventory.Count == 0)
+            if (wetwareOfTypeInInventory.Count() == 0)
             {
                 LogFile.Log.LogEntryDebug("Do not have wetware of type: " + wetwareTypeToEquip.ToString(), LogDebugLevel.Medium);
                 return false;
             }
 
-            Item wetwareToEquip = wetwareOfTypeInInventory[0];
+            Item wetwareToEquip = wetwareOfTypeInInventory.ElementAt(0);
             IEnumerable<Item> wetwareToFind;
 
             if (wetwareTypeToEquip == typeof(Items.ShieldWare))
@@ -1484,22 +1489,13 @@ namespace RogueBasin
             if (!invAvailable)
             {
                 LogFile.Log.LogEntryDebug("Can't equip inventory type " + itemType + " - not in inventory", LogDebugLevel.Medium);
-
+                return false;
             }
 
-            var equipSuccess = false;
-            if(invAvailable)
-                equipSuccess = EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First());
-
-            if (equipSuccess == false && reequip == false)
-            {
-                //Try to reequip melee
-                //EquipBestMeleeWeapon();
-            }
-            return false;
+            return EquipAndReplaceItem(Inventory.GetItemsOfType(itemType).First());
         }
         
-        public virtual bool PickUpItem(Item itemToPickUp)
+        public override bool PickUpItem(Item itemToPickUp)
         {
             bool pickedUp = base.PickUpItem(itemToPickUp);
 
@@ -1546,7 +1542,7 @@ namespace RogueBasin
 
         /// <summary>
         /// Equip an item into a relevant slot.
-        /// Will unequip and drop an item in the same slot.
+        /// Will unequip an item in the same slot.
         /// Returns true if operation successful
         /// Should be called after picking item up
         /// </summary>
@@ -1615,7 +1611,7 @@ namespace RogueBasin
                 if (IsObselete(oldItem))
                 {
                     LogFile.Log.LogEntryDebug("Item discarded: " + oldItem.SingleItemDescription, LogDebugLevel.Medium);
-                    //Game.MessageQueue.AddMessage("Discarding obselete " + oldItem.SingleItemDescription + ".");
+                    Game.MessageQueue.AddMessage("Discarding obselete " + oldItem.SingleItemDescription + ".");
 
                     UnequipAndDestroyItem(oldItem);
                 }

@@ -166,19 +166,9 @@ namespace RogueBasin
         /// </summary>
         /// <param name="itemType"></param>
         /// <returns></returns>
-        public List<Item> GetItemsOfType(Type thisType)
+        public IEnumerable<Item> GetItemsOfType(Type thisType)
         {
-            var toRet = new List<Item>();
-
-            foreach (var thisItem in items)
-            {
-                if (thisItem.GetType() == thisType)
-                {
-                    toRet.Add(thisItem);
-                }
-            }
-
-            return toRet;
+            return items.Where(i => i.GetType() == thisType);
         }
 
         /// <summary>

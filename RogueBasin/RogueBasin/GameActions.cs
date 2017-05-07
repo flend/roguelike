@@ -46,10 +46,17 @@
             Screen.Instance.ShowLogList = false;
         }
 
-        public ActionResult ItemSelectOverlay(InputHandler inputHandler)
+        public ActionResult WeaponSelectOverlay(InputHandler inputHandler)
         {
-            var weaponOverlayScreen = new ItemSelectOverlay(inputHandler, Screen.Instance, Game.Dungeon.Player);
+            var weaponOverlayScreen = new WeaponSelectOverlay(inputHandler, Screen.Instance, Game.Dungeon.Player);
             inputHandler.SetSpecialScreenAndHandler(weaponOverlayScreen.RenderItemSelectOverlay, weaponOverlayScreen.KeyboardEvent, weaponOverlayScreen.MouseButtonEvent);
+            return new ActionResult();
+        }
+
+        public ActionResult UtilitySelectOverlay(InputHandler inputHandler)
+        {
+            var utilityOverlayScreen = new UtilitySelectOverlay(inputHandler, Screen.Instance, Game.Dungeon.Player);
+            inputHandler.SetSpecialScreenAndHandler(utilityOverlayScreen.RenderItemSelectOverlay, utilityOverlayScreen.KeyboardEvent, utilityOverlayScreen.MouseButtonEvent);
             return new ActionResult();
         }
     }

@@ -34,19 +34,25 @@ namespace RogueBasin
             this.playerActions = playerActions;
             this.gameActions = gameActions;
             this.systemActions = systemActions;
-
-            SetupUIPanelActions();
         }
 
         private void SetupUIPanelActions()
         {
-            var itemSelectRect = new Rectangle(new System.Drawing.Point(0, 0), new Size(Screen.Instance.ScreenWidth, Screen.Instance.ScreenHeight));
-            var itemSelectAction = new UIAction(itemSelectRect, MouseButton.PrimaryButton, new Func<ActionResult>(ItemSelectOverlay));
-            uiPanelActions.Add(itemSelectAction);
+            var weaponSelectAction = new UIAction(Screen.Instance.rangedWeaponUIRectAbs, MouseButton.PrimaryButton, new Func<ActionResult>(WeaponSelectOverlay));
+            uiPanelActions.Add(weaponSelectAction);
+
+            var utilitySelectAction = new UIAction(Screen.Instance.utilityUIRectAbs, MouseButton.PrimaryButton, new Func<ActionResult>(UtilitySelectOverlay));
+            uiPanelActions.Add(utilitySelectAction);
         }
 
         public ActionResult HandleMouseClick(MouseButtonEventArgs clickLocation, bool shifted)
         {
+            //Delayed until the screen has had time to render once and calculate UI rects
+            if (uiPanelActions.Count == 0)
+            {
+                SetupUIPanelActions();
+            }
+
             foreach(var panelAction in uiPanelActions)
             {
                 if(panelAction.uiRect.Contains(clickLocation.Position) && panelAction.mouseButton == clickLocation.Button)
@@ -58,9 +64,14 @@ namespace RogueBasin
             return new ActionResult();
         }
 
-        private ActionResult ItemSelectOverlay()
+        private ActionResult WeaponSelectOverlay()
         {
-            return gameActions.ItemSelectOverlay(inputHandler);
+            return gameActions.WeaponSelectOverlay(inputHandler);
+        }
+
+        private ActionResult UtilitySelectOverlay()
+        {
+            return gameActions.UtilitySelectOverlay(inputHandler);
         }
 
         public bool PositionInUI(Point point)

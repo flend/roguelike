@@ -443,8 +443,12 @@ namespace RogueBasin
                     break;
 
                 case InputState.SpecialScreen:
-                    SpecialScreenKeyboardEvent(args);
-                    break;
+                    var result = SpecialScreenKeyboardHandler(args);
+                    if (result.endSpecialScreen)
+                    {
+                        ClearSpecialScreenAndHandler();
+                    }
+                    return result.AsActionResult();
 
                 //Normal movement on the map
                 case InputState.MapMovement:
@@ -462,9 +466,9 @@ namespace RogueBasin
                             case Key.Q:
                                 //Exit from game
                                 timeAdvances = false;
-                                YesNoQuestion("Really quit?", (result) =>
+                                YesNoQuestion("Really quit?", (r) =>
                                 {
-                                    if (result)
+                                    if (r)
                                     {
                                         Game.Dungeon.PlayerDeath("quit");
                                         timeAdvances = true;
